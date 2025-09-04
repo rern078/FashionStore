@@ -72,6 +72,22 @@ INSERT IGNORE INTO product_categories (product_id, category_id) VALUES
   (@p10, @cat_acc);
 
 
+-- About Us (optional seed)
+INSERT INTO about_us (title, content, image_url)
+VALUES
+  ('Our Story', 'Founded to bring quality fashion at fair prices. Update this content in Admin.', NULL)
+ON DUPLICATE KEY UPDATE
+  title=VALUES(title), content=VALUES(content), image_url=VALUES(image_url);
+
+-- Social Links (optional seed)
+INSERT INTO social_links (platform, label, url, icon, is_active, position)
+VALUES
+  ('facebook',  'Facebook',  'https://facebook.com/yourbrand',  'mdi:facebook',  1, 1),
+  ('instagram', 'Instagram', 'https://instagram.com/yourbrand', 'mdi:instagram', 1, 2),
+  ('twitter',   'Twitter',   'https://twitter.com/yourbrand',   'mdi:twitter',   0, 3)
+ON DUPLICATE KEY UPDATE
+  url=VALUES(url), icon=VALUES(icon), is_active=VALUES(is_active), position=VALUES(position);
+
 -- Promotions (sample data)
 INSERT INTO promotions (code, type, value, starts_at, ends_at, min_subtotal, max_uses, per_user_limit)
 VALUES

@@ -1,6 +1,17 @@
-<main class="main">
+<?php
+require_once __DIR__ . '/../admin/config/function.php';
 
-      <!-- Page Title -->
+// Load top-level categories and all subcategories
+$__fe_categories = db_all('SELECT id, name, slug FROM categories WHERE parent_id IS NULL ORDER BY name ASC');
+$__fe_subcategories = db_all('SELECT id, name, slug, category_id FROM subcategories ORDER BY name ASC');
+
+// Group subcategories by category_id for quick lookup
+$__fe_subcats_by_category = [];
+foreach ($__fe_subcategories as $__fe_sc) {
+      $__fe_subcats_by_category[$__fe_sc['category_id']][] = $__fe_sc;
+}
+?>
+<main class="main">
       <div class="page-title light-background">
             <div class="container">
                   <nav class="breadcrumbs">
@@ -11,179 +22,48 @@
                   </nav>
                   <h1>Category</h1>
             </div>
-      </div><!-- End Page Title -->
+      </div>
 
       <div class="container">
             <div class="row">
-
                   <div class="col-lg-4 sidebar">
-
                         <div class="widgets-container">
-
                               <!-- Product Categories Widget -->
                               <div class="product-categories-widget widget-item">
-
                                     <h3 class="widget-title">Categories</h3>
-
                                     <ul class="category-tree list-unstyled mb-0">
-                                          <!-- Clothing Category -->
-                                          <li class="category-item">
-                                                <div class="d-flex justify-content-between align-items-center category-header collapsed"
-                                                      data-bs-toggle="collapse"
-                                                      data-bs-target="#categories-1-clothing-subcategories"
-                                                      aria-expanded="false"
-                                                      aria-controls="categories-1-clothing-subcategories">
-                                                      <a href="javascript:void(0)"
-                                                            class="category-link">Clothing</a>
-                                                      <span class="category-toggle">
-                                                            <i class="bi bi-chevron-down"></i>
-                                                            <i class="bi bi-chevron-up"></i>
-                                                      </span>
-                                                </div>
-                                                <ul id="categories-1-clothing-subcategories"
-                                                      class="subcategory-list list-unstyled collapse ps-3 mt-2">
-                                                      <li><a href="#" class="subcategory-link">Men's Wear</a></li>
-                                                      <li><a href="#" class="subcategory-link">Women's Wear</a>
-                                                      </li>
-                                                      <li><a href="#" class="subcategory-link">Kids' Clothing</a>
-                                                      </li>
-                                                      <li><a href="#" class="subcategory-link">Accessories</a>
-                                                      </li>
-                                                </ul>
-                                          </li>
-
-                                          <!-- Electronics Category -->
-                                          <li class="category-item">
-                                                <div class="d-flex justify-content-between align-items-center category-header collapsed"
-                                                      data-bs-toggle="collapse"
-                                                      data-bs-target="#categories-1-electronics-subcategories"
-                                                      aria-expanded="false"
-                                                      aria-controls="categories-1-electronics-subcategories">
-                                                      <a href="javascript:void(0)"
-                                                            class="category-link">Electronics</a>
-                                                      <span class="category-toggle">
-                                                            <i class="bi bi-chevron-down"></i>
-                                                            <i class="bi bi-chevron-up"></i>
-                                                      </span>
-                                                </div>
-                                                <ul id="categories-1-electronics-subcategories"
-                                                      class="subcategory-list list-unstyled collapse ps-3 mt-2">
-                                                      <li><a href="#" class="subcategory-link">Smartphones</a>
-                                                      </li>
-                                                      <li><a href="#" class="subcategory-link">Laptops</a></li>
-                                                      <li><a href="#" class="subcategory-link">Tablets</a></li>
-                                                      <li><a href="#" class="subcategory-link">Accessories</a>
-                                                      </li>
-                                                </ul>
-                                          </li>
-
-                                          <!-- Home & Kitchen Category -->
-                                          <li class="category-item">
-                                                <div class="d-flex justify-content-between align-items-center category-header collapsed"
-                                                      data-bs-toggle="collapse"
-                                                      data-bs-target="#categories-1-home-subcategories"
-                                                      aria-expanded="false"
-                                                      aria-controls="categories-1-home-subcategories">
-                                                      <a href="javascript:void(0)" class="category-link">Home
-                                                            &amp; Kitchen</a>
-                                                      <span class="category-toggle">
-                                                            <i class="bi bi-chevron-down"></i>
-                                                            <i class="bi bi-chevron-up"></i>
-                                                      </span>
-                                                </div>
-                                                <ul id="categories-1-home-subcategories"
-                                                      class="subcategory-list list-unstyled collapse ps-3 mt-2">
-                                                      <li><a href="#" class="subcategory-link">Furniture</a></li>
-                                                      <li><a href="#" class="subcategory-link">Kitchen
-                                                                  Appliances</a></li>
-                                                      <li><a href="#" class="subcategory-link">Home Decor</a></li>
-                                                      <li><a href="#" class="subcategory-link">Bedding</a></li>
-                                                </ul>
-                                          </li>
-
-                                          <!-- Beauty & Personal Care Category -->
-                                          <li class="category-item">
-                                                <div class="d-flex justify-content-between align-items-center category-header collapsed"
-                                                      data-bs-toggle="collapse"
-                                                      data-bs-target="#categories-1-beauty-subcategories"
-                                                      aria-expanded="false"
-                                                      aria-controls="categories-1-beauty-subcategories">
-                                                      <a href="javascript:void(0)" class="category-link">Beauty
-                                                            &amp; Personal Care</a>
-                                                      <span class="category-toggle">
-                                                            <i class="bi bi-chevron-down"></i>
-                                                            <i class="bi bi-chevron-up"></i>
-                                                      </span>
-                                                </div>
-                                                <ul id="categories-1-beauty-subcategories"
-                                                      class="subcategory-list list-unstyled collapse ps-3 mt-2">
-                                                      <li><a href="#" class="subcategory-link">Skincare</a></li>
-                                                      <li><a href="#" class="subcategory-link">Makeup</a></li>
-                                                      <li><a href="#" class="subcategory-link">Hair Care</a></li>
-                                                      <li><a href="#" class="subcategory-link">Fragrances</a></li>
-                                                </ul>
-                                          </li>
-
-                                          <!-- Sports & Outdoors Category -->
-                                          <li class="category-item">
-                                                <div class="d-flex justify-content-between align-items-center category-header collapsed"
-                                                      data-bs-toggle="collapse"
-                                                      data-bs-target="#categories-1-sports-subcategories"
-                                                      aria-expanded="false"
-                                                      aria-controls="categories-1-sports-subcategories">
-                                                      <a href="javascript:void(0)" class="category-link">Sports
-                                                            &amp; Outdoors</a>
-                                                      <span class="category-toggle">
-                                                            <i class="bi bi-chevron-down"></i>
-                                                            <i class="bi bi-chevron-up"></i>
-                                                      </span>
-                                                </div>
-                                                <ul id="categories-1-sports-subcategories"
-                                                      class="subcategory-list list-unstyled collapse ps-3 mt-2">
-                                                      <li><a href="#" class="subcategory-link">Fitness
-                                                                  Equipment</a></li>
-                                                      <li><a href="#" class="subcategory-link">Outdoor Gear</a>
-                                                      </li>
-                                                      <li><a href="#" class="subcategory-link">Sports Apparel</a>
-                                                      </li>
-                                                      <li><a href="#" class="subcategory-link">Team Sports</a>
-                                                      </li>
-                                                </ul>
-                                          </li>
-
-                                          <!-- Books Category (no subcategories) -->
-                                          <li class="category-item">
-                                                <div
-                                                      class="d-flex justify-content-between align-items-center category-header">
-                                                      <a href="#" class="category-link">Books</a>
-                                                </div>
-                                          </li>
-
-                                          <!-- Toys & Games Category -->
-                                          <li class="category-item">
-                                                <div class="d-flex justify-content-between align-items-center category-header collapsed"
-                                                      data-bs-toggle="collapse"
-                                                      data-bs-target="#categories-1-toys-subcategories"
-                                                      aria-expanded="false"
-                                                      aria-controls="categories-1-toys-subcategories">
-                                                      <a href="javascript:void(0)" class="category-link">Toys
-                                                            &amp; Games</a>
-                                                      <span class="category-toggle">
-                                                            <i class="bi bi-chevron-down"></i>
-                                                            <i class="bi bi-chevron-up"></i>
-                                                      </span>
-                                                </div>
-                                                <ul id="categories-1-toys-subcategories"
-                                                      class="subcategory-list list-unstyled collapse ps-3 mt-2">
-                                                      <li><a href="#" class="subcategory-link">Board Games</a>
-                                                      </li>
-                                                      <li><a href="#" class="subcategory-link">Puzzles</a></li>
-                                                      <li><a href="#" class="subcategory-link">Action Figures</a>
-                                                      </li>
-                                                      <li><a href="#" class="subcategory-link">Educational
-                                                                  Toys</a></li>
-                                                </ul>
-                                          </li>
+                                          <?php foreach ($__fe_categories as $__fe_cat): ?>
+                                                <?php
+                                                $__fe_cat_id = (int)$__fe_cat['id'];
+                                                $__fe_cat_name = htmlspecialchars($__fe_cat['name'], ENT_QUOTES);
+                                                $__fe_cat_slug = htmlspecialchars($__fe_cat['slug'], ENT_QUOTES);
+                                                $__fe_children = $__fe_subcats_by_category[$__fe_cat_id] ?? [];
+                                                $__fe_has_children = !empty($__fe_children);
+                                                $__fe_target_id = 'categories-' . $__fe_cat_id . '-subcategories';
+                                                ?>
+                                                <li class="category-item">
+                                                      <div class="d-flex justify-content-between align-items-center category-header <?php echo $__fe_has_children ? 'collapsed' : ''; ?>" <?php if ($__fe_has_children): ?>
+                                                            data-bs-toggle="collapse"
+                                                            data-bs-target="#<?php echo $__fe_target_id; ?>"
+                                                            aria-expanded="false"
+                                                            aria-controls="<?php echo $__fe_target_id; ?>" <?php endif; ?>>
+                                                            <a href="javascript:void(0)" class="category-link"><?php echo $__fe_cat_name; ?></a>
+                                                            <?php if ($__fe_has_children): ?>
+                                                                  <span class="category-toggle">
+                                                                        <i class="bi bi-chevron-down"></i>
+                                                                        <i class="bi bi-chevron-up"></i>
+                                                                  </span>
+                                                            <?php endif; ?>
+                                                      </div>
+                                                      <?php if ($__fe_has_children): ?>
+                                                            <ul id="<?php echo $__fe_target_id; ?>" class="subcategory-list list-unstyled collapse ps-3 mt-2">
+                                                                  <?php foreach ($__fe_children as $__fe_sc): ?>
+                                                                        <li><a href="?p=category&amp;sub=<?php echo htmlspecialchars($__fe_sc['slug'], ENT_QUOTES); ?>" class="subcategory-link"><?php echo htmlspecialchars($__fe_sc['name'], ENT_QUOTES); ?></a></li>
+                                                                  <?php endforeach; ?>
+                                                            </ul>
+                                                      <?php endif; ?>
+                                                </li>
+                                          <?php endforeach; ?>
                                     </ul>
 
                               </div><!--/Product Categories Widget -->
@@ -1010,12 +890,8 @@
                                           </ul>
                                     </nav>
                               </div>
-
                         </section>
-
                   </div>
-
             </div>
       </div>
-
 </main>

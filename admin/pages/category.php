@@ -73,7 +73,10 @@ $offset = ($page - 1) * $perPage;
 $totalRow = db_one('SELECT COUNT(*) AS c FROM categories');
 $total = (int)($totalRow['c'] ?? 0);
 $totalPages = max(1, (int)ceil($total / $perPage));
+// Paged categories for table
 $cats = db_all('SELECT id, name, slug, parent_id FROM categories ORDER BY id DESC LIMIT ? OFFSET ?', [$perPage, $offset]);
+// Full list for selects
+$allCats = db_all('SELECT id, name FROM categories ORDER BY name ASC');
 ?>
 
 <div class="page-header">
@@ -124,7 +127,20 @@ $cats = db_all('SELECT id, name, slug, parent_id FROM categories ORDER BY id DES
                                                       <td><?php echo (int)$c['id']; ?></td>
                                                       <td><?php echo htmlspecialchars($c['name'], ENT_QUOTES); ?></td>
                                                       <td><?php echo htmlspecialchars($c['slug'], ENT_QUOTES); ?></td>
-                                                      <td><?php echo $c['parent_id'] ? (int)$c['parent_id'] : '—'; ?></td>
+                                                      <td>
+                                                            <?php
+                                                            $parentName = '—';
+                                                            if (!empty($c['parent_id'])) {
+                                                                  foreach ($allCats as $ac) {
+                                                                        if ($ac['id'] == $c['parent_id']) {
+                                                                              $parentName = htmlspecialchars($ac['name'], ENT_QUOTES);
+                                                                              break;
+                                                                        }
+                                                                  }
+                                                            }
+                                                            echo $parentName;
+                                                            ?>
+                                                      </td>
                                                       <td>
                                                             <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCategoryModal-<?php echo (int)$c['id']; ?>">Edit</button>
                                                             <form method="post" style="display:inline-block" onsubmit="return confirm('Delete this category?');">
@@ -157,7 +173,7 @@ $cats = db_all('SELECT id, name, slug, parent_id FROM categories ORDER BY id DES
                                                                                     <label class="form-label">Parent Category</label>
                                                                                     <select class="form-select" name="parent_id">
                                                                                           <option value="">— None —</option>
-                                                                                          <?php foreach ($cats as $pc): if ($pc['id'] == $c['id']) continue; ?>
+                                                                                          <?php foreach ($allCats as $pc): if ($pc['id'] == $c['id']) continue; ?>
                                                                                                 <option value="<?php echo (int)$pc['id']; ?>" <?php echo ($c['parent_id'] == $pc['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($pc['name'], ENT_QUOTES); ?></option>
                                                                                           <?php endforeach; ?>
                                                                                     </select>
@@ -202,8 +218,8 @@ $cats = db_all('SELECT id, name, slug, parent_id FROM categories ORDER BY id DES
                                     <label class="form-label">Parent Category</label>
                                     <select class="form-select" name="parent_id">
                                           <option value="">— None —</option>
-                                          <?php foreach ($cats as $c): ?>
-                                                <option value="<?php echo (int)$c['id']; ?>"><?php echo htmlspecialchars($c['name'], ENT_QUOTES); ?></option>
+                                          <?php foreach ($allCats as $ac): ?>
+                                                <option value="<?php echo (int)$ac['id']; ?>"><?php echo htmlspecialchars($ac['name'], ENT_QUOTES); ?></option>
                                           <?php endforeach; ?>
                                     </select>
                               </div>

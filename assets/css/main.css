@@ -203,12 +203,16 @@ h6 {
   border-bottom: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
 }
 
+.header .main-header .header-container {
+  height: 5rem;
+}
+
 .header .main-header .logo {
   line-height: 1;
 }
 
 .header .main-header .logo img {
-  max-height: 32px;
+  max-height: 5.5rem;
   margin-right: 8px;
 }
 
@@ -226,6 +230,10 @@ h6 {
 @media (max-width: 768px) {
   .header .main-header .logo h1 {
     font-size: 24px;
+  }
+
+  .header .main-header .logo img {
+    max-height: 4.5rem;
   }
 }
 
@@ -8982,7 +8990,7 @@ section,
   margin-top: 40px;
 }
 
-.contact-2 .info-item i {
+.contact-2 .info-item>i {
   color: var(--contrast-color);
   background: var(--accent-color);
   font-size: 20px;

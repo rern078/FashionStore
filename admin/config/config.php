@@ -35,5 +35,8 @@ return [
             'subcategories' => 'pages/subcategories.php',
             'seos' => 'pages/seos.php',
             'banners' => 'pages/banners.php',
+            'about_us' => 'pages/about_us.php',
+            'contact_messages' => 'pages/contact_messages.php',
+            'social_links' => 'pages/social_links.php',
       ],
 ];

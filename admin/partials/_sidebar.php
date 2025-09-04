@@ -125,13 +125,8 @@
         <i class="mdi mdi-account-group menu-icon"></i>
       </a>
     </li>
-    <li class="nav-item <?php echo $__ROUTE === 'addresses' ? 'active' : ''; ?>">
-      <a class="nav-link" href="/admin/?p=addresses">
-        <span class="menu-title">Addresses</span>
-        <i class="mdi mdi-map-marker menu-icon"></i>
-      </a>
-    </li>
-    <li class="nav-item <?php echo $__ROUTE === 'settings' || $__ROUTE === 'seos' || $__ROUTE === 'banners' ? 'active' : ''; ?>">
+
+    <li class="nav-item <?php echo $__ROUTE === 'settings' || $__ROUTE === 'seos' || $__ROUTE === 'banners' || $__ROUTE === 'about_us' || $__ROUTE === 'social_links' || $__ROUTE === 'contact_messages' || $__ROUTE === 'addresses' ? 'active' : ''; ?>">
       <a class="nav-link" data-bs-toggle="collapse" href="#ui-settings" aria-expanded="false" aria-controls="ui-settings">
         <span class="menu-title">Settings</span>
         <i class="menu-arrow"></i>
@@ -147,6 +142,18 @@
           </li>
           <li class="nav-item <?php echo $__ROUTE === 'banners' ? 'active' : ''; ?>">
             <a class="nav-link" href="/admin/?p=banners">Banners</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'about_us' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=about_us">About Us</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'social_links' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=social_links">Social Media</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'contact_messages' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=contact_messages">Contact Messages</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'addresses' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=addresses">Addresses</a>
           </li>
         </ul>
       </div>

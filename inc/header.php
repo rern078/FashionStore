@@ -93,13 +93,12 @@ $navItems = [
             <!-- Main Header -->
             <div class="main-header">
                   <div class="container-fluid container-xl">
-                        <div class="d-flex py-3 align-items-center justify-content-between">
-
+                        <div class="header-container d-flex py-3 align-items-center justify-content-between">
                               <!-- Logo -->
                               <a href="/" class="logo d-flex align-items-center">
                                     <!-- Uncomment the line below if you also wish to use an image logo -->
-                                    <!-- <img src="assets/img/logo.webp" alt=""> -->
-                                    <h1 class="sitename">Fashion<span>Store</span></h1>
+                                    <img src="assets/img/logo.png" alt="">
+                                    <!-- <h1 class="sitename">Ch-Fashion<span>Store</span></h1> -->
                               </a>
 
                               <!-- Search -->

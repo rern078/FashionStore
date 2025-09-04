@@ -384,3 +384,42 @@ CREATE TABLE banners (
 SET FOREIGN_KEY_CHECKS = 1;
 
 
+
+-- Content: About Us
+CREATE TABLE about_us (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(200) NULL,
+  content MEDIUMTEXT NULL,
+  image_url VARCHAR(500) NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Content: Contact Messages (from Contact Us page)
+CREATE TABLE contact_messages (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  phone VARCHAR(50) NULL,
+  subject VARCHAR(200) NULL,
+  message TEXT NOT NULL,
+  status ENUM('new','read','archived') NOT NULL DEFAULT 'new',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_contact_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Content: Social Links / Social Media
+CREATE TABLE social_links (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  platform ENUM('facebook','instagram','twitter','tiktok','youtube','linkedin','pinterest','telegram','whatsapp','other') NOT NULL,
+  label VARCHAR(100) NULL,
+  url VARCHAR(500) NOT NULL,
+  icon VARCHAR(100) NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  position INT UNSIGNED NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_platform_label (platform, label),
+  INDEX idx_social_active_position (is_active, position)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

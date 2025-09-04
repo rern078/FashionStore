@@ -52,3 +52,23 @@ function make_slug(string $text): string
       $text = trim($text, '-');
       return substr($text, 0, 200);
 }
+
+
+// Map platform to default Bootstrap Icon class
+function social_default_icon(string $platform): string
+{
+      $map = [
+            'facebook' => 'bi bi-facebook',
+            'instagram' => 'bi bi-instagram',
+            'twitter' => 'bi bi-twitter-x',
+            'tiktok' => 'bi bi-tiktok',
+            'youtube' => 'bi bi-youtube',
+            'linkedin' => 'bi bi-linkedin',
+            'pinterest' => 'bi bi-pinterest',
+            'telegram' => 'bi bi-telegram',
+            'whatsapp' => 'bi bi-whatsapp',
+            'other' => '',
+      ];
+      $key = strtolower(trim($platform));
+      return $map[$key] ?? '';
+}
