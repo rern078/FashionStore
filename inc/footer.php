@@ -3,6 +3,11 @@
 /** @var array $__CONFIG */
 $assetsUrl = ($__CONFIG['site']['assets_url'] ?? '/assets');
 $siteName = ($__CONFIG['site']['name'] ?? 'Site');
+require_once __DIR__ . '/../admin/config/function.php';
+// Load active social links for footer
+$socialLinks = db_all('SELECT platform, label, url, icon FROM social_links WHERE is_active = 1 ORDER BY position ASC, id DESC');
+// Load About Us content
+$about = db_one('SELECT title, content, image_url FROM about_us ORDER BY id ASC LIMIT 1');
 ?>
 <footer id="footer" class="footer light-background">
       <div class="footer-main">
@@ -13,23 +18,25 @@ $siteName = ($__CONFIG['site']['name'] ?? 'Site');
                                     <a href="/" class="logo">
                                           <span class="sitename">FashionStore</span>
                                     </a>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in nibh
-                                          vehicula, facilisis magna ut, consectetur lorem. Proin eget tortor
-                                          risus.</p>
+                                    <p><?php echo htmlspecialchars((string)($about['content'] ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in nibh vehicula, facilisis magna ut, consectetur lorem. Proin eget tortor risus.'), ENT_QUOTES); ?></p>
 
                                     <div class="social-links mt-4">
                                           <h5>Connect With Us</h5>
                                           <div class="social-icons">
-                                                <a href="#" aria-label="Facebook"><i
-                                                            class="bi bi-facebook"></i></a>
-                                                <a href="#" aria-label="Instagram"><i
-                                                            class="bi bi-instagram"></i></a>
-                                                <a href="#" aria-label="Twitter"><i
-                                                            class="bi bi-twitter-x"></i></a>
-                                                <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
-                                                <a href="#" aria-label="Pinterest"><i
-                                                            class="bi bi-pinterest"></i></a>
-                                                <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                                                <?php if (!empty($socialLinks)) { ?>
+                                                      <?php foreach ($socialLinks as $s) {
+                                                            $label = (string)($s['label'] !== '' ? $s['label'] : ucfirst((string)$s['platform']));
+                                                            $iconClass = (string)(!empty($s['icon']) ? $s['icon'] : social_default_icon((string)$s['platform']));
+                                                      ?>
+                                                            <a href="<?php echo htmlspecialchars((string)$s['url'], ENT_QUOTES); ?>" target="_blank" rel="noopener" aria-label="<?php echo htmlspecialchars($label, ENT_QUOTES); ?>" title="<?php echo htmlspecialchars($label, ENT_QUOTES); ?>">
+                                                                  <?php if ($iconClass !== '') { ?>
+                                                                        <i class="<?php echo htmlspecialchars($iconClass, ENT_QUOTES); ?>"></i>
+                                                                  <?php } else { ?>
+                                                                        <span><?php echo htmlspecialchars($label, ENT_QUOTES); ?></span>
+                                                                  <?php } ?>
+                                                            </a>
+                                                      <?php } ?>
+                                                <?php } ?>
                                           </div>
                                     </div>
                               </div>
@@ -112,10 +119,6 @@ $siteName = ($__CONFIG['site']['name'] ?? 'Site');
                                           Rights Reserved.</p>
                               </div>
                               <div class="credits mt-1">
-                                    <!-- All the links in the footer should remain intact. -->
-                                    <!-- You can delete the links only if you've purchased the pro version. -->
-                                    <!-- Licensing information: https://bootstrapmade.com/license/ -->
-                                    <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
                                     Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
                               </div>
                         </div>
@@ -153,9 +156,10 @@ $siteName = ($__CONFIG['site']['name'] ?? 'Site');
 
 <!-- Preloader -->
 <div id="preloader"></div>
-
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="<?php echo htmlspecialchars($assetsUrl, ENT_QUOTES); ?>/js/main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 </body>
 
 </html>

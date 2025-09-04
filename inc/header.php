@@ -10,14 +10,14 @@ $siteName = $site['name'] ?? 'Site';
 $charset = $site['charset'] ?? 'UTF-8';
 
 // Build simple nav from known routes
-$navItems = [
-      ['label' => 'Home', 'href' => '?p=home', 'key' => 'home'],
-      ['label' => 'Category', 'href' => '?p=category', 'key' => 'category'],
-      ['label' => 'Cart', 'href' => '?p=cart', 'key' => 'cart'],
-      ['label' => 'Checkout', 'href' => '?p=checkout', 'key' => 'checkout'],
-      ['label' => 'Account', 'href' => '?p=account', 'key' => 'account'],
-      ['label' => 'Contact', 'href' => '?p=contact', 'key' => 'contact'],
-];
+// $navItems = [
+//       ['label' => 'Home', 'href' => '?p=home', 'key' => 'home'],
+//       ['label' => 'Category', 'href' => '?p=category', 'key' => 'category'],
+//       ['label' => 'Cart', 'href' => '?p=cart', 'key' => 'cart'],
+//       ['label' => 'Checkout', 'href' => '?p=checkout', 'key' => 'checkout'],
+//       ['label' => 'Account', 'href' => '?p=account', 'key' => 'account'],
+//       ['label' => 'Contact', 'href' => '?p=contact', 'key' => 'contact'],
+// ];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -96,7 +96,6 @@ $navItems = [
                         <div class="header-container d-flex py-3 align-items-center justify-content-between">
                               <!-- Logo -->
                               <a href="/" class="logo d-flex align-items-center">
-                                    <!-- Uncomment the line below if you also wish to use an image logo -->
                                     <img src="assets/img/logo.png" alt="">
                                     <!-- <h1 class="sitename">Ch-Fashion<span>Store</span></h1> -->
                               </a>
@@ -273,30 +272,11 @@ $navItems = [
                         <nav id="navmenu" class="navmenu">
                               <ul>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=home" class="<?php echo htmlspecialchars($__ROUTE == 'home' ? 'active' : '', ENT_QUOTES); ?>">Home</a></li>
-                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=about" class="<?php echo htmlspecialchars($__ROUTE == 'about' ? 'active' : '', ENT_QUOTES); ?>">About</a></li>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=category" class="<?php echo htmlspecialchars($__ROUTE == 'category' ? 'active' : '', ENT_QUOTES); ?>">Category</a></li>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=product" class="<?php echo htmlspecialchars($__ROUTE == 'product' ? 'active' : '', ENT_QUOTES); ?>">Product Details</a></li>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=cart" class="<?php echo htmlspecialchars($__ROUTE == 'cart' ? 'active' : '', ENT_QUOTES); ?>">Cart</a></li>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=checkout" class="<?php echo htmlspecialchars($__ROUTE == 'checkout' ? 'active' : '', ENT_QUOTES); ?>">Checkout</a></li>
-                                    <li class="dropdown"><a href="#"><span>Dropdown</span> <i
-                                                      class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                          <ul>
-                                                <li><a href="#">Dropdown 1</a></li>
-                                                <li class="dropdown"><a href="#"><span>Deep Dropdown</span> <i
-                                                                  class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                                      <ul>
-                                                            <li><a href="#">Deep Dropdown 1</a></li>
-                                                            <li><a href="#">Deep Dropdown 2</a></li>
-                                                            <li><a href="#">Deep Dropdown 3</a></li>
-                                                            <li><a href="#">Deep Dropdown 4</a></li>
-                                                            <li><a href="#">Deep Dropdown 5</a></li>
-                                                      </ul>
-                                                </li>
-                                                <li><a href="#">Dropdown 2</a></li>
-                                                <li><a href="#">Dropdown 3</a></li>
-                                                <li><a href="#">Dropdown 4</a></li>
-                                          </ul>
-                                    </li>
+                                   
                                     <li class="products-megamenu-1"><a href="#"><span>Megamenu 1</span> <i
                                                       class="bi bi-chevron-down toggle-dropdown"></i></a>
                                           <ul class="mobile-megamenu">
@@ -917,7 +897,8 @@ $navItems = [
                                                 </div>
                                           </div>
                                     </li>
-                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=contact" class="<?php echo htmlspecialchars($__ROUTE == 'contact' ? 'active' : '', ENT_QUOTES); ?>">Contact</a></li>
+                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=about" class="<?php echo htmlspecialchars($__ROUTE == 'about' ? 'active' : '', ENT_QUOTES); ?>">About Us</a></li>
+                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=contact" class="<?php echo htmlspecialchars($__ROUTE == 'contact' ? 'active' : '', ENT_QUOTES); ?>">Contact Us</a></li>
                               </ul>
                         </nav>
                   </div>

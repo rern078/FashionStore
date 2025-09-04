@@ -128,7 +128,7 @@ $adminPhone = is_array($adminContact) && !empty($adminContact['phone']) ? (strin
                               <?php if (!empty($_GET['error'])): ?>
                                     <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars((string)$_GET['error'], ENT_QUOTES); ?></div>
                               <?php endif; ?>
-                              <form action="/forms/contact.php" method="post" class="php-email-form"
+                              <form action="/forms/contact.php" method="post" class="php-email-form" enctype="multipart/form-data"
                                     data-aos="fade-up" data-aos-delay="200">
                                     <div class="row gy-4">
                                           <div class="col-md-6">
@@ -148,6 +148,12 @@ $adminPhone = is_array($adminContact) && !empty($adminContact['phone']) ? (strin
                                           <div class="col-md-12">
                                                 <textarea class="form-control" name="message" rows="6"
                                                       placeholder="Message" required=""></textarea>
+                                          </div>
+
+                                          <div class="col-md-12">
+                                                <label class="form-label d-block">Attachment (optional)</label>
+                                                <input type="file" name="attachment" class="form-control" accept="image/*,application/pdf">
+                                                <small class="text-muted">Max 3 MB. Images/PDFs only.</small>
                                           </div>
 
                                           <div class="col-md-12 text-center">

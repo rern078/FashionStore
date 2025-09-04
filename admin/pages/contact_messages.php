@@ -29,12 +29,15 @@ $page = max(1, (int)($_GET['page'] ?? 1));
 $perPage = 10;
 $offset = ($page - 1) * $perPage;
 
+$limit = (int)$perPage;
+$off = (int)$offset;
+
 if ($statusFilter !== '') {
       $totalRow = db_one('SELECT COUNT(*) AS c FROM contact_messages WHERE status = ?', [$statusFilter]);
-      $rows = db_all('SELECT * FROM contact_messages WHERE status = ? ORDER BY id DESC LIMIT ? OFFSET ?', [$statusFilter, $perPage, $offset]);
+      $rows = db_all("SELECT * FROM contact_messages WHERE status = ? ORDER BY id DESC LIMIT $limit OFFSET $off", [$statusFilter]);
 } else {
       $totalRow = db_one('SELECT COUNT(*) AS c FROM contact_messages');
-      $rows = db_all('SELECT * FROM contact_messages ORDER BY id DESC LIMIT ? OFFSET ?', [$perPage, $offset]);
+      $rows = db_all("SELECT * FROM contact_messages ORDER BY id DESC LIMIT $limit OFFSET $off");
 }
 $total = (int)($totalRow['c'] ?? 0);
 $totalPages = max(1, (int)ceil($total / $perPage));
@@ -98,6 +101,11 @@ $totalPages = max(1, (int)ceil($total / $perPage));
                                                       <td><?php echo htmlspecialchars((string)$r['subject'], ENT_QUOTES); ?></td>
                                                       <td style="max-width:280px;">
                                                             <div class="text-truncate" style="max-width:280px;"><?php echo htmlspecialchars((string)$r['message'], ENT_QUOTES); ?></div>
+                                                            <?php if (!empty($r['attachment_url'] ?? '')): ?>
+                                                                  <div class="mt-1">
+                                                                        <a href="/<?php echo htmlspecialchars((string)$r['attachment_url'], ENT_QUOTES); ?>" target="_blank" class="badge badge-outline-primary">Attachment</a>
+                                                                  </div>
+                                                            <?php endif; ?>
                                                       </td>
                                                       <td><?php echo htmlspecialchars((string)$r['status'], ENT_QUOTES); ?></td>
                                                       <td><?php echo htmlspecialchars((string)$r['created_at'], ENT_QUOTES); ?></td>

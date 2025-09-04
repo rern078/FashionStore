@@ -72,12 +72,26 @@ INSERT IGNORE INTO product_categories (product_id, category_id) VALUES
   (@p10, @cat_acc);
 
 
--- About Us (optional seed)
+-- About Us (optional seed - 5 sample entries, idempotent)
 INSERT INTO about_us (title, content, image_url)
-VALUES
-  ('Our Story', 'Founded to bring quality fashion at fair prices. Update this content in Admin.', NULL)
-ON DUPLICATE KEY UPDATE
-  title=VALUES(title), content=VALUES(content), image_url=VALUES(image_url);
+SELECT 'Our Story', 'Founded to bring quality fashion at fair prices. Update this content in Admin.', NULL
+WHERE NOT EXISTS (SELECT 1 FROM about_us WHERE title = 'Our Story');
+
+INSERT INTO about_us (title, content, image_url)
+SELECT 'Our Mission', 'We aim to empower self-expression through accessible, high-quality fashion.', 'assets/img/product/product-f-1.webp'
+WHERE NOT EXISTS (SELECT 1 FROM about_us WHERE title = 'Our Mission');
+
+INSERT INTO about_us (title, content, image_url)
+SELECT 'Craftsmanship', 'Every piece is thoughtfully designed and rigorously tested for durability.', 'assets/img/product/product-m-1.webp'
+WHERE NOT EXISTS (SELECT 1 FROM about_us WHERE title = 'Craftsmanship');
+
+INSERT INTO about_us (title, content, image_url)
+SELECT 'Sustainability', 'We prioritize responsible sourcing and reduced waste in our operations.', 'assets/img/product/product-f-4.webp'
+WHERE NOT EXISTS (SELECT 1 FROM about_us WHERE title = 'Sustainability');
+
+INSERT INTO about_us (title, content, image_url)
+SELECT 'Community', 'Giving back is core to who we are—from local partnerships to global causes.', 'assets/img/product/product-m-4.webp'
+WHERE NOT EXISTS (SELECT 1 FROM about_us WHERE title = 'Community');
 
 -- Social Links (optional seed)
 INSERT INTO social_links (platform, label, url, icon, is_active, position)

@@ -21,5 +21,6 @@ return [
             'logout' => 'logout.php',
             'account' => 'account.php',
             'contact' => 'contact.php',
+            'about' => 'about.php',
       ],
 ];
