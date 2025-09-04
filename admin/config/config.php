@@ -1,0 +1,33 @@
+<?php
+return [
+      'site' => [
+            'name' => 'FashionStore Admin',
+            'base_url' => '/admin/',
+            'assets_url' => '/assets',
+            'charset' => 'UTF-8',
+            'timezone' => 'UTC',
+      ],
+      'routes' => [
+            '' => 'dashboard.php',
+            'dashboard' => 'dashboard.php',
+            'logout' => 'logout.php',
+            'category' => 'pages/category.php',
+            'products' => 'pages/products.php',
+            'addresses' => 'pages/addresses.php',
+            'variants' => 'pages/variants.php',
+            'inventory' => 'pages/inventory.php',
+            'carts' => 'pages/carts.php',
+            'cart_items' => 'pages/cart_items.php',
+            'promotions' => 'pages/promotions.php',
+            'orders' => 'pages/orders.php',
+            'order_items' => 'pages/order_items.php',
+            'payments' => 'pages/payments.php',
+            'shipments' => 'pages/shipments.php',
+            'returns' => 'pages/returns.php',
+            'return_items' => 'pages/return_items.php',
+            'reviews' => 'pages/reviews.php',
+            'size_charts' => 'pages/size_charts.php',
+            'users' => 'pages/users.php',
+            'settings' => 'pages/settings.php',
+      ],
+];
