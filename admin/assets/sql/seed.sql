@@ -95,3 +95,93 @@ INSERT INTO promotion_rules (promotion_id, rule_type, rule_value) VALUES
   (@promo_ship,   'country',               'US');
 
 
+
+-- Brands (sample data)
+INSERT INTO brands (name, slug, description, logo_url)
+VALUES
+  ('Brand A', 'brand-a', 'Sample brand A', 'assets/images/logo.svg'),
+  ('Brand B', 'brand-b', 'Sample brand B', 'assets/images/logo.svg'),
+  ('Brand C', 'brand-c', 'Sample brand C', 'assets/images/logo.svg'),
+  ('Brand D', 'brand-d', 'Sample brand D', 'assets/images/logo.svg'),
+  ('Brand E', 'brand-e', 'Sample brand E', 'assets/images/logo.svg'),
+  ('Brand F', 'brand-f', 'Sample brand F', 'assets/images/logo.svg'),
+  ('Brand G', 'brand-g', 'Sample brand G', 'assets/images/logo.svg'),
+  ('Brand H', 'brand-h', 'Sample brand H', 'assets/images/logo.svg'),
+  ('Brand I', 'brand-i', 'Sample brand I', 'assets/images/logo.svg'),
+  ('Brand J', 'brand-j', 'Sample brand J', 'assets/images/logo.svg')
+ON DUPLICATE KEY UPDATE
+  name=VALUES(name), description=VALUES(description), logo_url=VALUES(logo_url);
+
+-- Resolve brand ids
+SET @brand_a = (SELECT id FROM brands WHERE slug='brand-a');
+SET @brand_b = (SELECT id FROM brands WHERE slug='brand-b');
+SET @brand_c = (SELECT id FROM brands WHERE slug='brand-c');
+SET @brand_d = (SELECT id FROM brands WHERE slug='brand-d');
+SET @brand_e = (SELECT id FROM brands WHERE slug='brand-e');
+SET @brand_f = (SELECT id FROM brands WHERE slug='brand-f');
+SET @brand_g = (SELECT id FROM brands WHERE slug='brand-g');
+SET @brand_h = (SELECT id FROM brands WHERE slug='brand-h');
+SET @brand_i = (SELECT id FROM brands WHERE slug='brand-i');
+SET @brand_j = (SELECT id FROM brands WHERE slug='brand-j');
+
+-- Map products to brands via brand_id (based on existing brand name column)
+UPDATE products SET brand_id = @brand_a WHERE brand = 'Brand A';
+UPDATE products SET brand_id = @brand_b WHERE brand = 'Brand B';
+UPDATE products SET brand_id = @brand_c WHERE brand = 'Brand C';
+UPDATE products SET brand_id = @brand_d WHERE brand = 'Brand D';
+UPDATE products SET brand_id = @brand_e WHERE brand = 'Brand E';
+UPDATE products SET brand_id = @brand_f WHERE brand = 'Brand F';
+UPDATE products SET brand_id = @brand_g WHERE brand = 'Brand G';
+UPDATE products SET brand_id = @brand_h WHERE brand = 'Brand H';
+UPDATE products SET brand_id = @brand_i WHERE brand = 'Brand I';
+UPDATE products SET brand_id = @brand_j WHERE brand = 'Brand J';
+
+-- Subcategories (sample data)
+INSERT INTO subcategories (category_id, name, slug)
+VALUES
+  (@cat_tshirts, 'Plain Tees',        'plain-tees'),
+  (@cat_tshirts, 'Graphic Tees',      'graphic-tees'),
+  (@cat_shirts,  'Formal Shirts',     'formal-shirts'),
+  (@cat_shirts,  'Casual Shirts',     'casual-shirts'),
+  (@cat_jeans,   'Slim Fit',          'slim-fit'),
+  (@cat_jeans,   'Regular Fit',       'regular-fit'),
+  (@cat_jackets, 'Denim Jackets',     'denim-jackets'),
+  (@cat_jackets, 'Leather Jackets',   'leather-jackets'),
+  (@cat_shoes,   'Sneakers',          'sneakers'),
+  (@cat_shoes,   'Boots',             'boots'),
+  (@cat_acc,     'Scarves',           'scarves'),
+  (@cat_acc,     'Belts',             'belts'),
+  (@cat_hoodies, 'Pullover',          'pullover'),
+  (@cat_hoodies, 'Zip Up',            'zip-up'),
+  (@cat_dresses, 'Casual Dresses',    'casual-dresses'),
+  (@cat_dresses, 'Evening Dresses',   'evening-dresses'),
+  (@cat_shorts,  'Chino Shorts',      'chino-shorts'),
+  (@cat_shorts,  'Athletic Shorts',   'athletic-shorts'),
+  (@cat_skirts,  'Pencil Skirts',     'pencil-skirts'),
+  (@cat_skirts,  'Mini Skirts',       'mini-skirts')
+ON DUPLICATE KEY UPDATE name=VALUES(name);
+
+-- Resolve subcategory ids used for sample product mapping
+SET @sub_plain_tees      = (SELECT id FROM subcategories WHERE category_id=@cat_tshirts AND slug='plain-tees');
+SET @sub_slim_fit        = (SELECT id FROM subcategories WHERE category_id=@cat_jeans   AND slug='slim-fit');
+SET @sub_pullover        = (SELECT id FROM subcategories WHERE category_id=@cat_hoodies AND slug='pullover');
+SET @sub_formal_shirts   = (SELECT id FROM subcategories WHERE category_id=@cat_shirts  AND slug='formal-shirts');
+SET @sub_sneakers        = (SELECT id FROM subcategories WHERE category_id=@cat_shoes   AND slug='sneakers');
+SET @sub_casual_dresses  = (SELECT id FROM subcategories WHERE category_id=@cat_dresses AND slug='casual-dresses');
+SET @sub_chino_shorts    = (SELECT id FROM subcategories WHERE category_id=@cat_shorts  AND slug='chino-shorts');
+SET @sub_denim_jackets   = (SELECT id FROM subcategories WHERE category_id=@cat_jackets AND slug='denim-jackets');
+SET @sub_pencil_skirts   = (SELECT id FROM subcategories WHERE category_id=@cat_skirts  AND slug='pencil-skirts');
+SET @sub_scarves         = (SELECT id FROM subcategories WHERE category_id=@cat_acc     AND slug='scarves');
+
+-- Map products to subcategories (sample mapping)
+INSERT IGNORE INTO product_subcategories (product_id, subcategory_id) VALUES
+  (@p1,  @sub_plain_tees),
+  (@p2,  @sub_slim_fit),
+  (@p3,  @sub_pullover),
+  (@p4,  @sub_formal_shirts),
+  (@p5,  @sub_sneakers),
+  (@p6,  @sub_casual_dresses),
+  (@p7,  @sub_chino_shorts),
+  (@p8,  @sub_denim_jackets),
+  (@p9,  @sub_pencil_skirts),
+  (@p10, @sub_scarves);

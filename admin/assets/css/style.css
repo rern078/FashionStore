@@ -9312,6 +9312,8 @@
  */
 :root,
 [data-bs-theme=light] {
+  --bs-main-1: #c2e9fb;
+  --bs-main-2: #a1c4fd;
   --bs-blue: #5E50F9;
   --bs-indigo: #6610f2;
   --bs-purple: #6a008a;
@@ -26017,7 +26019,7 @@ code {
   background: linear-gradient(89deg, #5e7188, #3e4b5b);
   color: #000000;
 }
-/* background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); */
+
 /* gradient buttons */
 .btn-gradient-primary {
   background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
@@ -29269,9 +29271,9 @@ dl li {
 }
 
 .navbar .navbar-brand-wrapper .navbar-brand img {
-  width: calc(260px - 120px);
+  width: calc(260px - 35px);
   max-width: 100%;
-  height: 28px;
+  /* height: 28px; */
   margin: auto;
   vertical-align: middle;
 }
@@ -29281,9 +29283,9 @@ dl li {
 }
 
 .navbar .navbar-brand-wrapper .navbar-brand.brand-logo-mini img {
-  width: calc(70px - 50px);
+  width: calc(70px - 35px);
   max-width: 100%;
-  height: 28px;
+  /* height: 28px; */
   margin: auto;
 }
 
