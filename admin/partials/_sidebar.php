@@ -19,28 +19,56 @@
         <i class="mdi mdi-home menu-icon"></i>
       </a>
     </li>
-    <li class="nav-item <?php echo $__ROUTE === 'category' ? 'active' : ''; ?>">
-      <a class="nav-link" href="/admin/?p=category">
-        <span class="menu-title">Categories</span>
-        <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+    <li class="nav-item <?php echo $__ROUTE === 'category' || $__ROUTE === 'subcategories' || $__ROUTE === 'brands' ? 'active' : ''; ?>">
+      <a class="nav-link" data-bs-toggle="collapse" href="#ui-category" aria-expanded="false" aria-controls="ui-category">
+        <span class="menu-title">Category</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-crosshairs-gps menu-icon"></i>
       </a>
+      <div class="collapse" id="ui-category">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item <?php echo $__ROUTE === 'category' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=category">Categories</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'subcategories' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=subcategories">Subcategories</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'brands' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=brands">Brands</a>
+          </li>
+        </ul>
+      </div>
     </li>
-    <li class="nav-item <?php echo $__ROUTE === 'products' ? 'active' : ''; ?>">
-      <a class="nav-link" href="/admin/?p=products">
-        <span class="menu-title">Products</span>
+    <li class="nav-item <?php echo $__ROUTE === 'products' || $__ROUTE === 'variants' || $__ROUTE === 'inventory' ? 'active' : ''; ?>">
+      <a class="nav-link" data-bs-toggle="collapse" href="#ui-product" aria-expanded="false" aria-controls="ui-product">
+        <span class="menu-title">Product</span>
+        <i class="menu-arrow"></i>
         <i class="mdi mdi-rename-box-outline menu-icon"></i>
       </a>
+      <div class="collapse" id="ui-product">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item <?php echo $__ROUTE === 'products' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=products">Products</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'variants' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=variants">Variants</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'inventory' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=inventory">Inventory</a>
+          </li>
+        </ul>
+      </div>
     </li>
-    <li class="nav-item <?php echo $__ROUTE === 'variants' ? 'active' : ''; ?>">
-      <a class="nav-link" href="/admin/?p=variants">
-        <span class="menu-title">Variants</span>
-        <i class="mdi mdi-shape-plus menu-icon"></i>
+    <li class="nav-item <?php echo $__ROUTE === 'colors' ? 'active' : ''; ?>">
+      <a class="nav-link" href="/admin/?p=colors">
+        <span class="menu-title">Colors</span>
+        <i class="mdi mdi-palette menu-icon"></i>
       </a>
     </li>
-    <li class="nav-item <?php echo $__ROUTE === 'inventory' ? 'active' : ''; ?>">
-      <a class="nav-link" href="/admin/?p=inventory">
-        <span class="menu-title">Inventory</span>
-        <i class="mdi mdi-warehouse menu-icon"></i>
+    <li class="nav-item <?php echo $__ROUTE === 'sizes' ? 'active' : ''; ?>">
+      <a class="nav-link" href="/admin/?p=sizes">
+        <span class="menu-title">Sizes</span>
+        <i class="mdi mdi-ruler-square menu-icon"></i>
       </a>
     </li>
     <li class="nav-item <?php echo $__ROUTE === 'carts' ? 'active' : ''; ?>">
@@ -91,7 +119,6 @@
         <i class="mdi mdi-ruler menu-icon"></i>
       </a>
     </li>
-
     <li class="nav-item <?php echo $__ROUTE === 'users' ? 'active' : ''; ?>">
       <a class="nav-link" href="/admin/?p=users">
         <span class="menu-title">Users</span>
@@ -104,22 +131,22 @@
         <i class="mdi mdi-map-marker menu-icon"></i>
       </a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-        <span class="menu-title">Basic UI Elements</span>
+    <li class="nav-item <?php echo $__ROUTE === 'settings' || $__ROUTE === 'seos' || $__ROUTE === 'banners' ? 'active' : ''; ?>">
+      <a class="nav-link" data-bs-toggle="collapse" href="#ui-settings" aria-expanded="false" aria-controls="ui-settings">
+        <span class="menu-title">Settings</span>
         <i class="menu-arrow"></i>
-        <i class="mdi mdi-crosshairs-gps menu-icon"></i>
+        <i class="mdi mdi-cog menu-icon"></i>
       </a>
-      <div class="collapse" id="ui-basic">
+      <div class="collapse" id="ui-settings">
         <ul class="nav flex-column sub-menu">
-          <li class="nav-item">
-            <a class="nav-link" href="../pages/ui-features/buttons.html">Buttons</a>
+          <li class="nav-item <?php echo $__ROUTE === 'settings' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=settings">Settings</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="../pages/ui-features/dropdowns.html">Dropdowns</a>
+          <li class="nav-item <?php echo $__ROUTE === 'seos' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=seos">SEO</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="../pages/ui-features/typography.html">Typography</a>
+          <li class="nav-item <?php echo $__ROUTE === 'banners' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=banners">Banners</a>
           </li>
         </ul>
       </div>

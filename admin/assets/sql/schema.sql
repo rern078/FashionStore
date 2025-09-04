@@ -279,6 +279,108 @@ CREATE TABLE size_charts (
   INDEX idx_size_charts_product (product_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Brands
+CREATE TABLE brands (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  slug VARCHAR(180) NOT NULL UNIQUE,
+  description TEXT NULL,
+  logo_url VARCHAR(500) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Colors
+CREATE TABLE colors (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(80) NOT NULL UNIQUE,
+  hex VARCHAR(7) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Sizes
+CREATE TABLE sizes (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  label VARCHAR(40) NOT NULL UNIQUE,
+  sort_order INT UNSIGNED NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Subcategories (child of Categories)
+CREATE TABLE subcategories (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  category_id BIGINT UNSIGNED NOT NULL,
+  name VARCHAR(150) NOT NULL,
+  slug VARCHAR(180) NOT NULL,
+  UNIQUE KEY uniq_subcategories_category_slug (category_id, slug),
+  CONSTRAINT fk_subcategories_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+  INDEX idx_subcategories_category (category_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ProductSubcategories (many-to-many between products and subcategories)
+CREATE TABLE product_subcategories (
+  product_id BIGINT UNSIGNED NOT NULL,
+  subcategory_id BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (product_id, subcategory_id),
+  CONSTRAINT fk_ps_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+  CONSTRAINT fk_ps_subcategory FOREIGN KEY (subcategory_id) REFERENCES subcategories(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Schema adaptations for new relations
+ALTER TABLE products
+  ADD COLUMN brand_id BIGINT UNSIGNED NULL AFTER brand,
+  ADD INDEX idx_products_brand (brand_id),
+  ADD CONSTRAINT fk_products_brand FOREIGN KEY (brand_id) REFERENCES brands(id) ON DELETE SET NULL;
+
+ALTER TABLE variants
+  ADD COLUMN color_id BIGINT UNSIGNED NULL AFTER color,
+  ADD COLUMN size_id BIGINT UNSIGNED NULL AFTER size,
+  ADD INDEX idx_variants_color (color_id),
+  ADD INDEX idx_variants_size (size_id),
+  ADD CONSTRAINT fk_variants_color FOREIGN KEY (color_id) REFERENCES colors(id) ON DELETE SET NULL,
+  ADD CONSTRAINT fk_variants_size FOREIGN KEY (size_id) REFERENCES sizes(id) ON DELETE SET NULL;
+
+-- Settings
+CREATE TABLE settings (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `key` VARCHAR(100) NOT NULL UNIQUE,
+  `value` TEXT NULL,
+  description VARCHAR(255) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- SEOs
+CREATE TABLE seos (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  page VARCHAR(150) NOT NULL UNIQUE,
+  slug VARCHAR(200) NULL,
+  meta_title VARCHAR(200) NULL,
+  meta_description VARCHAR(300) NULL,
+  meta_keywords VARCHAR(300) NULL,
+  og_title VARCHAR(200) NULL,
+  og_description VARCHAR(300) NULL,
+  og_image_url VARCHAR(500) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Banners
+CREATE TABLE banners (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(150) NULL,
+  subtitle VARCHAR(200) NULL,
+  image_url VARCHAR(500) NOT NULL,
+  link_url VARCHAR(500) NULL,
+  alt_text VARCHAR(150) NULL,
+  position INT UNSIGNED NOT NULL DEFAULT 1,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  starts_at DATETIME NULL,
+  ends_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_banners_active_position (is_active, position)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 

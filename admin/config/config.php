@@ -29,5 +29,11 @@ return [
             'size_charts' => 'pages/size_charts.php',
             'users' => 'pages/users.php',
             'settings' => 'pages/settings.php',
+            'brands' => 'pages/brands.php',
+            'colors' => 'pages/colors.php',
+            'sizes' => 'pages/sizes.php',
+            'subcategories' => 'pages/subcategories.php',
+            'seos' => 'pages/seos.php',
+            'banners' => 'pages/banners.php',
       ],
 ];
