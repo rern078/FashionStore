@@ -39,7 +39,7 @@
         </ul>
       </div>
     </li>
-    <li class="nav-item <?php echo $__ROUTE === 'products' || $__ROUTE === 'variants' || $__ROUTE === 'inventory' ? 'active' : ''; ?>">
+    <li class="nav-item <?php echo $__ROUTE === 'products' || $__ROUTE === 'variants' || $__ROUTE === 'inventory' || $__ROUTE === 'colors' || $__ROUTE === 'sizes' ? 'active' : ''; ?>">
       <a class="nav-link" data-bs-toggle="collapse" href="#ui-product" aria-expanded="false" aria-controls="ui-product">
         <span class="menu-title">Product</span>
         <i class="menu-arrow"></i>
@@ -56,20 +56,14 @@
           <li class="nav-item <?php echo $__ROUTE === 'inventory' ? 'active' : ''; ?>">
             <a class="nav-link" href="/admin/?p=inventory">Inventory</a>
           </li>
+          <li class="nav-item <?php echo $__ROUTE === 'colors' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=colors">Colors</a>  
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'sizes' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=sizes">Sizes</a>
+          </li>
         </ul>
       </div>
-    </li>
-    <li class="nav-item <?php echo $__ROUTE === 'colors' ? 'active' : ''; ?>">
-      <a class="nav-link" href="/admin/?p=colors">
-        <span class="menu-title">Colors</span>
-        <i class="mdi mdi-palette menu-icon"></i>
-      </a>
-    </li>
-    <li class="nav-item <?php echo $__ROUTE === 'sizes' ? 'active' : ''; ?>">
-      <a class="nav-link" href="/admin/?p=sizes">
-        <span class="menu-title">Sizes</span>
-        <i class="mdi mdi-ruler-square menu-icon"></i>
-      </a>
     </li>
     <li class="nav-item <?php echo $__ROUTE === 'currencies' ? 'active' : ''; ?>">
       <a class="nav-link" href="/admin/?p=currencies">

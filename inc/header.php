@@ -285,7 +285,7 @@ $adminPhone = $contact['adminPhone'] ?? '';
                               <ul>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=home" class="<?php echo htmlspecialchars($__ROUTE == 'home' ? 'active' : '', ENT_QUOTES); ?>">Home</a></li>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=category" class="<?php echo htmlspecialchars($__ROUTE == 'category' ? 'active' : '', ENT_QUOTES); ?>">Category</a></li>
-                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=product" class="<?php echo htmlspecialchars($__ROUTE == 'product' ? 'active' : '', ENT_QUOTES); ?>">Product Details</a></li>
+                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=products" class="<?php echo htmlspecialchars($__ROUTE == 'products' ? 'active' : '', ENT_QUOTES); ?>">Products</a></li>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=cart" class="<?php echo htmlspecialchars($__ROUTE == 'cart' ? 'active' : '', ENT_QUOTES); ?>">Cart</a></li>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=checkout" class="<?php echo htmlspecialchars($__ROUTE == 'checkout' ? 'active' : '', ENT_QUOTES); ?>">Checkout</a></li>
 

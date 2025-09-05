@@ -12,6 +12,7 @@ if (!isset($pageTitle) || !$pageTitle) {
             'register' => 'Register',
             'account' => 'Your Account',
             'contact' => 'Contact Us',
+            '404' => '404 - Page Not Found',
       ];
       if (isset($map[$__ROUTE])) {
             $pageTitle = $map[$__ROUTE];
@@ -25,10 +26,8 @@ if (!isset($pageTitle) || !$pageTitle) {
 <meta name="description" content="">
 <meta name="keywords" content="">
 <meta name="robots" content="noindex, nofollow">
-<!-- Favicons -->
 <link href="assets/img/favicon.png" rel="icon">
 <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
-<!-- Fonts -->
 <link href="https://fonts.googleapis.com" rel="preconnect">
 <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">

@@ -41,8 +41,6 @@ $pageTitle = $config['site']['name'] ?? 'Website';
 $__CONFIG = $config;
 $__ROUTE = $route;
 
-// require_once __DIR__ . '/admin/config/database.php';
-
 require_once __DIR__ . '/admin/config/function.php';
 
 require_once __DIR__ . '/admin/config/global.php';
@@ -52,7 +50,6 @@ require __DIR__ . '/inc/header.php';
 if (is_file($modulePath)) {
       include $modulePath;
 } else {
-      http_response_code(404);
       echo '<main class="container"><h1>404</h1><p>Page not found.</p></main>';
 }
 

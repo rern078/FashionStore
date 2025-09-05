@@ -14,6 +14,7 @@ return [
             'home' => 'index.php',
             'category' => 'category.php',
             'product-detail' => 'product_detail.php',
+            'products' => 'products.php',
             'cart' => 'cart.php',
             'checkout' => 'checkout.php',
             'login' => 'login.php',

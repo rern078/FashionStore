@@ -126,11 +126,9 @@ function getContact()
 
 function getCategories()
 {
-      // Load top-level categories and all subcategories
       $categories = db_all('SELECT id, name, slug FROM categories WHERE parent_id IS NULL ORDER BY name ASC');
       $subcategories = db_all('SELECT id, name, slug, category_id FROM subcategories ORDER BY name ASC');
 
-      // Group subcategories by category_id for quick lookup
       $subcatsByCategory = [];
       foreach ($subcategories as $subcat) {
             $categoryId = (int)$subcat['category_id'];
@@ -185,14 +183,63 @@ function getSizes()
       try {
             $rows = db_all(
                   "SELECT s.id, s.label, COUNT(v.id) AS usage_count\n" .
-                  "FROM sizes s\n" .
-                  "LEFT JOIN variants v ON v.size_id = s.id\n" .
-                  "GROUP BY s.id, s.label\n" .
-                  "ORDER BY s.label ASC"
+                        "FROM sizes s\n" .
+                        "LEFT JOIN variants v ON v.size_id = s.id\n" .
+                        "GROUP BY s.id, s.label\n" .
+                        "ORDER BY s.label ASC"
             );
       } catch (Throwable $e) {
             $rows = [];
       }
 
+      return is_array($rows) ? $rows : [];
+}
+
+function getAllProduct()
+{
+      // Return all active products for frontend listings
+      try {
+            $rows = db_all(
+                  "SELECT id, title, slug, price, discount_percent, featured_image, status\n" .
+                        "FROM products\n" .
+                        "WHERE (status IS NULL OR status = 'active')\n" .
+                        "ORDER BY id DESC"
+            );
+      } catch (Throwable $e) {
+            $rows = [];
+      }
+
+      return is_array($rows) ? $rows : [];
+}
+
+function countActiveProducts(): int
+{
+      try {
+            $row = db_one(
+                  "SELECT COUNT(*) AS c\n" .
+                        "FROM products\n" .
+                        "WHERE (status IS NULL OR status = 'active')"
+            );
+            return (int)($row['c'] ?? 0);
+      } catch (Throwable $e) {
+            return 0;
+      }
+}
+
+function getActiveProductsPaginated(int $limit = 8, int $offset = 0): array
+{
+      $limit = max(1, min(100, (int)$limit));
+      $offset = max(0, (int)$offset);
+      try {
+            $sql =
+                  "SELECT id, title, slug, price, discount_percent, featured_image, status\n" .
+                  "FROM products\n" .
+                  "WHERE (status IS NULL OR status = 'active')\n" .
+                  "ORDER BY id DESC\n" .
+                  "LIMIT $limit OFFSET $offset";
+            $rows = db_all($sql);
+      } catch (Throwable $e) {
+            $rows = [];
+      }
       return is_array($rows) ? $rows : [];
 }
