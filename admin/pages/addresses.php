@@ -14,6 +14,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
       $postal = trim($_POST['postal'] ?? '');
       $country = strtoupper(trim($_POST['country'] ?? ''));
       $isDefault = isset($_POST['is_default']) ? 1 : 0;
+      $businessHours = trim($_POST['business_hours'] ?? '');
 
       if ($userId <= 0 || $line1 === '' || $city === '' || $postal === '' || $country === '') {
             header('Location: /admin/?p=addresses&error=Missing%20required%20fields');
@@ -25,8 +26,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
       }
 
       db_exec(
-            'INSERT INTO addresses (user_id, line1, line2, city, state, postal, country, is_default) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [$userId, $line1, $line2 !== '' ? $line2 : null, $city, $state !== '' ? $state : null, $postal, substr($country, 0, 2), $isDefault]
+            'INSERT INTO addresses (user_id, line1, line2, city, state, postal, country, is_default, business_hours) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [$userId, $line1, $line2 !== '' ? $line2 : null, $city, $state !== '' ? $state : null, $postal, substr($country, 0, 2), $isDefault, $businessHours !== '' ? $businessHours : null]
       );
 
       header('Location: /admin/?p=addresses&added=1');
@@ -54,6 +55,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
       $postal = trim($_POST['postal'] ?? '');
       $country = strtoupper(trim($_POST['country'] ?? ''));
       $isDefault = isset($_POST['is_default']) ? 1 : 0;
+      $businessHours = trim($_POST['business_hours'] ?? '');
 
       if ($id <= 0 || $userId <= 0 || $line1 === '' || $city === '' || $postal === '' || $country === '') {
             header('Location: /admin/?p=addresses&error=Invalid%20data');
@@ -65,8 +67,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
       }
 
       db_exec(
-            'UPDATE addresses SET user_id=?, line1=?, line2=?, city=?, state=?, postal=?, country=?, is_default=? WHERE id=?',
-            [$userId, $line1, $line2 !== '' ? $line2 : null, $city, $state !== '' ? $state : null, $postal, substr($country, 0, 2), $isDefault, $id]
+            'UPDATE addresses SET user_id=?, line1=?, line2=?, city=?, state=?, postal=?, country=?, is_default=?, business_hours=? WHERE id=?',
+            [$userId, $line1, $line2 !== '' ? $line2 : null, $city, $state !== '' ? $state : null, $postal, substr($country, 0, 2), $isDefault, $businessHours !== '' ? $businessHours : null, $id]
       );
 
       header('Location: /admin/?p=addresses&updated=1');
@@ -82,7 +84,7 @@ $total = (int)($totalRow['c'] ?? 0);
 $totalPages = max(1, (int)ceil($total / $perPage));
 
 $rows = db_all(
-      'SELECT a.id, a.user_id, a.line1, a.line2, a.city, a.state, a.postal, a.country, a.is_default, u.name AS user_name, u.email AS user_email
+      'SELECT a.id, a.user_id, a.line1, a.line2, a.city, a.state, a.postal, a.country, a.is_default, a.business_hours, u.name AS user_name, u.email AS user_email
    FROM addresses a
    JOIN users u ON u.id = a.user_id
    ORDER BY a.id DESC
@@ -135,6 +137,7 @@ $rows = db_all(
                                                 <th>Postal</th>
                                                 <th>Country</th>
                                                 <th>Default</th>
+                                                <th>Business Hours</th>
                                                 <th>Actions</th>
                                           </tr>
                                     </thead>
@@ -150,6 +153,7 @@ $rows = db_all(
                                                       <td><?php echo htmlspecialchars($r['postal'] ?? '', ENT_QUOTES); ?></td>
                                                       <td><?php echo htmlspecialchars($r['country'] ?? '', ENT_QUOTES); ?></td>
                                                       <td><label class="badge badge-<?php echo ((int)$r['is_default'] === 1) ? 'success' : 'secondary'; ?>"><?php echo ((int)$r['is_default'] === 1) ? 'Yes' : 'No'; ?></label></td>
+                                                      <td style="white-space:pre-line; max-width:260px;"><?php echo htmlspecialchars($r['business_hours'] ?? '', ENT_QUOTES); ?></td>
                                                       <td>
                                                             <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editAddressModal-<?php echo (int)$r['id']; ?>">Edit</button>
                                                             <form method="post" style="display:inline-block" onsubmit="return confirm('Delete this address?');">
@@ -206,6 +210,10 @@ $rows = db_all(
                                                                                           <label class="form-label">Country (2-letter) *</label>
                                                                                           <input type="text" class="form-control" name="country" maxlength="2" required value="<?php echo htmlspecialchars($r['country'] ?? '', ENT_QUOTES); ?>">
                                                                                     </div>
+                                                                              </div>
+                                                                              <div class="mb-3">
+                                                                                    <label class="form-label">Business Hours</label>
+                                                                                    <textarea class="form-control" name="business_hours" rows="3" placeholder="e.g. Monday-Friday: 9am-6pm&#10;Saturday: 10am-4pm&#10;Sunday: Closed"><?php echo htmlspecialchars($r['business_hours'] ?? '', ENT_QUOTES); ?></textarea>
                                                                               </div>
                                                                               <div class="form-check">
                                                                                     <input class="form-check-input" type="checkbox" name="is_default" id="editIsDefault-<?php echo (int)$r['id']; ?>" <?php echo ((int)$r['is_default'] === 1) ? 'checked' : ''; ?>>
@@ -293,6 +301,10 @@ $rows = db_all(
                                           <label class="form-label">Country (2-letter) *</label>
                                           <input type="text" class="form-control" name="country" maxlength="2" required>
                                     </div>
+                              </div>
+                              <div class="mb-3">
+                                    <label class="form-label">Business Hours</label>
+                                    <textarea class="form-control" name="business_hours" rows="3" placeholder="e.g. Monday-Friday: 9am-6pm&#10;Saturday: 10am-4pm&#10;Sunday: Closed"></textarea>
                               </div>
                               <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="is_default" id="addIsDefault">

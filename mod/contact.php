@@ -1,6 +1,6 @@
 <?php
 $defaultAddress = getDefaultAddress();
-$addressText = $defaultAddress;
+$addressText = $defaultAddress[0];
 $contact = getContact();
 $socialLinks = $contact['socialLinks'];
 $adminEmail = $contact['adminEmail'];

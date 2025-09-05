@@ -28,6 +28,7 @@ CREATE TABLE addresses (
   postal VARCHAR(20) NOT NULL,
   country VARCHAR(2) NOT NULL,
   is_default TINYINT(1) NOT NULL DEFAULT 0,
+  business_hours TEXT NULL,
   CONSTRAINT fk_addresses_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   INDEX idx_addresses_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

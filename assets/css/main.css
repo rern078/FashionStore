@@ -12998,3 +12998,8 @@ section,
   color: color-mix(in srgb, var(--default-color), transparent 60%);
   font-size: 14px;
 }
+
+.form-control[type=file]:not(:disabled):not([readonly]) {
+  border-radius: 0;
+  line-height: 1.8;
+}

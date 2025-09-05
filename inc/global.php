@@ -69,8 +69,9 @@ function getAbout()
 
 function getDefaultAddress()
 {
-      $defaultAddress = db_one('SELECT line1, line2, city, state, postal, country FROM addresses WHERE is_default = 1 ORDER BY id DESC LIMIT 1');
+      $defaultAddress = db_one('SELECT line1, line2, city, state, postal, country, business_hours FROM addresses WHERE is_default = 1 ORDER BY id DESC LIMIT 1');
       $addressText = 'Sangkat Teuk Thla, Kan Sensok, Phnom Penh, Cambodia';
+      $businessHours = '';
       $parts = [];
       if (is_array($defaultAddress) && !empty($defaultAddress)) {
             if (!empty($defaultAddress['line1'])) {
@@ -95,11 +96,14 @@ function getDefaultAddress()
             if (!empty($defaultAddress['country'])) {
                   $parts[] = strtoupper((string)$defaultAddress['country']);
             }
+            if (!empty($defaultAddress['business_hours'])) {
+                  $businessHours = (string)$defaultAddress['business_hours'];
+            }
       }
       if (!empty($parts)) {
             $addressText = implode(', ', $parts);
       }
-      return $addressText;
+      return [$addressText, $businessHours];
 }
 
 

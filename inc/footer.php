@@ -8,7 +8,9 @@ $about = getAbout();
 $aboutTitle = $about['title'] ?? '';
 $aboutContent = $about['content'] ?? '';
 $aboutImage = $about['image_url'] ?? '';
-$addressText = getDefaultAddress();
+$defaultAddressInfo = getDefaultAddress();
+$addressText = is_array($defaultAddressInfo) ? ($defaultAddressInfo[0] ?? '') : (string)$defaultAddressInfo;
+$addressHours = is_array($defaultAddressInfo) ? (string)($defaultAddressInfo[1] ?? '') : '';
 
 ?>
 <footer id="footer" class="footer light-background">
@@ -90,8 +92,7 @@ $addressText = getDefaultAddress();
                                           </div>
                                           <div class="contact-item">
                                                 <i class="bi bi-clock"></i>
-                                                <span>Monday-Friday: 9am-6pm<br>Saturday: 10am-4pm<br>Sunday:
-                                                      Closed</span>
+                                                <span><?php echo nl2br(htmlspecialchars(($addressHours !== '' ? $addressHours : "Monday-Friday: 9am-6pm\nSaturday: 10am-4pm\nSunday: Closed"), ENT_QUOTES)); ?></span>
                                           </div>
                                     </div>
 

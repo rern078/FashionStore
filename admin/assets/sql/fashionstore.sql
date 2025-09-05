@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `addresses` (
   `postal` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `country` varchar(2) COLLATE utf8mb4_unicode_ci NOT NULL,
   `is_default` tinyint(1) NOT NULL DEFAULT '0',
+  `business_hours` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_addresses_user` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
