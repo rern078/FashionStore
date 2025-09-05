@@ -9,24 +9,26 @@ $assetsUrl = $site['assets_url'] ?? '/assets';
 $siteName = $site['name'] ?? 'Site';
 $charset = $site['charset'] ?? 'UTF-8';
 
-// Build simple nav from known routes
-// $navItems = [
-//       ['label' => 'Home', 'href' => '?p=home', 'key' => 'home'],
-//       ['label' => 'Category', 'href' => '?p=category', 'key' => 'category'],
-//       ['label' => 'Cart', 'href' => '?p=cart', 'key' => 'cart'],
-//       ['label' => 'Checkout', 'href' => '?p=checkout', 'key' => 'checkout'],
-//       ['label' => 'Account', 'href' => '?p=account', 'key' => 'account'],
-//       ['label' => 'Contact', 'href' => '?p=contact', 'key' => 'contact'],
-// ];
+// Load currencies from DB for header dropdown
+$currencyData = getCurrencies();
+$currencies = $currencyData['currencies'] ?? [];
+$currentCurrencyCode = $currencyData['currentCurrencyCode'] ?? 'USD';
+$currentCurrencyLabel = $currencyData['currentCurrencyLabel'] ?? 'USD';
+$currentCurrencySymbol = $currencyData['currentCurrencySymbol'] ?? '$';
+
+// end currencies logic
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-      <meta charset="<?php echo htmlspecialchars($charset, ENT_QUOTES); ?>">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title><?php echo htmlspecialchars($pageTitle ?: $siteName, ENT_QUOTES); ?></title>
-      <link rel="stylesheet" href="<?php echo htmlspecialchars($assetsUrl, ENT_QUOTES); ?>/css/main.css">
+      <?php
+      $titleOverride = __DIR__ . '/title.inc.php';
+      if (is_file($titleOverride)) {
+            include $titleOverride;
+      }
+      ?>
 </head>
 
 <body class="<?php echo htmlspecialchars($__ROUTE, ENT_QUOTES); ?>">
@@ -74,14 +76,22 @@ $charset = $site['charset'] ?? 'UTF-8';
                                           </div>
                                           <div class="top-bar-item dropdown">
                                                 <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
-                                                      <i class="bi bi-currency-dollar me-2"></i>USD
+                                                      <i class="me-2"><?php echo $currentCurrencySymbol; ?></i><?php echo htmlspecialchars($currentCurrencyLabel, ENT_QUOTES); ?>
                                                 </a>
                                                 <ul class="dropdown-menu">
-                                                      <li><a class="dropdown-item" href="#"><i
-                                                                        class="bi bi-check2 me-2 selected-icon"></i>USD</a>
-                                                      </li>
-                                                      <li><a class="dropdown-item" href="#">EUR</a></li>
-                                                      <li><a class="dropdown-item" href="#">GBP</a></li>
+                                                      <?php if (!empty($currencies)) { ?>
+                                                            <?php foreach ($currencies as $cur) {
+                                                                  $isCurrent = strtoupper($currentCurrencyCode) === strtoupper($cur['code']); ?>
+                                                                  <li>
+                                                                        <a class="dropdown-item" href="?set_currency=<?php echo urlencode($cur['code']); ?>">
+                                                                              <?php if ($isCurrent) { ?><i class="bi bi-check2 me-2 selected-icon"></i><?php } ?>
+                                                                              <?php echo htmlspecialchars($cur['symbol'], ENT_QUOTES) . ' - ' . htmlspecialchars($cur['code'], ENT_QUOTES); ?>
+                                                                        </a>
+                                                                  </li>
+                                                            <?php } ?>
+                                                      <?php } else { ?>
+                                                            <li><span class="dropdown-item-text text-muted">No currencies</span></li>
+                                                      <?php } ?>
                                                 </ul>
                                           </div>
                                     </div>
@@ -276,7 +286,7 @@ $charset = $site['charset'] ?? 'UTF-8';
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=product" class="<?php echo htmlspecialchars($__ROUTE == 'product' ? 'active' : '', ENT_QUOTES); ?>">Product Details</a></li>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=cart" class="<?php echo htmlspecialchars($__ROUTE == 'cart' ? 'active' : '', ENT_QUOTES); ?>">Cart</a></li>
                                     <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=checkout" class="<?php echo htmlspecialchars($__ROUTE == 'checkout' ? 'active' : '', ENT_QUOTES); ?>">Checkout</a></li>
-                                   
+
                                     <li class="products-megamenu-1"><a href="#"><span>Megamenu 1</span> <i
                                                       class="bi bi-chevron-down toggle-dropdown"></i></a>
                                           <ul class="mobile-megamenu">

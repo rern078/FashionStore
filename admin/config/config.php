@@ -32,6 +32,7 @@ return [
             'brands' => 'pages/brands.php',
             'colors' => 'pages/colors.php',
             'sizes' => 'pages/sizes.php',
+            'currencies' => 'pages/currencies.php',
             'subcategories' => 'pages/subcategories.php',
             'seos' => 'pages/seos.php',
             'banners' => 'pages/banners.php',

@@ -1,13 +1,11 @@
 <?php
-require_once __DIR__ . '/../admin/config/function.php';
-$aboutRows = db_all('SELECT title, content, image_url FROM about_us ORDER BY id ASC');
-$first = $aboutRows[0] ?? null;
-$aboutTitle = (string)($first['title'] ?? 'About Our Company');
-$aboutContent = (string)($first['content'] ?? '');
-$aboutImage = (string)($first['image_url'] ?? '');
+$about = getAbout();
+$aboutTitle = $about['title'] ?? '';
+$aboutContent = $about['content'] ?? '';
+$aboutContent2 = $about['content_2'] ?? '';
+$aboutImage = $about['image_url'] ?? '';
 ?>
 <main class="main">
-
       <!-- Page Title -->
       <div class="page-title light-background">
             <div class="container">
@@ -168,29 +166,32 @@ $aboutImage = (string)($first['image_url'] ?? '');
                         </script>
 
                         <div class="swiper-wrapper">
-                              <?php foreach ($aboutRows as $row) { ?>
+                              <?php foreach ($about as $row) { ?>
                                     <div class="swiper-slide">
                                           <div class="testimonial-item">
                                                 <div class="row">
                                                       <div class="col-lg-8">
-                                                            <h2><?php echo htmlspecialchars((string)$row['title'], ENT_QUOTES); ?></h2>
+                                                            <h2><?php echo htmlspecialchars((string)$aboutTitle, ENT_QUOTES); ?></h2>
                                                             <p>
-                                                                  <?php echo nl2br(htmlspecialchars((string)$row['content'], ENT_QUOTES)); ?>
+                                                                  <?php echo nl2br(htmlspecialchars((string)$aboutContent, ENT_QUOTES)); ?>
+                                                            </p>
+                                                            <p>
+                                                                  <?php echo nl2br(htmlspecialchars((string)$aboutContent2, ENT_QUOTES)); ?>
                                                             </p>
                                                             <div class="profile d-flex align-items-center">
-                                                                  <?php if (!empty($row['image_url'])) { ?>
-                                                                        <img src="<?php echo htmlspecialchars((string)$row['image_url'], ENT_QUOTES); ?>" class="profile-img" alt="">
+                                                                  <?php if (!empty($aboutImage)) { ?>
+                                                                        <img src="<?php echo htmlspecialchars((string)$aboutImage, ENT_QUOTES); ?>" class="profile-img" alt="">
                                                                   <?php } ?>
                                                                   <div class="profile-info">
-                                                                        <h3><?php echo htmlspecialchars((string)$row['title'], ENT_QUOTES); ?></h3>
+                                                                        <h3><?php echo htmlspecialchars((string)$aboutTitle, ENT_QUOTES); ?></h3>
                                                                         <span>Client</span>
                                                                   </div>
                                                             </div>
                                                       </div>
                                                       <div class="col-lg-4 d-none d-lg-block">
-                                                            <?php if (!empty($row['image_url'])) { ?>
+                                                            <?php if (!empty($aboutImage)) { ?>
                                                                   <div class="featured-img-wrapper">
-                                                                        <img src="<?php echo htmlspecialchars((string)$row['image_url'], ENT_QUOTES); ?>" class="featured-img" alt="">
+                                                                        <img src="<?php echo htmlspecialchars((string)$aboutImage, ENT_QUOTES); ?>" class="featured-img" alt="">
                                                                   </div>
                                                             <?php } ?>
                                                       </div>

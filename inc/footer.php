@@ -1,13 +1,15 @@
 <?php
 
-/** @var array $__CONFIG */
-$assetsUrl = ($__CONFIG['site']['assets_url'] ?? '/assets');
-$siteName = ($__CONFIG['site']['name'] ?? 'Site');
-require_once __DIR__ . '/../admin/config/function.php';
-// Load active social links for footer
-$socialLinks = db_all('SELECT platform, label, url, icon FROM social_links WHERE is_active = 1 ORDER BY position ASC, id DESC');
-// Load About Us content
-$about = db_one('SELECT title, content, image_url FROM about_us ORDER BY id ASC LIMIT 1');
+$contact = getContact();
+$socialLinks = $contact['socialLinks'] ?? [];
+$adminEmail = $contact['adminEmail'] ?? '';
+$adminPhone = $contact['adminPhone'] ?? '';
+$about = getAbout();
+$aboutTitle = $about['title'] ?? '';
+$aboutContent = $about['content'] ?? '';
+$aboutImage = $about['image_url'] ?? '';
+$addressText = getDefaultAddress();
+
 ?>
 <footer id="footer" class="footer light-background">
       <div class="footer-main">
@@ -18,7 +20,7 @@ $about = db_one('SELECT title, content, image_url FROM about_us ORDER BY id ASC 
                                     <a href="/" class="logo">
                                           <span class="sitename">FashionStore</span>
                                     </a>
-                                    <p><?php echo htmlspecialchars((string)($about['content'] ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in nibh vehicula, facilisis magna ut, consectetur lorem. Proin eget tortor risus.'), ENT_QUOTES); ?></p>
+                                    <p><?php echo htmlspecialchars((string)($aboutContent !== '' ? $aboutContent : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in nibh vehicula, facilisis magna ut, consectetur lorem. Proin eget tortor risus.'), ENT_QUOTES); ?></p>
 
                                     <div class="social-links mt-4">
                                           <h5>Connect With Us</h5>
@@ -76,16 +78,15 @@ $about = db_one('SELECT title, content, image_url FROM about_us ORDER BY id ASC 
                                     <div class="footer-contact">
                                           <div class="contact-item">
                                                 <i class="bi bi-geo-alt"></i>
-                                                <span>123 Fashion Street, New York, NY 10001</span>
+                                                <span><?php echo htmlspecialchars($addressText, ENT_QUOTES); ?></span>
                                           </div>
                                           <div class="contact-item">
                                                 <i class="bi bi-telephone"></i>
-                                                <span>+1 (555) 123-4567</span>
+                                                <span><?php echo htmlspecialchars($adminPhone !== '' ? $adminPhone : '+1 (555) 123-4567', ENT_QUOTES); ?></span>
                                           </div>
                                           <div class="contact-item">
                                                 <i class="bi bi-envelope"></i>
-                                                <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__"
-                                                            data-cfemail="84ece1e8e8ebc4e1fce5e9f4e8e1aae7ebe9">[email&#160;protected]</a></span>
+                                                <span><?php if ($adminEmail !== '') { ?><a href="mailto:<?php echo htmlspecialchars($adminEmail, ENT_QUOTES); ?>"><?php echo htmlspecialchars($adminEmail, ENT_QUOTES); ?></a><?php } else { ?><a href="/cdn-cgi/l/email-protection" class="__cf_email__">[email&#160;protected]</a><?php } ?></span>
                                           </div>
                                           <div class="contact-item">
                                                 <i class="bi bi-clock"></i>

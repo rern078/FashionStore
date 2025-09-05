@@ -71,6 +71,12 @@
         <i class="mdi mdi-ruler-square menu-icon"></i>
       </a>
     </li>
+    <li class="nav-item <?php echo $__ROUTE === 'currencies' ? 'active' : ''; ?>">
+      <a class="nav-link" href="/admin/?p=currencies">
+        <span class="menu-title">Currencies</span>
+        <i class="mdi mdi-currency-usd menu-icon"></i>
+      </a>
+    </li>
     <li class="nav-item <?php echo $__ROUTE === 'carts' ? 'active' : ''; ?>">
       <a class="nav-link" href="/admin/?p=carts">
         <span class="menu-title">Carts</span>

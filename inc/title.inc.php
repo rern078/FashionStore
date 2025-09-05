@@ -19,9 +19,9 @@ if (!isset($pageTitle) || !$pageTitle) {
 }
 
 ?>
-<meta charset="utf-8">
+<meta charset="<?php echo htmlspecialchars($charset, ENT_QUOTES); ?>">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Login - FashionStore Bootstrap Template</title>
+<title><?php echo htmlspecialchars($pageTitle ?: $siteName, ENT_QUOTES); ?></title>
 <meta name="description" content="">
 <meta name="keywords" content="">
 <meta name="robots" content="noindex, nofollow">
@@ -35,4 +35,4 @@ if (!isset($pageTitle) || !$pageTitle) {
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<link href="../assets/css/main.css" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($assetsUrl, ENT_QUOTES); ?>/css/main.css">

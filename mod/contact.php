@@ -1,45 +1,10 @@
 <?php
-require_once __DIR__ . '/../admin/config/function.php';
-
-$defaultAddress = db_one('SELECT line1, line2, city, state, postal, country FROM addresses WHERE is_default = 1 ORDER BY id DESC LIMIT 1');
-
-$addressText = 'A108 Adam Street, New York, NY 535022';
-if ($defaultAddress) {
-      $parts = [];
-      if (!empty($defaultAddress['line1'])) {
-            $parts[] = (string)$defaultAddress['line1'];
-      }
-      if (!empty($defaultAddress['line2'])) {
-            $parts[] = (string)$defaultAddress['line2'];
-      }
-      $cityStatePostal = [];
-      if (!empty($defaultAddress['city'])) {
-            $cityStatePostal[] = (string)$defaultAddress['city'];
-      }
-      if (!empty($defaultAddress['state'])) {
-            $cityStatePostal[] = (string)$defaultAddress['state'];
-      }
-      if (!empty($defaultAddress['postal'])) {
-            $cityStatePostal[] = (string)$defaultAddress['postal'];
-      }
-      if ($cityStatePostal) {
-            $parts[] = implode(', ', $cityStatePostal);
-      }
-      if (!empty($defaultAddress['country'])) {
-            $parts[] = strtoupper((string)$defaultAddress['country']);
-      }
-      if ($parts) {
-            $addressText = implode(', ', $parts);
-      }
-}
-
-// Load active social links
-$socialLinks = db_all('SELECT platform, label, url, icon FROM social_links WHERE is_active = 1 ORDER BY position ASC, id DESC');
-
-// Load admin user contact
-$adminContact = db_one('SELECT name, email, phone FROM users WHERE role = ? ORDER BY id ASC LIMIT 1', ['admin']);
-$adminEmail = is_array($adminContact) && !empty($adminContact['email']) ? (string)$adminContact['email'] : '';
-$adminPhone = is_array($adminContact) && !empty($adminContact['phone']) ? (string)$adminContact['phone'] : '';
+$defaultAddress = getDefaultAddress();
+$addressText = $defaultAddress;
+$contact = getContact();
+$socialLinks = $contact['socialLinks'];
+$adminEmail = $contact['adminEmail'];
+$adminPhone = $contact['adminPhone'];
 ?>
 <main class="main">
       <div class="page-title light-background">

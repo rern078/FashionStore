@@ -13,7 +13,17 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 $routes = $config['routes'] ?? [];
 $route = isset($_GET['p']) ? trim((string)$_GET['p'], "/ \t\n\r\0\x0B") : '';
 
-// Allow nested paths like product/123 to resolve to 'product'
+// Handle currency switch globally
+if (isset($_GET['set_currency'])) {
+      $code = strtoupper(substr(trim((string)$_GET['set_currency']), 0, 3));
+      if ($code !== '') {
+            $_SESSION['currency'] = $code;
+            $redirect = $_SERVER['HTTP_REFERER'] ?? ($config['site']['base_url'] ?? '/');
+            header('Location: ' . $redirect);
+            exit;
+      }
+}
+
 if (!array_key_exists($route, $routes)) {
       $primary = $route !== '' ? explode('/', $route)[0] : '';
       if ($primary !== '' && array_key_exists($primary, $routes)) {
@@ -26,16 +36,16 @@ if (!array_key_exists($route, $routes)) {
 $moduleRel = $routes[$route] ?? 'index.php';
 $modulePath = __DIR__ . '/mod/' . $moduleRel;
 
-// Default title; can be overridden in inc/title.inc.php
 $pageTitle = $config['site']['name'] ?? 'Website';
-$titleOverride = __DIR__ . '/inc/title.inc.php';
-if (is_file($titleOverride)) {
-      include $titleOverride; // may set $pageTitle using $__ROUTE or other context
-}
 
-// Make config and route available to templates
 $__CONFIG = $config;
 $__ROUTE = $route;
+
+// require_once __DIR__ . '/admin/config/database.php';
+
+require_once __DIR__ . '/admin/config/function.php';
+
+require_once __DIR__ . '/inc/global.php';
 
 require __DIR__ . '/inc/header.php';
 

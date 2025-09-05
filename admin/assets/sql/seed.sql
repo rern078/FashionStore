@@ -4,6 +4,19 @@
 
 SET NAMES utf8mb4;
 
+-- Currencies (idempotent seeds)
+INSERT INTO currencies (code, name, exchange_rate, symbol, decimal_places, position, is_default, is_active)
+VALUES
+  ('USD', 'US Dollar',       1.000000, '$',  2, 'prefix', 1, 1),
+  ('EUR', 'Euro',            0.920000, '€',  2, 'suffix', 0, 1),
+  ('GBP', 'British Pound',   0.800000, '£',  2, 'prefix', 0, 1),
+  ('JPY', 'Japanese Yen',  150.000000, '¥',  0, 'prefix', 0, 1),
+  ('INR', 'Indian Rupee',   83.000000, '₹',  2, 'prefix', 0, 1)
+ON DUPLICATE KEY UPDATE
+  name=VALUES(name), exchange_rate=VALUES(exchange_rate), symbol=VALUES(symbol),
+  decimal_places=VALUES(decimal_places), position=VALUES(position),
+  is_default=VALUES(is_default), is_active=VALUES(is_active);
+
 -- Categories
 INSERT INTO categories (name, slug, parent_id)
 VALUES
