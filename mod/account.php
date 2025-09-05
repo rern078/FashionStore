@@ -1,6 +1,4 @@
 <main class="main">
-
-      <!-- Page Title -->
       <div class="page-title light-background">
             <div class="container">
                   <nav class="breadcrumbs">
@@ -11,14 +9,10 @@
                   </nav>
                   <h1>Account</h1>
             </div>
-      </div><!-- End Page Title -->
-
-      <!-- Account Section -->
+      </div>
       <section id="account" class="account section">
 
             <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-                  <!-- Mobile Sidebar Toggle Button -->
                   <div class="sidebar-toggle d-lg-none mb-3">
                         <button class="btn btn-toggle" type="button" data-bs-toggle="collapse"
                               data-bs-target="#profileSidebar" aria-expanded="false"
@@ -28,7 +22,6 @@
                   </div>
 
                   <div class="row">
-                        <!-- Profile Sidebar -->
                         <div class="col-lg-3 profile-sidebar collapse d-lg-block" id="profileSidebar"
                               data-aos="fade-right" data-aos-delay="200">
                               <div class="profile-header">
@@ -130,7 +123,6 @@
                               </div>
                         </div>
 
-                        <!-- Profile Content -->
                         <div class="col-lg-9 profile-content" data-aos="fade-left" data-aos-delay="300">
                               <div class="tab-content" id="profileTabsContent">
                                     <!-- Orders Tab -->
@@ -1421,7 +1413,6 @@
                                           </div>
                                           <div class="addresses-list">
                                                 <div class="row">
-                                                      <!-- Address Item 1 -->
                                                       <div class="col-lg-6 mb-4" data-aos="fade-up"
                                                             data-aos-delay="100">
                                                             <div class="address-item">
@@ -1444,9 +1435,7 @@
                                                                   </div>
                                                                   <div class="default-badge">Default</div>
                                                             </div>
-                                                      </div><!-- End Address Item -->
-
-                                                      <!-- Address Item 2 -->
+                                                      </div>
                                                       <div class="col-lg-6 mb-4" data-aos="fade-up"
                                                             data-aos-delay="200">
                                                             <div class="address-item">
@@ -1471,7 +1460,7 @@
                                                                   <button class="btn btn-sm btn-make-default"
                                                                         type="button">Make default</button>
                                                             </div>
-                                                      </div><!-- End Address Item -->
+                                                      </div>
                                                 </div>
                                           </div>
                                     </div>
@@ -1610,9 +1599,6 @@
                               </div>
                         </div>
                   </div>
-
             </div>
-
-      </section><!-- /Account Section -->
-
+      </section>
 </main>

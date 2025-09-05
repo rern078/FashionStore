@@ -13,7 +13,7 @@ return [
             '' => 'index.php',
             'home' => 'index.php',
             'category' => 'category.php',
-            'product' => 'product_detail.php',
+            'product-detail' => 'product_detail.php',
             'cart' => 'cart.php',
             'checkout' => 'checkout.php',
             'login' => 'login.php',
@@ -22,5 +22,6 @@ return [
             'account' => 'account.php',
             'contact' => 'contact.php',
             'about' => 'about.php',
+            'track-order' => 'track_order.php',
       ],
 ];

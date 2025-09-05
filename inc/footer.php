@@ -84,11 +84,11 @@ $addressHours = is_array($defaultAddressInfo) ? (string)($defaultAddressInfo[1] 
                                           </div>
                                           <div class="contact-item">
                                                 <i class="bi bi-telephone"></i>
-                                                <span><?php echo htmlspecialchars($adminPhone !== '' ? $adminPhone : '+1 (555) 123-4567', ENT_QUOTES); ?></span>
+                                                <span><?php echo htmlspecialchars($adminPhone !== '' ? $adminPhone : '+855 967 797 762', ENT_QUOTES); ?></span>
                                           </div>
                                           <div class="contact-item">
                                                 <i class="bi bi-envelope"></i>
-                                                <span><?php if ($adminEmail !== '') { ?><a href="mailto:<?php echo htmlspecialchars($adminEmail, ENT_QUOTES); ?>"><?php echo htmlspecialchars($adminEmail, ENT_QUOTES); ?></a><?php } else { ?><a href="/cdn-cgi/l/email-protection" class="__cf_email__">[email&#160;protected]</a><?php } ?></span>
+                                                <span><?php if ($adminEmail !== '') { ?><a href="mailto:<?php echo htmlspecialchars($adminEmail, ENT_QUOTES); ?>"><?php echo htmlspecialchars($adminEmail, ENT_QUOTES); ?></a><?php } else { ?><a href="mailto:tiengchamrern2@gmail.com" class="__cf_email__">tiengchamrern2@gmail.com</a><?php } ?></span>
                                           </div>
                                           <div class="contact-item">
                                                 <i class="bi bi-clock"></i>

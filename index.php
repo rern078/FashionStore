@@ -45,7 +45,7 @@ $__ROUTE = $route;
 
 require_once __DIR__ . '/admin/config/function.php';
 
-require_once __DIR__ . '/inc/global.php';
+require_once __DIR__ . '/admin/config/global.php';
 
 require __DIR__ . '/inc/header.php';
 

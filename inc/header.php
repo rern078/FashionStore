@@ -15,7 +15,10 @@ $currencies = $currencyData['currencies'] ?? [];
 $currentCurrencyCode = $currencyData['currentCurrencyCode'] ?? 'USD';
 $currentCurrencyLabel = $currencyData['currentCurrencyLabel'] ?? 'USD';
 $currentCurrencySymbol = $currencyData['currentCurrencySymbol'] ?? '$';
-
+$contact = getContact();
+$socialLinks = $contact['socialLinks'] ?? [];
+$adminEmail = $contact['adminEmail'] ?? '';
+$adminPhone = $contact['adminPhone'] ?? '';
 // end currencies logic
 
 ?>
@@ -42,14 +45,13 @@ $currentCurrencySymbol = $currencyData['currentCurrencySymbol'] ?? '$';
                                           <div class="top-bar-item me-4">
                                                 <i class="bi bi-telephone-fill me-2"></i>
                                                 <span>Customer Support: </span>
-                                                <a href="tel:+1234567890">+1 (234) 567-890</a>
+                                                <a href="<?php echo htmlspecialchars($adminPhone !== '' ? 'tel:' . $adminPhone : 'tel:+855967797762', ENT_QUOTES); ?>"><?php echo htmlspecialchars($adminPhone !== '' ? $adminPhone : '+855 967 797 762', ENT_QUOTES); ?></a>
                                           </div>
                                           <div class="top-bar-item">
                                                 <i class="bi bi-envelope-fill me-2"></i>
-                                                <a
-                                                      href="/cdn-cgi/l/email-protection#1e6d6b6e6e716c6a5e7b667f736e727b307d7173"><span
-                                                            class="__cf_email__"
-                                                            data-cfemail="1c6f696c6c736e685c79647d716c7079327f7371">[email&#160;protected]</span></a>
+                                                <a href="">
+                                                      <span class="__cf_email__"><?php if ($adminEmail !== '') { ?><a href="mailto:<?php echo htmlspecialchars($adminEmail, ENT_QUOTES); ?>"><?php echo htmlspecialchars($adminEmail, ENT_QUOTES); ?></a><?php } else { ?><a href="mailto:tiengchamrern2@gmail.com" class="__cf_email__">tiengchamrern2@gmail.com</a><?php } ?></span>
+                                                </a>
                                           </div>
                                     </div>
                               </div>
@@ -57,7 +59,7 @@ $currentCurrencySymbol = $currencyData['currentCurrencySymbol'] ?? '$';
                               <div class="col-lg-6">
                                     <div class="d-flex justify-content-end">
                                           <div class="top-bar-item me-4">
-                                                <a href="track-order.html">
+                                                <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=track-order">
                                                       <i class="bi bi-truck me-2"></i>Track Order
                                                 </a>
                                           </div>

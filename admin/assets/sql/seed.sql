@@ -359,6 +359,27 @@ VALUES
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), description=VALUES(description), logo_url=VALUES(logo_url);
 
+-- Colors (15 items)
+INSERT INTO colors (name, hex)
+VALUES
+  ('Black',       '#000000'),
+  ('White',       '#FFFFFF'),
+  ('Red',         '#FF0000'),
+  ('Green',       '#008000'),
+  ('Blue',        '#0000FF'),
+  ('Yellow',      '#FFFF00'),
+  ('Orange',      '#FFA500'),
+  ('Purple',      '#800080'),
+  ('Pink',        '#FFC0CB'),
+  ('Brown',       '#A52A2A'),
+  ('Gray',        '#808080'),
+  ('Cyan',        '#00FFFF'),
+  ('Maroon',      '#800000'),
+  ('Teal',        '#008080'),
+  ('Light Blue',  '#ADD8E6')
+ON DUPLICATE KEY UPDATE
+  hex = VALUES(hex);
+
 -- Resolve brand ids
 SET @brand_a = (SELECT id FROM brands WHERE slug='brand-a');
 SET @brand_b = (SELECT id FROM brands WHERE slug='brand-b');

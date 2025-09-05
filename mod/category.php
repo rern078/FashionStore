@@ -1,15 +1,10 @@
 <?php
-require_once __DIR__ . '/../admin/config/function.php';
-
-// Load top-level categories and all subcategories
-$__fe_categories = db_all('SELECT id, name, slug FROM categories WHERE parent_id IS NULL ORDER BY name ASC');
-$__fe_subcategories = db_all('SELECT id, name, slug, category_id FROM subcategories ORDER BY name ASC');
-
-// Group subcategories by category_id for quick lookup
-$__fe_subcats_by_category = [];
-foreach ($__fe_subcategories as $__fe_sc) {
-      $__fe_subcats_by_category[$__fe_sc['category_id']][] = $__fe_sc;
-}
+// Fetch categories and subcategories using global helper
+$__catData = getCategories();
+$__fe_categories = $__catData['categories'] ?? [];
+$__fe_subcats_by_category = $__catData['subcatsByCategory'] ?? [];
+$brands = getBrand();
+$colors = getColors();
 ?>
 <main class="main">
       <div class="page-title light-background">
@@ -130,105 +125,22 @@ foreach ($__fe_subcategories as $__fe_sc) {
 
                                     <div class="color-filter-content">
                                           <div class="color-options">
-                                                <div class="form-check color-option">
-                                                      <input class="form-check-input" type="checkbox"
-                                                            value="black" id="color-black">
-                                                      <label class="form-check-label" for="color-black">
-                                                            <span class="color-swatch"
-                                                                  style="background-color: #000000;"
-                                                                  title="Black"></span>
-                                                      </label>
-                                                </div>
-
-                                                <div class="form-check color-option">
-                                                      <input class="form-check-input" type="checkbox"
-                                                            value="white" id="color-white">
-                                                      <label class="form-check-label" for="color-white">
-                                                            <span class="color-swatch"
-                                                                  style="background-color: #ffffff;"
-                                                                  title="White"></span>
-                                                      </label>
-                                                </div>
-
-                                                <div class="form-check color-option">
-                                                      <input class="form-check-input" type="checkbox" value="red"
-                                                            id="color-red">
-                                                      <label class="form-check-label" for="color-red">
-                                                            <span class="color-swatch"
-                                                                  style="background-color: #e74c3c;"
-                                                                  title="Red"></span>
-                                                      </label>
-                                                </div>
-
-                                                <div class="form-check color-option">
-                                                      <input class="form-check-input" type="checkbox" value="blue"
-                                                            id="color-blue">
-                                                      <label class="form-check-label" for="color-blue">
-                                                            <span class="color-swatch"
-                                                                  style="background-color: #3498db;"
-                                                                  title="Blue"></span>
-                                                      </label>
-                                                </div>
-
-                                                <div class="form-check color-option">
-                                                      <input class="form-check-input" type="checkbox"
-                                                            value="green" id="color-green">
-                                                      <label class="form-check-label" for="color-green">
-                                                            <span class="color-swatch"
-                                                                  style="background-color: #2ecc71;"
-                                                                  title="Green"></span>
-                                                      </label>
-                                                </div>
-
-                                                <div class="form-check color-option">
-                                                      <input class="form-check-input" type="checkbox"
-                                                            value="yellow" id="color-yellow">
-                                                      <label class="form-check-label" for="color-yellow">
-                                                            <span class="color-swatch"
-                                                                  style="background-color: #f1c40f;"
-                                                                  title="Yellow"></span>
-                                                      </label>
-                                                </div>
-
-                                                <div class="form-check color-option">
-                                                      <input class="form-check-input" type="checkbox"
-                                                            value="purple" id="color-purple">
-                                                      <label class="form-check-label" for="color-purple">
-                                                            <span class="color-swatch"
-                                                                  style="background-color: #9b59b6;"
-                                                                  title="Purple"></span>
-                                                      </label>
-                                                </div>
-
-                                                <div class="form-check color-option">
-                                                      <input class="form-check-input" type="checkbox"
-                                                            value="orange" id="color-orange">
-                                                      <label class="form-check-label" for="color-orange">
-                                                            <span class="color-swatch"
-                                                                  style="background-color: #e67e22;"
-                                                                  title="Orange"></span>
-                                                      </label>
-                                                </div>
-
-                                                <div class="form-check color-option">
-                                                      <input class="form-check-input" type="checkbox" value="pink"
-                                                            id="color-pink">
-                                                      <label class="form-check-label" for="color-pink">
-                                                            <span class="color-swatch"
-                                                                  style="background-color: #fd79a8;"
-                                                                  title="Pink"></span>
-                                                      </label>
-                                                </div>
-
-                                                <div class="form-check color-option">
-                                                      <input class="form-check-input" type="checkbox"
-                                                            value="brown" id="color-brown">
-                                                      <label class="form-check-label" for="color-brown">
-                                                            <span class="color-swatch"
-                                                                  style="background-color: #795548;"
-                                                                  title="Brown"></span>
-                                                      </label>
-                                                </div>
+                                                <?php if (!empty($colors)) { ?>
+                                                      <?php foreach ($colors as $c) {
+                                                            $cid = (int)$c['id'];
+                                                            $cname = htmlspecialchars($c['name'] ?? '', ENT_QUOTES);
+                                                            $chex = htmlspecialchars(strtoupper($c['hex'] ?? ''), ENT_QUOTES);
+                                                      ?>
+                                                            <div class="form-check color-option">
+                                                                  <input class="form-check-input" type="checkbox" id="color-<?php echo $cid; ?>" name="color[]" value="<?php echo $cid; ?>">
+                                                                  <label class="form-check-label" for="color-<?php echo $cid; ?>">
+                                                                        <span class="color-swatch" style="background-color: <?php echo ($chex !== '' ? $chex : '#CCCCCC'); ?>;" title="<?php echo $cname; ?>"></span>
+                                                                  </label>
+                                                            </div>
+                                                      <?php } ?>
+                                                <?php } else { ?>
+                                                      <div class="text-muted small">No colors found</div>
+                                                <?php } ?>
                                           </div>
 
                                           <div class="filter-actions mt-3">
@@ -254,93 +166,26 @@ foreach ($__fe_subcategories as $__fe_sc) {
                                           </div>
 
                                           <div class="brand-list">
-                                                <div class="brand-item">
-                                                      <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                  id="brand1">
-                                                            <label class="form-check-label" for="brand1">
-                                                                  Nike
-                                                                  <span class="brand-count">(24)</span>
-                                                            </label>
-                                                      </div>
-                                                </div>
-
-                                                <div class="brand-item">
-                                                      <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                  id="brand2">
-                                                            <label class="form-check-label" for="brand2">
-                                                                  Adidas
-                                                                  <span class="brand-count">(18)</span>
-                                                            </label>
-                                                      </div>
-                                                </div>
-
-                                                <div class="brand-item">
-                                                      <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                  id="brand3">
-                                                            <label class="form-check-label" for="brand3">
-                                                                  Puma
-                                                                  <span class="brand-count">(12)</span>
-                                                            </label>
-                                                      </div>
-                                                </div>
-
-                                                <div class="brand-item">
-                                                      <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                  id="brand4">
-                                                            <label class="form-check-label" for="brand4">
-                                                                  Reebok
-                                                                  <span class="brand-count">(9)</span>
-                                                            </label>
-                                                      </div>
-                                                </div>
-
-                                                <div class="brand-item">
-                                                      <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                  id="brand5">
-                                                            <label class="form-check-label" for="brand5">
-                                                                  Under Armour
-                                                                  <span class="brand-count">(7)</span>
-                                                            </label>
-                                                      </div>
-                                                </div>
-
-                                                <div class="brand-item">
-                                                      <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                  id="brand6">
-                                                            <label class="form-check-label" for="brand6">
-                                                                  New Balance
-                                                                  <span class="brand-count">(6)</span>
-                                                            </label>
-                                                      </div>
-                                                </div>
-
-                                                <div class="brand-item">
-                                                      <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                  id="brand7">
-                                                            <label class="form-check-label" for="brand7">
-                                                                  Converse
-                                                                  <span class="brand-count">(5)</span>
-                                                            </label>
-                                                      </div>
-                                                </div>
-
-                                                <div class="brand-item">
-                                                      <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                  id="brand8">
-                                                            <label class="form-check-label" for="brand8">
-                                                                  Vans
-                                                                  <span class="brand-count">(4)</span>
-                                                            </label>
-                                                      </div>
-                                                </div>
+                                                <?php if (!empty($brands)) { ?>
+                                                      <?php foreach ($brands as $b) {
+                                                            $bid = (int)$b['id'];
+                                                            $bname = htmlspecialchars($b['name'] ?? '', ENT_QUOTES);
+                                                            $bslug = htmlspecialchars($b['slug'] ?? '', ENT_QUOTES);
+                                                            $count = (int)($b['product_count'] ?? 0);
+                                                      ?>
+                                                            <div class="brand-item">
+                                                                  <div class="form-check">
+                                                                        <input class="form-check-input" type="checkbox" id="brand-<?php echo $bid; ?>" name="brand[]" value="<?php echo $bslug; ?>">
+                                                                        <label class="form-check-label" for="brand-<?php echo $bid; ?>">
+                                                                              <?php echo $bname; ?>
+                                                                              <span class="brand-count"><?php echo $count > 0 ? '(' . $count . ')' : ''; ?></span>
+                                                                        </label>
+                                                                  </div>
+                                                            </div>
+                                                      <?php } ?>
+                                                <?php } else { ?>
+                                                      <div class="text-muted small">No brands found</div>
+                                                <?php } ?>
                                           </div>
 
                                           <div class="brand-actions">

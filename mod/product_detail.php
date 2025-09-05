@@ -1,6 +1,4 @@
 <main class="main">
-
-      <!-- Page Title -->
       <div class="page-title light-background">
             <div class="container">
                   <nav class="breadcrumbs">
@@ -11,18 +9,13 @@
                   </nav>
                   <h1>Product Details</h1>
             </div>
-      </div><!-- End Page Title -->
+      </div>
 
-      <!-- Product Details Section -->
       <section id="product-details" class="product-details section">
-
             <div class="container" data-aos="fade-up" data-aos-delay="100">
-
                   <div class="row g-5">
-                        <!-- Product Images Column -->
                         <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right" data-aos-delay="200">
                               <div class="product-gallery">
-                                    <!-- Vertical Thumbnails -->
                                     <div class="thumbnails-vertical">
                                           <div class="thumbnails-container">
                                                 <div class="thumbnail-item active"

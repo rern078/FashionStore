@@ -122,3 +122,77 @@ function getContact()
             'adminPhone' => $adminPhone,
       ];
 }
+
+
+function getCategories()
+{
+      // Load top-level categories and all subcategories
+      $categories = db_all('SELECT id, name, slug FROM categories WHERE parent_id IS NULL ORDER BY name ASC');
+      $subcategories = db_all('SELECT id, name, slug, category_id FROM subcategories ORDER BY name ASC');
+
+      // Group subcategories by category_id for quick lookup
+      $subcatsByCategory = [];
+      foreach ($subcategories as $subcat) {
+            $categoryId = (int)$subcat['category_id'];
+            $subcatsByCategory[$categoryId][] = $subcat;
+      }
+
+      return [
+            'categories' => $categories,
+            'subcatsByCategory' => $subcatsByCategory,
+      ];
+}
+
+function getBrand()
+{
+      // Return brands with optional product counts for display in filters
+      try {
+            $rows = db_all(
+                  "SELECT b.id, b.name, b.slug, b.logo_url, COUNT(p.id) AS product_count\n" .
+                        "FROM brands b\n" .
+                        "LEFT JOIN products p ON p.brand_id = b.id AND (p.status IS NULL OR p.status = 'active')\n" .
+                        "GROUP BY b.id, b.name, b.slug, b.logo_url\n" .
+                        "ORDER BY b.name ASC"
+            );
+      } catch (Throwable $e) {
+            $rows = [];
+      }
+
+      return is_array($rows) ? $rows : [];
+}
+
+function getColors()
+{
+      // Return colors with optional usage counts from variants
+      try {
+            $rows = db_all(
+                  "SELECT c.id, c.name, c.hex, COUNT(v.id) AS usage_count\n" .
+                        "FROM colors c\n" .
+                        "LEFT JOIN variants v ON v.color_id = c.id\n" .
+                        "GROUP BY c.id, c.name, c.hex\n" .
+                        "ORDER BY c.name ASC"
+            );
+      } catch (Throwable $e) {
+            $rows = [];
+      }
+
+      return is_array($rows) ? $rows : [];
+}
+
+function getSizes()
+{
+      // Return sizes with optional usage counts from variants
+      try {
+            $rows = db_all(
+                  "SELECT s.id, s.label, COUNT(v.id) AS usage_count\n" .
+                  "FROM sizes s\n" .
+                  "LEFT JOIN variants v ON v.size_id = s.id\n" .
+                  "GROUP BY s.id, s.label\n" .
+                  "ORDER BY s.label ASC"
+            );
+      } catch (Throwable $e) {
+            $rows = [];
+      }
+
+      return is_array($rows) ? $rows : [];
+}

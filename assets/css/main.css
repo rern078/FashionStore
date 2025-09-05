@@ -5610,9 +5610,9 @@ section,
 /*--------------------------------------------------------------
 # Checkout Section
 --------------------------------------------------------------*/
-.checkout {
+/* .checkout {
   padding: 60px 0;
-}
+} */
 
 .checkout .checkout-steps {
   display: flex;
@@ -13000,6 +13000,14 @@ section,
 }
 
 .form-control[type=file]:not(:disabled):not([readonly]) {
+  border-radius: 0;
+  line-height: 1.8;
+}
+#track-order .form-control:focus{
+  outline: none;
+  box-shadow: none;
+}
+#track-order .form-control{
   border-radius: 0;
   line-height: 1.8;
 }
