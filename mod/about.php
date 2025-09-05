@@ -177,14 +177,9 @@ $aboutImage = (string)($first['image_url'] ?? '');
                                                             <p>
                                                                   <?php echo nl2br(htmlspecialchars((string)$row['content'], ENT_QUOTES)); ?>
                                                             </p>
-                                                            <?php if (!empty($row['image_url'])) { ?>
-                                                                  <div class="featured-img-wrapper">
-                                                                        <img src="admin/<?php echo htmlspecialchars((string)$row['image_url'], ENT_QUOTES); ?>" class="featured-img" alt="">
-                                                                  </div>
-                                                            <?php } ?>
                                                             <div class="profile d-flex align-items-center">
                                                                   <?php if (!empty($row['image_url'])) { ?>
-                                                                        <img src="admin/<?php echo htmlspecialchars((string)$row['image_url'], ENT_QUOTES); ?>" class="profile-img" alt="">
+                                                                        <img src="<?php echo htmlspecialchars((string)$row['image_url'], ENT_QUOTES); ?>" class="profile-img" alt="">
                                                                   <?php } ?>
                                                                   <div class="profile-info">
                                                                         <h3><?php echo htmlspecialchars((string)$row['title'], ENT_QUOTES); ?></h3>
@@ -195,7 +190,7 @@ $aboutImage = (string)($first['image_url'] ?? '');
                                                       <div class="col-lg-4 d-none d-lg-block">
                                                             <?php if (!empty($row['image_url'])) { ?>
                                                                   <div class="featured-img-wrapper">
-                                                                        <img src="admin/<?php echo htmlspecialchars((string)$row['image_url'], ENT_QUOTES); ?>" class="featured-img" alt="">
+                                                                        <img src="<?php echo htmlspecialchars((string)$row['image_url'], ENT_QUOTES); ?>" class="featured-img" alt="">
                                                                   </div>
                                                             <?php } ?>
                                                       </div>

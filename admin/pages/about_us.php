@@ -4,12 +4,12 @@ require_once __DIR__ . '/../config/function.php';
 // Helpers
 function about_get(int $id): ?array
 {
-      return db_one('SELECT id, title, content, image_url, created_at, updated_at FROM about_us WHERE id = ?', [$id]);
+      return db_one('SELECT id, title, content,content_2, image_url, created_at, updated_at FROM about_us WHERE id = ?', [$id]);
 }
 
 function about_list(): array
 {
-      return db_all('SELECT id, title, content, image_url, created_at, updated_at FROM about_us ORDER BY id DESC');
+      return db_all('SELECT id, title, content,content_2, image_url, created_at, updated_at FROM about_us ORDER BY id DESC');
 }
 
 // Handle delete (by id)
@@ -36,6 +36,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
       $id = (int)($_POST['id'] ?? 0);
       $title = trim($_POST['title'] ?? '');
       $content = trim($_POST['content'] ?? '');
+      $content_2 = trim($_POST['content_2'] ?? '');
       $imageUrlText = trim($_POST['image_url'] ?? '');
       $removeImage = isset($_POST['remove_image']) && $_POST['remove_image'] === '1';
 
@@ -78,9 +79,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
 
       // If creating, insert first (without image), then update with image if any
       if ($id === 0) {
-            db_exec('INSERT INTO about_us (title, content, image_url) VALUES (?, ?, ?)', [
+            db_exec('INSERT INTO about_us (title, content, content_2, image_url) VALUES (?, ?, ?, ?)', [
                   $title !== '' ? $title : null,
                   $content !== '' ? $content : null,
+                  $content_2 !== '' ? $content_2 : null,
                   null,
             ]);
             $id = db_last_insert_id();
@@ -114,9 +116,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
             $finalImage = $imageUrlText;
       }
 
-      db_exec('UPDATE about_us SET title = ?, content = ?, image_url = ? WHERE id = ?', [
+      db_exec('UPDATE about_us SET title = ?, content = ?, content_2 = ?, image_url = ? WHERE id = ?', [
             $title !== '' ? $title : null,
             $content !== '' ? $content : null,
+            $content_2 !== '' ? $content_2 : null,
             $finalImage !== '' ? $finalImage : null,
             $id,
       ]);
@@ -183,6 +186,7 @@ if ($mode === 'edit') {
                                                       <th>ID</th>
                                                       <th>Title</th>
                                                       <th>Content</th>
+                                                      <th>Content 2</th>
                                                       <th>Image</th>
                                                       <th>Updated</th>
                                                       <th>Actions</th>
@@ -199,6 +203,7 @@ if ($mode === 'edit') {
                                                                   <td><?php echo (int)$row['id']; ?></td>
                                                                   <td><?php echo htmlspecialchars((string)($row['title'] ?? ''), ENT_QUOTES); ?></td>
                                                                   <td><?php echo htmlspecialchars((string)($row['content'] ?? ''), ENT_QUOTES); ?></td>
+                                                                  <td><?php echo htmlspecialchars((string)($row['content_2'] ?? ''), ENT_QUOTES); ?></td>
                                                                   <td>
                                                                         <?php if (!empty($row['image_url'])) { ?>
                                                                               <img src="<?php echo htmlspecialchars((string)$row['image_url'], ENT_QUOTES); ?>" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:4px;" />
@@ -273,6 +278,10 @@ if ($mode === 'edit') {
                                     <div class="mb-3">
                                           <label class="form-label">Content</label>
                                           <textarea class="form-control" name="content" rows="10"><?php echo htmlspecialchars((string)($isEdit ? ($editing['content'] ?? '') : ''), ENT_QUOTES); ?></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                          <label class="form-label">Content 2</label>
+                                          <textarea class="form-control" name="content_2" rows="10"><?php echo htmlspecialchars((string)($isEdit ? ($editing['content_2'] ?? '') : ''), ENT_QUOTES); ?></textarea>
                                     </div>
                                     <div class="d-flex justify-content-end">
                                           <button type="submit" class="btn btn-gradient-primary"><?php echo $isEdit ? 'Save Changes' : 'Create'; ?></button>
