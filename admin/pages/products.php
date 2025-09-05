@@ -1,10 +1,13 @@
 <?php
 require_once __DIR__ . '/../config/function.php';
 $categories = db_all('SELECT id, name FROM categories ORDER BY name ASC');
+$subcategories = db_all('SELECT id, category_id, name FROM subcategories ORDER BY name ASC');
+$brands = db_all('SELECT id, name FROM brands ORDER BY name ASC');
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_POST['form'] === 'add_product') {
       $title = trim($_POST['title'] ?? '');
-      $brand = trim($_POST['brand'] ?? '');
+      $brandId = (int)($_POST['brand_id'] ?? 0);
+      $brand = '';
       $price = isset($_POST['price']) ? (float)$_POST['price'] : 0.0;
       $stockQty = isset($_POST['stock_qty']) ? (int)$_POST['stock_qty'] : 0;
       $discount = isset($_POST['discount_percent']) && $_POST['discount_percent'] !== '' ? (float)$_POST['discount_percent'] : null;
@@ -13,6 +16,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
       $status = $_POST['status'] ?? 'draft';
       $description = trim($_POST['description'] ?? '');
       $slugInput = trim($_POST['slug'] ?? '');
+      $subcategoryId = (int)($_POST['subcategory_id'] ?? 0);
 
       if ($title === '') {
             header('Location: /admin/?p=products&error=Title%20is%20required');
@@ -50,8 +54,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
             }
       }
 
+      // Resolve brand name by selected brand_id
+      if ($brandId > 0) {
+            $b = db_one('SELECT name FROM brands WHERE id = ?', [$brandId]);
+            if ($b && !empty($b['name'])) {
+                  $brand = $b['name'];
+            }
+      }
+
       db_exec(
-            'INSERT INTO products (title, slug, description, featured_image, price, stock_qty, discount_percent, brand, gender, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO products (title, slug, description, featured_image, price, stock_qty, discount_percent, brand, brand_id, gender, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                   $title,
                   $slug,
@@ -61,6 +73,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
                   $stockQty,
                   $discount,
                   $brand !== '' ? $brand : null,
+                  $brandId > 0 ? $brandId : null,
                   $gender !== '' ? $gender : null,
                   $status
             ]
@@ -92,6 +105,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
             // ensure single mapping
             db_exec('DELETE FROM product_categories WHERE product_id = ?', [$productId]);
             db_exec('INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)', [$productId, $categoryId]);
+      }
+
+      // Map to subcategory (single)
+      db_exec('DELETE FROM product_subcategories WHERE product_id = ?', [$productId]);
+      if ($subcategoryId > 0 && $categoryId > 0) {
+            $valid = db_one('SELECT id FROM subcategories WHERE id = ? AND category_id = ?', [$subcategoryId, $categoryId]);
+            if ($valid) {
+                  db_exec('INSERT INTO product_subcategories (product_id, subcategory_id) VALUES (?, ?)', [$productId, $subcategoryId]);
+            }
       }
 
       header('Location: /admin/?p=products&added=1');
@@ -126,12 +148,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_POST['form'] === 'update_product') {
       $id = (int)($_POST['id'] ?? 0);
       $title = trim($_POST['title'] ?? '');
-      $brand = trim($_POST['brand'] ?? '');
+      $brandId = (int)($_POST['brand_id'] ?? 0);
+      $brand = '';
       $gender = $_POST['gender'] ?? null;
       $status = $_POST['status'] ?? 'draft';
       $categoryId = (int)($_POST['category_id'] ?? 0);
+      $subcategoryId = (int)($_POST['subcategory_id'] ?? 0);
       $description = trim($_POST['description'] ?? '');
       $slugInput = trim($_POST['slug'] ?? '');
+      $price = isset($_POST['price']) ? (float)$_POST['price'] : 0.0;
+      $stockQty = isset($_POST['stock_qty']) ? (int)$_POST['stock_qty'] : 0;
+      $discount = isset($_POST['discount_percent']) && $_POST['discount_percent'] !== '' ? (float)$_POST['discount_percent'] : null;
       if ($id > 0 && $title !== '') {
             $old = db_one('SELECT slug, featured_image FROM products WHERE id = ?', [$id]);
             $slug = $slugInput !== '' ? make_slug($slugInput) : ($old['slug'] ?? make_slug($title));
@@ -166,12 +193,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
                   }
             }
 
-            db_exec('UPDATE products SET title=?, slug=?, description=?, featured_image=?, brand=?, gender=?, status=? WHERE id=?', [
+            // Resolve brand name by selected brand_id
+            if ($brandId > 0) {
+                  $b = db_one('SELECT name FROM brands WHERE id = ?', [$brandId]);
+                  if ($b && !empty($b['name'])) {
+                        $brand = $b['name'];
+                  }
+            }
+
+            db_exec('UPDATE products SET title=?, slug=?, description=?, featured_image=?, price=?, stock_qty=?, discount_percent=?, brand=?, brand_id=?, gender=?, status=? WHERE id=?', [
                   $title,
                   $slug,
                   $description !== '' ? $description : null,
                   $featuredImagePath,
+                  $price,
+                  $stockQty,
+                  $discount,
                   $brand !== '' ? $brand : null,
+                  $brandId > 0 ? $brandId : null,
                   $gender !== '' ? $gender : null,
                   $status,
                   $id
@@ -204,6 +243,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
                   db_exec('INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)', [$id, $categoryId]);
             }
 
+            // Update subcategory mapping (single)
+            db_exec('DELETE FROM product_subcategories WHERE product_id = ?', [$id]);
+            if ($subcategoryId > 0 && $categoryId > 0) {
+                  $valid = db_one('SELECT id FROM subcategories WHERE id = ? AND category_id = ?', [$subcategoryId, $categoryId]);
+                  if ($valid) {
+                        db_exec('INSERT INTO product_subcategories (product_id, subcategory_id) VALUES (?, ?)', [$id, $subcategoryId]);
+                  }
+            }
+
             header('Location: /admin/?p=products&updated=1');
             exit;
       } else {
@@ -219,7 +267,7 @@ $offset = ($page - 1) * $perPage;
 $totalRow = db_one('SELECT COUNT(*) AS c FROM products');
 $total = (int)($totalRow['c'] ?? 0);
 $totalPages = max(1, (int)ceil($total / $perPage));
-$products = db_all('SELECT p.id, p.title, p.price, p.stock_qty, p.discount_percent, p.brand, p.gender, p.status, p.created_at, p.slug, p.featured_image, pc.category_id, c.name AS category_name FROM products p LEFT JOIN product_categories pc ON pc.product_id = p.id LEFT JOIN categories c ON c.id = pc.category_id ORDER BY p.id DESC LIMIT ? OFFSET ?', [$perPage, $offset]);
+$products = db_all('SELECT p.id, p.title, p.price, p.stock_qty, p.discount_percent, p.brand, p.brand_id, p.gender, p.status, p.created_at, p.slug, p.featured_image, pc.category_id, c.name AS category_name, ps.subcategory_id, sc.name AS subcategory_name FROM products p LEFT JOIN product_categories pc ON pc.product_id = p.id LEFT JOIN categories c ON c.id = pc.category_id LEFT JOIN product_subcategories ps ON ps.product_id = p.id LEFT JOIN subcategories sc ON sc.id = ps.subcategory_id ORDER BY p.id DESC LIMIT ? OFFSET ?', [$perPage, $offset]);
 ?>
 
 <div class="page-header">
@@ -316,15 +364,26 @@ $products = db_all('SELECT p.id, p.title, p.price, p.stock_qty, p.discount_perce
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
                                                                                           <label class="form-label">Brand</label>
-                                                                                          <input type="text" name="brand" class="form-control" value="<?php echo htmlspecialchars($p['brand'] ?? '', ENT_QUOTES); ?>">
+                                                                                          <select name="brand_id" class="form-select">
+                                                                                                <option value="0">— None —</option>
+                                                                                                <?php foreach ($brands as $b): ?>
+                                                                                                      <option value="<?php echo (int)$b['id']; ?>" <?php echo (((int)($p['brand_id'] ?? 0) === (int)$b['id']) || (isset($p['brand']) && strcasecmp((string)$p['brand'], (string)$b['name']) === 0)) ? 'selected' : ''; ?>><?php echo htmlspecialchars($b['name'], ENT_QUOTES); ?></option>
+                                                                                                <?php endforeach; ?>
+                                                                                          </select>
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
                                                                                           <label class="form-label">Category</label>
-                                                                                          <select name="category_id" class="form-select">
+                                                                                          <select name="category_id" class="form-select" data-subcat-target="#edit-subcategory-<?php echo (int)$p['id']; ?>">
                                                                                                 <option value="0">— None —</option>
                                                                                                 <?php foreach ($categories as $cat): ?>
-                                                                                                      <option value="<?php echo (int)$cat['id']; ?>" <?php echo ((int)($p['category_id'] ?? 0) === (int)$cat['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat['name'], ENT_QUOTES); ?></option>
+                                                                                                      <option value="<?php echo (int)$cat['id']; ?>" <?php echo ((int)($p['category_id'] ?? 0) === (int)$cat['id'] || (!isset($p['category_id']) && isset($p['category_name']) && strcasecmp((string)$p['category_name'], (string)$cat['name']) === 0)) ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat['name'], ENT_QUOTES); ?></option>
                                                                                                 <?php endforeach; ?>
+                                                                                          </select>
+                                                                                    </div>
+                                                                                    <div class="col-md-4 mb-3">
+                                                                                          <label class="form-label">Subcategory</label>
+                                                                                          <select name="subcategory_id" id="edit-subcategory-<?php echo (int)$p['id']; ?>" class="form-select" data-initial-category="<?php echo (int)($p['category_id'] ?? 0); ?>" data-initial-subcategory="<?php echo (int)($p['subcategory_id'] ?? 0); ?>">
+                                                                                                <option value="0">— None —</option>
                                                                                           </select>
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
@@ -433,15 +492,26 @@ $products = db_all('SELECT p.id, p.title, p.price, p.stock_qty, p.discount_perce
                                     </div>
                                     <div class="col-md-4 mb-3">
                                           <label class="form-label">Brand</label>
-                                          <input type="text" name="brand" class="form-control">
+                                          <select name="brand_id" class="form-select">
+                                                <option value="0">— None —</option>
+                                                <?php foreach ($brands as $b): ?>
+                                                      <option value="<?php echo (int)$b['id']; ?>"><?php echo htmlspecialchars($b['name'], ENT_QUOTES); ?></option>
+                                                <?php endforeach; ?>
+                                          </select>
                                     </div>
                                     <div class="col-md-4 mb-3">
                                           <label class="form-label">Category</label>
-                                          <select name="category_id" class="form-select">
+                                          <select name="category_id" class="form-select" data-subcat-target="#add-subcategory">
                                                 <option value="0">— None —</option>
                                                 <?php foreach ($categories as $cat): ?>
                                                       <option value="<?php echo (int)$cat['id']; ?>"><?php echo htmlspecialchars($cat['name'], ENT_QUOTES); ?></option>
                                                 <?php endforeach; ?>
+                                          </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                          <label class="form-label">Subcategory</label>
+                                          <select name="subcategory_id" id="add-subcategory" class="form-select">
+                                                <option value="0">— None —</option>
                                           </select>
                                     </div>
                                     <div class="col-md-4 mb-3">
@@ -499,3 +569,70 @@ $products = db_all('SELECT p.id, p.title, p.price, p.stock_qty, p.discount_perce
             </div>
       </div>
 </div>
+
+<script>
+      (function() {
+            const subcategories = <?php echo json_encode($subcategories, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+
+            function populateSubcategories(selectEl, targetSelector, initialSubcategoryId) {
+                  const target = document.querySelector(targetSelector);
+                  if (!target) return;
+                  const categoryId = parseInt(selectEl.value || '0', 10);
+                  const options = [{
+                        value: 0,
+                        label: '— None —'
+                  }];
+                  if (categoryId > 0) {
+                        for (const sc of subcategories) {
+                              if (parseInt(sc.category_id, 10) === categoryId) {
+                                    options.push({
+                                          value: parseInt(sc.id, 10),
+                                          label: sc.name
+                                    });
+                              }
+                        }
+                  }
+                  target.innerHTML = '';
+                  for (const opt of options) {
+                        const o = document.createElement('option');
+                        o.value = String(opt.value);
+                        o.textContent = opt.label;
+                        if (initialSubcategoryId && opt.value === initialSubcategoryId) {
+                              o.selected = true;
+                        }
+                        target.appendChild(o);
+                  }
+            }
+
+            // Wire up dynamic behavior for both Add and Edit forms
+            document.addEventListener('change', function(e) {
+                  const sel = e.target;
+                  if (sel && sel.matches('select[name="category_id"][data-subcat-target]')) {
+                        const targetSelector = sel.getAttribute('data-subcat-target');
+                        populateSubcategories(sel, targetSelector, null);
+                  }
+            });
+
+            // Initialize all existing pairs on load (handles Edit modals when opened too)
+            function initAll() {
+                  const selects = document.querySelectorAll('select[name="category_id"][data-subcat-target]');
+                  for (const sel of selects) {
+                        const targetSelector = sel.getAttribute('data-subcat-target');
+                        const target = document.querySelector(targetSelector);
+                        let initial = null;
+                        if (target && target.hasAttribute('data-initial-subcategory')) {
+                              const v = parseInt(target.getAttribute('data-initial-subcategory') || '0', 10);
+                              initial = v > 0 ? v : null;
+                        }
+                        populateSubcategories(sel, targetSelector, initial);
+                  }
+            }
+
+            // Initialize on DOM ready
+            if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', initAll);
+            } else {
+                  initAll();
+            }
+      })();
+</script>

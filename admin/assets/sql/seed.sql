@@ -139,6 +139,189 @@ INSERT INTO promotion_rules (promotion_id, rule_type, rule_value) VALUES
 
 
 
+-- New Top-level Categories per spec
+INSERT INTO categories (name, slug, parent_id)
+VALUES
+  ('Clothing',                 'clothing',                 NULL),
+  ('Electronics',              'electronics',              NULL),
+  ('Home & Kitchen',           'home-kitchen',             NULL),
+  ('Beauty & Personal Care',   'beauty-personal-care',     NULL),
+  ('Sports & Outdoors',        'sports-outdoors',          NULL),
+  ('Books',                    'books',                    NULL),
+  ('Toys & Games',             'toys-games',               NULL)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- Resolve new category ids
+SET @cat_clothing  = (SELECT id FROM categories WHERE slug='clothing');
+SET @cat_elec      = (SELECT id FROM categories WHERE slug='electronics');
+SET @cat_home      = (SELECT id FROM categories WHERE slug='home-kitchen');
+SET @cat_beauty    = (SELECT id FROM categories WHERE slug='beauty-personal-care');
+SET @cat_sports    = (SELECT id FROM categories WHERE slug='sports-outdoors');
+SET @cat_books     = (SELECT id FROM categories WHERE slug='books');
+SET @cat_toys      = (SELECT id FROM categories WHERE slug='toys-games');
+
+-- Subcategories for the new categories
+INSERT INTO subcategories (category_id, name, slug)
+VALUES
+  -- Clothing
+  (@cat_clothing, 'Men''s Wear',        'mens-wear'),
+  (@cat_clothing, 'Women''s Wear',      'womens-wear'),
+  (@cat_clothing, 'Kid''s Clothing',    'kids-clothing'),
+  (@cat_clothing, 'Accessories',        'accessories'),
+  -- Electronics
+  (@cat_elec, 'Smartphones',           'smartphones'),
+  (@cat_elec, 'Laptops',               'laptops'),
+  (@cat_elec, 'Tablets',               'tablets'),
+  (@cat_elec, 'Accessories',           'accessories'),
+  -- Home & Kitchen
+  (@cat_home, 'Furniture',             'furniture'),
+  (@cat_home, 'Kitchen Appliances',    'kitchen-appliances'),
+  (@cat_home, 'Home Decor',            'home-decor'),
+  (@cat_home, 'Bedding',               'bedding'),
+  -- Beauty & Personal Care
+  (@cat_beauty, 'Skincare',            'skincare'),
+  (@cat_beauty, 'Makeup',              'makeup'),
+  (@cat_beauty, 'Hair Care',           'hair-care'),
+  (@cat_beauty, 'Fragrances',          'fragrances'),
+  -- Sports & Outdoors
+  (@cat_sports, 'Fitness Equipment',   'fitness-equipment'),
+  (@cat_sports, 'Outdoor Gear',        'outdoor-gear'),
+  (@cat_sports, 'Sports Apparel',      'sports-apparel'),
+  (@cat_sports, 'Team Sports',         'team-sports'),
+  -- Toys & Games
+  (@cat_toys, 'Board Games',           'board-games'),
+  (@cat_toys, 'Puzzles',               'puzzles'),
+  (@cat_toys, 'Action Figures',        'action-figures'),
+  (@cat_toys, 'Educational Toys',      'educational-toys')
+ON DUPLICATE KEY UPDATE name=VALUES(name);
+
+-- Resolve subcategory ids we will use
+SET @sub_mens_wear       = (SELECT id FROM subcategories WHERE category_id=@cat_clothing AND slug='mens-wear');
+SET @sub_womens_wear     = (SELECT id FROM subcategories WHERE category_id=@cat_clothing AND slug='womens-wear');
+SET @sub_kids_clothing   = (SELECT id FROM subcategories WHERE category_id=@cat_clothing AND slug='kids-clothing');
+SET @sub_clothing_acc    = (SELECT id FROM subcategories WHERE category_id=@cat_clothing AND slug='accessories');
+
+SET @sub_smartphones     = (SELECT id FROM subcategories WHERE category_id=@cat_elec AND slug='smartphones');
+SET @sub_laptops         = (SELECT id FROM subcategories WHERE category_id=@cat_elec AND slug='laptops');
+SET @sub_tablets         = (SELECT id FROM subcategories WHERE category_id=@cat_elec AND slug='tablets');
+SET @sub_elec_acc        = (SELECT id FROM subcategories WHERE category_id=@cat_elec AND slug='accessories');
+
+SET @sub_furniture       = (SELECT id FROM subcategories WHERE category_id=@cat_home AND slug='furniture');
+SET @sub_kitchen_appl    = (SELECT id FROM subcategories WHERE category_id=@cat_home AND slug='kitchen-appliances');
+SET @sub_home_decor      = (SELECT id FROM subcategories WHERE category_id=@cat_home AND slug='home-decor');
+SET @sub_bedding         = (SELECT id FROM subcategories WHERE category_id=@cat_home AND slug='bedding');
+
+SET @sub_skincare        = (SELECT id FROM subcategories WHERE category_id=@cat_beauty AND slug='skincare');
+SET @sub_makeup          = (SELECT id FROM subcategories WHERE category_id=@cat_beauty AND slug='makeup');
+SET @sub_hair_care       = (SELECT id FROM subcategories WHERE category_id=@cat_beauty AND slug='hair-care');
+SET @sub_fragrances      = (SELECT id FROM subcategories WHERE category_id=@cat_beauty AND slug='fragrances');
+
+SET @sub_fitness_eq      = (SELECT id FROM subcategories WHERE category_id=@cat_sports AND slug='fitness-equipment');
+SET @sub_outdoor_gear    = (SELECT id FROM subcategories WHERE category_id=@cat_sports AND slug='outdoor-gear');
+SET @sub_sports_apparel  = (SELECT id FROM subcategories WHERE category_id=@cat_sports AND slug='sports-apparel');
+SET @sub_team_sports     = (SELECT id FROM subcategories WHERE category_id=@cat_sports AND slug='team-sports');
+
+SET @sub_board_games     = (SELECT id FROM subcategories WHERE category_id=@cat_toys AND slug='board-games');
+SET @sub_puzzles         = (SELECT id FROM subcategories WHERE category_id=@cat_toys AND slug='puzzles');
+SET @sub_action_figures  = (SELECT id FROM subcategories WHERE category_id=@cat_toys AND slug='action-figures');
+SET @sub_edu_toys        = (SELECT id FROM subcategories WHERE category_id=@cat_toys AND slug='educational-toys');
+
+-- 30 Sample Products (idempotent)
+INSERT INTO products (title, slug, description, featured_image, price, stock_qty, discount_percent, brand, gender, status)
+VALUES
+  ('Men''s Classic Tee',            'prod-sample-001', 'Comfort cotton tee for everyday wear.', 'assets/images/samples/img_1.jpg', 19.99, 100, NULL, 'Nike',       'men',    'active'),
+  ('Women''s Running Leggings',     'prod-sample-002', 'Stretch leggings for workouts.',        'assets/images/samples/img_2.jpg', 29.99,  80, NULL, 'Adidas',     'women',  'active'),
+  ('Kids Hoodie',                   'prod-sample-003', 'Soft hoodie for kids.',                 'assets/images/samples/img_3.jpg', 24.99,  60, NULL, 'Puma',       'kids',   'active'),
+  ('Leather Belt',                  'prod-sample-004', 'Genuine leather belt.',                 'assets/images/samples/img_4.jpg', 15.99, 120, NULL, 'FILA',       NULL,     'active'),
+
+  ('Android Smartphone X',          'prod-sample-005', '6.5" display, 128GB storage.',          'assets/images/samples/img_1.jpg', 399.00, 50, NULL, 'Samsung',    NULL,     'active'),
+  ('Ultrabook 14"',                'prod-sample-006', 'Lightweight laptop for travel.',        'assets/images/samples/img_2.jpg', 899.00, 25, NULL, 'Lenovo',     NULL,     'active'),
+  ('10" Tablet Pro',               'prod-sample-007', 'Entertainment and work on the go.',     'assets/images/samples/img_3.jpg', 299.00, 40, NULL, 'Apple',      NULL,     'active'),
+  ('Wireless Earbuds',              'prod-sample-008', 'Noise-cancelling earbuds.',             'assets/images/samples/img_4.jpg',  79.00, 90, NULL, 'Sony',       NULL,     'active'),
+
+  ('Modern Sofa 3-Seater',          'prod-sample-009', 'Comfortable contemporary sofa.',        'assets/images/samples/img_1.jpg', 599.00, 10, NULL, 'Brand A',    NULL,     'active'),
+  ('Air Fryer XL',                  'prod-sample-010', 'Crispy results with less oil.',         'assets/images/samples/img_2.jpg', 129.00, 35, NULL, 'Brand B',    NULL,     'active'),
+  ('Wall Art Canvas',               'prod-sample-011', 'Abstract canvas wall art.',             'assets/images/samples/img_3.jpg',  49.00, 70, NULL, 'Brand C',    NULL,     'active'),
+  ('King Size Duvet',               'prod-sample-012', 'Soft microfiber duvet.',                'assets/images/samples/img_4.jpg',  89.00, 45, NULL, 'Brand D',    NULL,     'active'),
+
+  ('Hydrating Face Serum',          'prod-sample-013', 'Hyaluronic acid serum.',                'assets/images/samples/img_1.jpg',  25.00, 80, NULL, 'Brand E',    NULL,     'active'),
+  ('Matte Lipstick',                'prod-sample-014', 'Long-lasting matte finish.',            'assets/images/samples/img_2.jpg',  12.00,120, NULL, 'Brand F',    NULL,     'active'),
+  ('Nourishing Shampoo',            'prod-sample-015', 'For all hair types.',                   'assets/images/samples/img_3.jpg',   9.00,150, NULL, 'Brand G',    NULL,     'active'),
+  ('Eau de Parfum',                 'prod-sample-016', 'Floral fragrance.',                     'assets/images/samples/img_4.jpg',  59.00, 60, NULL, 'Brand H',    NULL,     'active'),
+
+  ('Adjustable Dumbbells',          'prod-sample-017', 'Space-saving strength training.',       'assets/images/samples/img_1.jpg', 199.00, 20, NULL, 'Brand I',    NULL,     'active'),
+  ('Hiking Backpack 30L',           'prod-sample-018', 'Durable outdoor pack.',                 'assets/images/samples/img_2.jpg',  79.00, 50, NULL, 'Brand J',    NULL,     'active'),
+  ('Breathable Sports Tee',         'prod-sample-019', 'Quick-dry athletic shirt.',             'assets/images/samples/img_3.jpg',  19.00,100, NULL, 'Under Armour','men',    'active'),
+  ('Team Soccer Ball',              'prod-sample-020', 'Official size 5.',                      'assets/images/samples/img_4.jpg',  25.00, 80, NULL, 'Adidas',     NULL,     'active'),
+
+  ('Mystery Novel',                 'prod-sample-021', 'Bestselling mystery thriller.',         'assets/images/samples/img_1.jpg',  14.00,200, NULL, 'Brand A',    NULL,     'active'),
+  ('Science Fiction Epic',          'prod-sample-022', 'Space opera adventure.',                'assets/images/samples/img_2.jpg',  18.00,150, NULL, 'Brand B',    NULL,     'active'),
+  ('Self-Help Guide',               'prod-sample-023', 'Practical life strategies.',            'assets/images/samples/img_3.jpg',  16.00,170, NULL, 'Brand C',    NULL,     'active'),
+  ('Cookbook Favorites',            'prod-sample-024', '100 easy recipes.',                     'assets/images/samples/img_4.jpg',  22.00,120, NULL, 'Brand D',    NULL,     'active'),
+
+  ('Family Board Game',             'prod-sample-025', 'Fun for all ages.',                     'assets/images/samples/img_1.jpg',  29.00, 90, NULL, 'Brand E',    NULL,     'active'),
+  ('1000-piece Puzzle',             'prod-sample-026', 'Challenging and relaxing.',             'assets/images/samples/img_2.jpg',  15.00,110, NULL, 'Brand F',    NULL,     'active'),
+  ('Action Figure Hero',            'prod-sample-027', 'Poseable collector figure.',            'assets/images/samples/img_3.jpg',  19.00,130, NULL, 'Brand G',    NULL,     'active'),
+  ('STEM Kit Robotics',             'prod-sample-028', 'Learn coding and robotics.',            'assets/images/samples/img_4.jpg',  49.00, 70, NULL, 'Brand H',    NULL,     'active'),
+
+  ('Women''s Summer Dress',         'prod-sample-029', 'Lightweight and flowy.',                'assets/images/samples/img_1.jpg',  39.00, 60, NULL, 'Zara',       'women',  'active'),
+  ('Men''s Chinos',                 'prod-sample-030', 'Slim fit cotton chinos.',               'assets/images/samples/img_2.jpg',  34.00, 80, NULL, 'H&M',        'men',    'active')
+ON DUPLICATE KEY UPDATE
+  title=VALUES(title), description=VALUES(description), featured_image=VALUES(featured_image), price=VALUES(price), stock_qty=VALUES(stock_qty), discount_percent=VALUES(discount_percent), brand=VALUES(brand), gender=VALUES(gender), status=VALUES(status);
+
+-- Resolve product ids
+SET @pp01 = (SELECT id FROM products WHERE slug='prod-sample-001');
+SET @pp02 = (SELECT id FROM products WHERE slug='prod-sample-002');
+SET @pp03 = (SELECT id FROM products WHERE slug='prod-sample-003');
+SET @pp04 = (SELECT id FROM products WHERE slug='prod-sample-004');
+SET @pp05 = (SELECT id FROM products WHERE slug='prod-sample-005');
+SET @pp06 = (SELECT id FROM products WHERE slug='prod-sample-006');
+SET @pp07 = (SELECT id FROM products WHERE slug='prod-sample-007');
+SET @pp08 = (SELECT id FROM products WHERE slug='prod-sample-008');
+SET @pp09 = (SELECT id FROM products WHERE slug='prod-sample-009');
+SET @pp10 = (SELECT id FROM products WHERE slug='prod-sample-010');
+SET @pp11 = (SELECT id FROM products WHERE slug='prod-sample-011');
+SET @pp12 = (SELECT id FROM products WHERE slug='prod-sample-012');
+SET @pp13 = (SELECT id FROM products WHERE slug='prod-sample-013');
+SET @pp14 = (SELECT id FROM products WHERE slug='prod-sample-014');
+SET @pp15 = (SELECT id FROM products WHERE slug='prod-sample-015');
+SET @pp16 = (SELECT id FROM products WHERE slug='prod-sample-016');
+SET @pp17 = (SELECT id FROM products WHERE slug='prod-sample-017');
+SET @pp18 = (SELECT id FROM products WHERE slug='prod-sample-018');
+SET @pp19 = (SELECT id FROM products WHERE slug='prod-sample-019');
+SET @pp20 = (SELECT id FROM products WHERE slug='prod-sample-020');
+SET @pp21 = (SELECT id FROM products WHERE slug='prod-sample-021');
+SET @pp22 = (SELECT id FROM products WHERE slug='prod-sample-022');
+SET @pp23 = (SELECT id FROM products WHERE slug='prod-sample-023');
+SET @pp24 = (SELECT id FROM products WHERE slug='prod-sample-024');
+SET @pp25 = (SELECT id FROM products WHERE slug='prod-sample-025');
+SET @pp26 = (SELECT id FROM products WHERE slug='prod-sample-026');
+SET @pp27 = (SELECT id FROM products WHERE slug='prod-sample-027');
+SET @pp28 = (SELECT id FROM products WHERE slug='prod-sample-028');
+SET @pp29 = (SELECT id FROM products WHERE slug='prod-sample-029');
+SET @pp30 = (SELECT id FROM products WHERE slug='prod-sample-030');
+
+-- Map products to categories
+INSERT IGNORE INTO product_categories (product_id, category_id) VALUES
+  (@pp01, @cat_clothing), (@pp02, @cat_clothing), (@pp03, @cat_clothing), (@pp04, @cat_clothing),
+  (@pp05, @cat_elec),     (@pp06, @cat_elec),     (@pp07, @cat_elec),     (@pp08, @cat_elec),
+  (@pp09, @cat_home),     (@pp10, @cat_home),     (@pp11, @cat_home),     (@pp12, @cat_home),
+  (@pp13, @cat_beauty),   (@pp14, @cat_beauty),   (@pp15, @cat_beauty),   (@pp16, @cat_beauty),
+  (@pp17, @cat_sports),   (@pp18, @cat_sports),   (@pp19, @cat_sports),   (@pp20, @cat_sports),
+  (@pp21, @cat_books),    (@pp22, @cat_books),    (@pp23, @cat_books),    (@pp24, @cat_books),
+  (@pp25, @cat_toys),     (@pp26, @cat_toys),     (@pp27, @cat_toys),     (@pp28, @cat_toys),
+  (@pp29, @cat_clothing), (@pp30, @cat_clothing);
+
+-- Map products to subcategories (where applicable)
+INSERT IGNORE INTO product_subcategories (product_id, subcategory_id) VALUES
+  (@pp01, @sub_mens_wear),      (@pp02, @sub_womens_wear),  (@pp03, @sub_kids_clothing), (@pp04, @sub_clothing_acc),
+  (@pp05, @sub_smartphones),    (@pp06, @sub_laptops),      (@pp07, @sub_tablets),       (@pp08, @sub_elec_acc),
+  (@pp09, @sub_furniture),      (@pp10, @sub_kitchen_appl), (@pp11, @sub_home_decor),    (@pp12, @sub_bedding),
+  (@pp13, @sub_skincare),       (@pp14, @sub_makeup),       (@pp15, @sub_hair_care),     (@pp16, @sub_fragrances),
+  (@pp17, @sub_fitness_eq),     (@pp18, @sub_outdoor_gear), (@pp19, @sub_sports_apparel),(@pp20, @sub_team_sports),
+  -- Books have no subcategory mapping
+  (@pp25, @sub_board_games),    (@pp26, @sub_puzzles),      (@pp27, @sub_action_figures),(@pp28, @sub_edu_toys),
+  (@pp29, @sub_womens_wear),    (@pp30, @sub_mens_wear);
 -- Brands (sample data)
 INSERT INTO brands (name, slug, description, logo_url)
 VALUES
@@ -152,6 +335,27 @@ VALUES
   ('Brand H', 'brand-h', 'Sample brand H', 'assets/images/logo.svg'),
   ('Brand I', 'brand-i', 'Sample brand I', 'assets/images/logo.svg'),
   ('Brand J', 'brand-j', 'Sample brand J', 'assets/images/logo.svg')
+ON DUPLICATE KEY UPDATE
+  name=VALUES(name), description=VALUES(description), logo_url=VALUES(logo_url);
+
+-- Brands (popular, 15 items)
+INSERT INTO brands (name, slug, description, logo_url)
+VALUES
+  ('Nike',          'nike',           'Innovative sportswear and footwear.',                'assets/images/logo.svg'),
+  ('Adidas',        'adidas',         'Performance apparel and iconic sneakers.',           'assets/images/logo.svg'),
+  ('Puma',          'puma',           'Sport-inspired footwear and apparel.',               'assets/images/logo.svg'),
+  ('Reebok',        'reebok',         'Fitness-focused shoes and apparel.',                 'assets/images/logo.svg'),
+  ('New Balance',   'new-balance',    'Comfort-first running and lifestyle shoes.',         'assets/images/logo.svg'),
+  ('Under Armour',  'under-armour',   'Training gear and performance sportswear.',          'assets/images/logo.svg'),
+  ('ASICS',         'asics',          'Running shoes engineered for distance.',             'assets/images/logo.svg'),
+  ('Converse',      'converse',       'Classic canvas sneakers and street style.',          'assets/images/logo.svg'),
+  ('Vans',          'vans',           'Skate-inspired shoes and apparel.',                  'assets/images/logo.svg'),
+  ('FILA',          'fila',           'Retro athletic style and footwear.',                 'assets/images/logo.svg'),
+  ('Champion',      'champion',       'Iconic athletic apparel and basics.',                'assets/images/logo.svg'),
+  ('Jordan',        'jordan',         'Premium basketball footwear and apparel.',           'assets/images/logo.svg'),
+  ('Skechers',      'skechers',       'Everyday comfort shoes and sneakers.',               'assets/images/logo.svg'),
+  ('HOKA',          'hoka',           'Max-cushion performance running shoes.',             'assets/images/logo.svg'),
+  ('On',            'on-running',     'Swiss-engineered running shoes with CloudTec.',      'assets/images/logo.svg')
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), description=VALUES(description), logo_url=VALUES(logo_url);
 

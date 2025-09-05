@@ -23,6 +23,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
             $slug = $base . '-' . (++$i);
       }
 
+      // Try to save uploaded file if provided; fallback to text URL
+      $uploadedUrl = fs_save_uploaded_logo('logo_file');
+      if ($uploadedUrl) {
+            $logoUrl = $uploadedUrl;
+      }
+
       db_exec('INSERT INTO brands (name, slug, description, logo_url) VALUES (?, ?, ?, ?)', [$name, $slug, $description, $logoUrl]);
       header('Location: /admin/?p=brands&added=1');
       exit;
@@ -31,6 +37,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_POST['form'] === 'delete_brand') {
       $id = (int)($_POST['id'] ?? 0);
       if ($id > 0) {
+            // Delete logo file if exists
+            $existing = db_one('SELECT logo_url FROM brands WHERE id = ?', [$id]);
+            if ($existing && !empty($existing['logo_url'])) {
+                  fs_delete_admin_file_by_url($existing['logo_url']);
+            }
             db_exec('DELETE FROM brands WHERE id = ?', [$id]);
       }
       header('Location: /admin/?p=brands&deleted=1');
@@ -42,16 +53,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
       $name = trim($_POST['name'] ?? '');
       $slugInput = trim($_POST['slug'] ?? '');
       $description = trim($_POST['description'] ?? '');
-      $logoUrl = trim($_POST['logo_url'] ?? '');
+      $logoUrlInput = trim($_POST['logo_url'] ?? '');
       if ($id > 0 && $name !== '') {
-            $existing = db_one('SELECT slug FROM brands WHERE id = ?', [$id]);
+            $existing = db_one('SELECT slug, logo_url FROM brands WHERE id = ?', [$id]);
             $slug = $slugInput !== '' ? make_slug($slugInput) : ($existing['slug'] ?? make_slug($name));
             $base = $slug;
             $i = 1;
             while (db_one('SELECT id FROM brands WHERE slug = ? AND id <> ?', [$slug, $id])) {
                   $slug = $base . '-' . (++$i);
             }
-            db_exec('UPDATE brands SET name = ?, slug = ?, description = ?, logo_url = ? WHERE id = ?', [$name, $slug, $description, $logoUrl, $id]);
+            // Decide logo URL: uploaded file has priority
+            $newUploaded = fs_save_uploaded_logo('logo_file');
+            $finalLogoUrl = $newUploaded ?: $logoUrlInput;
+            // If replacing with a new uploaded file and previous file exists, delete old
+            if ($newUploaded && !empty($existing['logo_url']) && $existing['logo_url'] !== $newUploaded) {
+                  fs_delete_admin_file_by_url($existing['logo_url']);
+            }
+            db_exec('UPDATE brands SET name = ?, slug = ?, description = ?, logo_url = ? WHERE id = ?', [$name, $slug, $description, $finalLogoUrl, $id]);
             header('Location: /admin/?p=brands&updated=1');
             exit;
       } else {
@@ -139,7 +157,7 @@ $brands = db_all('SELECT id, name, slug, description, logo_url FROM brands ORDER
                                                                         <h5 class="modal-title" id="editBrandModalLabel-<?php echo (int)$b['id']; ?>">Edit Brand</h5>
                                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                   </div>
-                                                                  <form method="post">
+                                                                  <form method="post" enctype="multipart/form-data">
                                                                         <input type="hidden" name="form" value="update_brand">
                                                                         <input type="hidden" name="id" value="<?php echo (int)$b['id']; ?>">
                                                                         <div class="modal-body">
@@ -154,6 +172,11 @@ $brands = db_all('SELECT id, name, slug, description, logo_url FROM brands ORDER
                                                                               <div class="mb-3">
                                                                                     <label class="form-label">Logo URL</label>
                                                                                     <input type="text" class="form-control" name="logo_url" value="<?php echo htmlspecialchars($b['logo_url'], ENT_QUOTES); ?>">
+                                                                              </div>
+                                                                              <div class="mb-3">
+                                                                                    <label class="form-label">Or Upload New Logo</label>
+                                                                                    <input type="file" class="form-control" name="logo_file" accept="image/*">
+                                                                                    <div class="form-text">Uploading a file will replace the current logo.</div>
                                                                               </div>
                                                                               <div class="mb-3">
                                                                                     <label class="form-label">Description</label>
@@ -184,7 +207,7 @@ $brands = db_all('SELECT id, name, slug, description, logo_url FROM brands ORDER
                         <h5 class="modal-title" id="addBrandModalLabel">Add Brand</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
-                  <form method="post">
+                  <form method="post" enctype="multipart/form-data">
                         <input type="hidden" name="form" value="add_brand">
                         <div class="modal-body">
                               <div class="mb-3">
@@ -198,6 +221,10 @@ $brands = db_all('SELECT id, name, slug, description, logo_url FROM brands ORDER
                               <div class="mb-3">
                                     <label class="form-label">Logo URL</label>
                                     <input type="text" class="form-control" name="logo_url">
+                              </div>
+                              <div class="mb-3">
+                                    <label class="form-label">Or Upload Logo</label>
+                                    <input type="file" class="form-control" name="logo_file" accept="image/*">
                               </div>
                               <div class="mb-3">
                                     <label class="form-label">Description</label>
