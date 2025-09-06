@@ -3062,7 +3062,6 @@ section,
 .product-list .product-filters ul {
   gap: 10px;
 }
-
 .product-list .product-filters ul li {
   padding: 8px 20px;
   font-size: 14px;
@@ -3082,6 +3081,10 @@ section,
 .product-list .product-filters ul li.filter-active {
   color: var(--contrast-color);
   background-color: var(--accent-color);
+}
+
+.product-list .product-filters ul li.filter-active a{
+  color: var(--contrast-color);
 }
 
 .product-list .product-container {

@@ -200,7 +200,7 @@ function getAllProduct()
       // Return all active products for frontend listings
       try {
             $rows = db_all(
-                  "SELECT id, title, slug, price, discount_percent, featured_image, status\n" .
+                  "SELECT id, title, slug, description, price, discount_percent, featured_image, stock_qty, brand, gender, care, status\n" .
                         "FROM products\n" .
                         "WHERE (status IS NULL OR status = 'active')\n" .
                         "ORDER BY id DESC"
@@ -212,32 +212,69 @@ function getAllProduct()
       return is_array($rows) ? $rows : [];
 }
 
-function countActiveProducts(): int
+function countActiveProducts(?string $categorySlug = null): int
 {
       try {
-            $row = db_one(
-                  "SELECT COUNT(*) AS c\n" .
-                        "FROM products\n" .
-                        "WHERE (status IS NULL OR status = 'active')"
-            );
+            if ($categorySlug !== null && $categorySlug !== '') {
+                  $row = db_one(
+                        "SELECT COUNT(DISTINCT p.id) AS c\n" .
+                              "FROM products p\n" .
+                              "LEFT JOIN product_categories pc ON pc.product_id = p.id\n" .
+                              "LEFT JOIN categories c ON c.id = pc.category_id\n" .
+                              "LEFT JOIN product_subcategories ps ON ps.product_id = p.id\n" .
+                              "LEFT JOIN subcategories s ON s.id = ps.subcategory_id\n" .
+                              "LEFT JOIN categories cp ON cp.id = s.category_id\n" .
+                              "WHERE (p.status IS NULL OR p.status = 'active') AND (c.slug = ? OR cp.slug = ?)",
+                        [$categorySlug, $categorySlug]
+                  );
+            } else {
+                  $row = db_one(
+                        "SELECT COUNT(*) AS c\n" .
+                              "FROM products\n" .
+                              "WHERE (status IS NULL OR status = 'active')"
+                  );
+            }
             return (int)($row['c'] ?? 0);
       } catch (Throwable $e) {
             return 0;
       }
 }
 
-function getActiveProductsPaginated(int $limit = 8, int $offset = 0): array
+function getActiveProductsPaginated(int $limit = 8, int $offset = 0, ?string $categorySlug = null): array
 {
       $limit = max(1, min(100, (int)$limit));
       $offset = max(0, (int)$offset);
       try {
-            $sql =
-                  "SELECT id, title, slug, price, discount_percent, featured_image, status\n" .
-                  "FROM products\n" .
-                  "WHERE (status IS NULL OR status = 'active')\n" .
-                  "ORDER BY id DESC\n" .
-                  "LIMIT $limit OFFSET $offset";
-            $rows = db_all($sql);
+            $slugsJoin =
+                  "LEFT JOIN (\n" .
+                  "  SELECT pc.product_id, c.slug FROM product_categories pc JOIN categories c ON c.id = pc.category_id\n" .
+                  "  UNION\n" .
+                  "  SELECT ps.product_id, c2.slug FROM product_subcategories ps JOIN subcategories s ON s.id = ps.subcategory_id JOIN categories c2 ON c2.id = s.category_id\n" .
+                  ") slugs ON slugs.product_id = p.id";
+
+            if ($categorySlug !== null && $categorySlug !== '') {
+                  $sql =
+                        "SELECT p.id, p.title, p.slug, p.description, p.price, p.discount_percent, p.featured_image, p.stock_qty, p.brand, p.gender, p.care, p.status,\n" .
+                        "       GROUP_CONCAT(DISTINCT slugs.slug) AS category_slugs\n" .
+                        "FROM products p\n" .
+                        $slugsJoin . "\n" .
+                        "WHERE (p.status IS NULL OR p.status = 'active') AND slugs.slug = ?\n" .
+                        "GROUP BY p.id, p.title, p.slug, p.description, p.price, p.discount_percent, p.featured_image, p.stock_qty, p.brand, p.gender, p.care, p.status\n" .
+                        "ORDER BY p.id DESC\n" .
+                        "LIMIT $limit OFFSET $offset";
+                  $rows = db_all($sql, [$categorySlug]);
+            } else {
+                  $sql =
+                        "SELECT p.id, p.title, p.slug, p.description, p.price, p.discount_percent, p.featured_image, p.stock_qty, p.brand, p.gender, p.care, p.status,\n" .
+                        "       GROUP_CONCAT(DISTINCT slugs.slug) AS category_slugs\n" .
+                        "FROM products p\n" .
+                        $slugsJoin . "\n" .
+                        "WHERE (p.status IS NULL OR p.status = 'active')\n" .
+                        "GROUP BY p.id, p.title, p.slug, p.description, p.price, p.discount_percent, p.featured_image, p.stock_qty, p.brand, p.gender, p.care, p.status\n" .
+                        "ORDER BY p.id DESC\n" .
+                        "LIMIT $limit OFFSET $offset";
+                  $rows = db_all($sql);
+            }
       } catch (Throwable $e) {
             $rows = [];
       }

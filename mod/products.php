@@ -1,3 +1,17 @@
+<?php
+$categories = getCategories();
+$filterCat = isset($_GET['category']) ? trim((string)$_GET['category']) : '';
+$categoryId = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
+if ($categoryId > 0 && $filterCat === '') {
+      foreach ($categories['categories'] as $cat) {
+            if ((int)($cat['id'] ?? 0) === $categoryId) {
+                  $filterCat = (string)$cat['slug'];
+                  break;
+            }
+      }
+}
+$baseUrl = (string)($__CONFIG['site']['base_url'] ?? '/');
+?>
 <main class="main">
       <section id="category-cards" class="category-cards section light-background">
 
@@ -150,18 +164,17 @@
 
       </section>
       <section id="product-list" class="product-list section">
-            <div class="container isotope-layout" data-aos="fade-up" data-aos-delay="100" data-default-filter="*"
+            <div class="container isotope-layout" data-aos="fade-up" data-aos-delay="100" data-default-filter="<?php echo $filterCat !== '' ? '.filter-' . htmlspecialchars($filterCat, ENT_QUOTES) : '*'; ?>"
                   data-layout="masonry" data-sort="original-order">
-
                   <div class="row">
                         <div class="col-12">
                               <div class="product-filters isotope-filters mb-5 d-flex justify-content-center"
                                     data-aos="fade-up">
                                     <ul class="d-flex flex-wrap gap-2 list-unstyled">
-                                          <li class="filter-active" data-filter="*">All</li>
-                                          <li data-filter=".filter-clothing">Clothing</li>
-                                          <li data-filter=".filter-accessories">Accessories</li>
-                                          <li data-filter=".filter-electronics">Electronics</li>
+                                          <li class="<?php echo $filterCat === '' ? 'filter-active' : ''; ?>" data-filter="*"><a href="<?php echo htmlspecialchars($baseUrl . '?p=products', ENT_QUOTES); ?>">All</a></li>
+                                          <?php foreach ($categories['categories'] as $category) { ?>
+                                                <li class="<?php echo $filterCat === (string)$category['slug'] ? 'filter-active' : ''; ?>" data-filter=".filter-<?php echo htmlspecialchars($category['slug'], ENT_QUOTES); ?>"><a href="<?php echo htmlspecialchars($baseUrl . '?p=products&category_id=' . (int)$category['id'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($category['name'], ENT_QUOTES); ?></a></li>
+                                          <?php } ?>
                                     </ul>
                               </div>
                         </div>
@@ -171,14 +184,27 @@
                         <?php
                         $perPage = 8;
                         $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-                        $total = countActiveProducts();
+                        // Use $filterCat computed at top (from slug or category_id)
+                        $total = countActiveProducts($filterCat !== '' ? $filterCat : null);
                         $totalPages = max(1, (int)ceil($total / $perPage));
                         if ($page > $totalPages) {
                               $page = $totalPages;
                         }
                         $offset = ($page - 1) * $perPage;
 
-                        $products = getActiveProductsPaginated($perPage, $offset);
+                        $products = getActiveProductsPaginated($perPage, $offset, $filterCat !== '' ? $filterCat : null);
+
+                        // Fallback: if category filter yields no products, show all
+                        if (empty($products) && $filterCat !== '') {
+                              $filterCat = '';
+                              $total = countActiveProducts(null);
+                              $totalPages = max(1, (int)ceil($total / $perPage));
+                              if ($page > $totalPages) {
+                                    $page = $totalPages;
+                              }
+                              $offset = ($page - 1) * $perPage;
+                              $products = getActiveProductsPaginated($perPage, $offset, null);
+                        }
                         $currencySymbol = isset($currentCurrencySymbol) ? (string)$currentCurrencySymbol : '$';
                         $baseUrl = (string)($__CONFIG['site']['base_url'] ?? '/');
                         if (is_array($products) && !empty($products)) {
@@ -194,7 +220,19 @@
                                     $isOnSale = $sale !== null && $sale > 0 && $sale < $price;
                                     $href = $baseUrl . '?p=product-detail' . ($slug !== '' ? ('&slug=' . urlencode($slug)) : ($id > 0 ? ('&id=' . $id) : ''));
                         ?>
-                                    <div class="col-md-6 col-lg-3 product-item isotope-item filter-clothing">
+                                    <?php
+                                    $catClasses = '';
+                                    if (!empty($p['category_slugs'])) {
+                                          $slugs = explode(',', (string)$p['category_slugs']);
+                                          foreach ($slugs as $s) {
+                                                $s = trim($s);
+                                                if ($s !== '') {
+                                                      $catClasses .= ' filter-' . htmlspecialchars($s, ENT_QUOTES);
+                                                }
+                                          }
+                                    }
+                                    ?>
+                                    <div class="col-md-6 col-lg-3 product-item isotope-item<?php echo $catClasses; ?>">
                                           <div class="product-card">
                                                 <div class="product-image">
                                                       <?php if ($isOnSale) { ?><span class="badge">Sale</span><?php } ?>
@@ -245,13 +283,12 @@
                   </div>
 
                   <section id="product-pagination" class="category-pagination section">
-
                         <div class="container">
                               <nav class="d-flex justify-content-center" aria-label="Page navigation">
                                     <ul>
                                           <?php if ($page > 1) { ?>
                                                 <li>
-                                                      <a href="<?php echo htmlspecialchars($baseUrl . '?p=products&page=' . ($page - 1), ENT_QUOTES); ?>" aria-label="Previous page">
+                                                      <a href="<?php echo htmlspecialchars($baseUrl . '?p=products' . ($filterCat !== '' ? ('&category=' . urlencode($filterCat)) : '') . '&page=' . ($page - 1), ENT_QUOTES); ?>" aria-label="Previous page">
                                                             <i class="bi bi-arrow-left"></i>
                                                             <span class="d-none d-sm-inline">Previous</span>
                                                       </a>
@@ -264,26 +301,26 @@
                                           $start = max(1, $page - $window);
                                           $end = min($totalPages, $page + $window);
                                           if ($start > 1) {
-                                                echo '<li><a href="' . htmlspecialchars($baseUrl . '?p=products&page=1', ENT_QUOTES) . '">1</a></li>';
+                                                echo '<li><a href="' . htmlspecialchars($baseUrl . '?p=products' . ($filterCat !== '' ? ('&category=' . urlencode($filterCat)) : '') . '&page=1', ENT_QUOTES) . '">1</a></li>';
                                                 if ($start > 2) {
                                                       echo '<li class="ellipsis">...</li>';
                                                 }
                                           }
                                           for ($i = $start; $i <= $end; $i++) {
                                                 $active = $i === $page ? ' class="active"' : '';
-                                                echo '<li><a' . $active . ' href="' . htmlspecialchars($baseUrl . '?p=products&page=' . $i, ENT_QUOTES) . '">' . $i . '</a></li>';
+                                                echo '<li><a' . $active . ' href="' . htmlspecialchars($baseUrl . '?p=products' . ($filterCat !== '' ? ('&category=' . urlencode($filterCat)) : '') . '&page=' . $i, ENT_QUOTES) . '">' . $i . '</a></li>';
                                           }
                                           if ($end < $totalPages) {
                                                 if ($end < $totalPages - 1) {
                                                       echo '<li class="ellipsis">...</li>';
                                                 }
-                                                echo '<li><a href="' . htmlspecialchars($baseUrl . '?p=products&page=' . $totalPages, ENT_QUOTES) . '">' . $totalPages . '</a></li>';
+                                                echo '<li><a href="' . htmlspecialchars($baseUrl . '?p=products' . ($filterCat !== '' ? ('&category=' . urlencode($filterCat)) : '') . '&page=' . $totalPages, ENT_QUOTES) . '">' . $totalPages . '</a></li>';
                                           }
                                           ?>
 
                                           <?php if ($page < $totalPages) { ?>
                                                 <li>
-                                                      <a href="<?php echo htmlspecialchars($baseUrl . '?p=products&page=' . ($page + 1), ENT_QUOTES); ?>" aria-label="Next page">
+                                                      <a href="<?php echo htmlspecialchars($baseUrl . '?p=products' . ($filterCat !== '' ? ('&category=' . urlencode($filterCat)) : '') . '&page=' . ($page + 1), ENT_QUOTES); ?>" aria-label="Next page">
                                                             <span class="d-none d-sm-inline">Next</span>
                                                             <i class="bi bi-arrow-right"></i>
                                                       </a>
@@ -293,14 +330,10 @@
                               </nav>
                         </div>
                   </section>
-
                   <div class="text-center mt-5" data-aos="fade-up">
                         <a href="category.html" class="view-all-btn">View All Products <i
                                     class="bi bi-arrow-right"></i></a>
                   </div>
-
             </div>
-
-      </section><!-- /Product List Section -->
-
+      </section>
 </main>
