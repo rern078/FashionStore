@@ -138,6 +138,23 @@ INSERT INTO promotion_rules (promotion_id, rule_type, rule_value) VALUES
   (@promo_ship,   'country',               'US');
 
 
+-- Shipping Methods (sample data)
+INSERT INTO shipping_methods (name, code, base_cost, min_subtotal_free, is_active, sort_order)
+VALUES
+  ('Standard Delivery', 'standard', 2.99, 300.00, 1, 1),
+  ('Express Delivery',  'express', 12.99, NULL,   1, 2)
+ON DUPLICATE KEY UPDATE
+  name=VALUES(name), base_cost=VALUES(base_cost), min_subtotal_free=VALUES(min_subtotal_free), is_active=VALUES(is_active), sort_order=VALUES(sort_order);
+
+-- Tax Rates (sample data)
+INSERT INTO tax_rates (name, country, state, city, postal, rate_percent, is_active, sort_order)
+VALUES
+  ('US Default Sales Tax', 'US', NULL, NULL, NULL, 8.250, 1, 1),
+  ('CA Ontario HST', 'CA', 'ON', NULL, NULL, 13.000, 1, 2)
+ON DUPLICATE KEY UPDATE
+  country=VALUES(country), state=VALUES(state), city=VALUES(city), postal=VALUES(postal), rate_percent=VALUES(rate_percent), is_active=VALUES(is_active), sort_order=VALUES(sort_order);
+
+
 
 -- New Top-level Categories per spec
 INSERT INTO categories (name, slug, parent_id)

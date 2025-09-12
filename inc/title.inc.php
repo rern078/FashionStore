@@ -5,6 +5,7 @@ if (!isset($pageTitle) || !$pageTitle) {
             '' => ($__CONFIG['site']['name'] ?? 'Home'),
             'home' => ($__CONFIG['site']['name'] ?? 'Home'),
             'category' => 'Shop by Category',
+            'product-detail' => 'Product Details',
             'product' => 'Product Details',
             'cart' => 'Your Cart',
             'checkout' => 'Checkout',
@@ -34,4 +35,4 @@ if (!isset($pageTitle) || !$pageTitle) {
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<link rel="stylesheet" href="<?php echo htmlspecialchars($assetsUrl, ENT_QUOTES); ?>/css/main.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($assetsUrl, ENT_QUOTES); ?>/css/main.css?v=<?php echo time(); ?>">

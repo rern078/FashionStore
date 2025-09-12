@@ -19,6 +19,7 @@ return [
             'carts' => 'pages/carts.php',
             'cart_items' => 'pages/cart_items.php',
             'promotions' => 'pages/promotions.php',
+            'promotion_rules' => 'pages/promotion_rules.php',
             'orders' => 'pages/orders.php',
             'order_items' => 'pages/order_items.php',
             'payments' => 'pages/payments.php',
@@ -39,5 +40,7 @@ return [
             'about_us' => 'pages/about_us.php',
             'contact_messages' => 'pages/contact_messages.php',
             'social_links' => 'pages/social_links.php',
+            'shipping_methods' => 'pages/shipping_methods.php',
+            'tax_rates' => 'pages/tax_rates.php',
       ],
 ];

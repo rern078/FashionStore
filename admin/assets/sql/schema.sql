@@ -183,6 +183,25 @@ CREATE TABLE orders (
   INDEX idx_orders_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- OrderAddresses (snapshot of shipping/billing address per order)
+CREATE TABLE order_addresses (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  order_id BIGINT UNSIGNED NOT NULL,
+  address_type ENUM('shipping','billing') NOT NULL DEFAULT 'shipping',
+  full_name VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NULL,
+  phone VARCHAR(50) NULL,
+  line1 VARCHAR(255) NOT NULL,
+  line2 VARCHAR(255) NULL,
+  city VARCHAR(100) NOT NULL,
+  state VARCHAR(100) NULL,
+  postal VARCHAR(20) NOT NULL,
+  country CHAR(2) NOT NULL,
+  CONSTRAINT fk_order_addresses_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  INDEX idx_order_addresses_order (order_id),
+  INDEX idx_order_addresses_type (order_id, address_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- OrderItems
 CREATE TABLE order_items (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -397,6 +416,35 @@ CREATE TABLE banners (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_banners_active_position (is_active, position)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Shipping Methods
+CREATE TABLE shipping_methods (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  code VARCHAR(80) NOT NULL UNIQUE,
+  base_cost DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  min_subtotal_free DECIMAL(10,2) NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  sort_order INT UNSIGNED NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tax Rates
+CREATE TABLE tax_rates (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  country CHAR(2) NULL,
+  state VARCHAR(100) NULL,
+  city VARCHAR(100) NULL,
+  postal VARCHAR(20) NULL,
+  rate_percent DECIMAL(6,3) NOT NULL DEFAULT 0.000,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  sort_order INT UNSIGNED NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_tax_geo (country, state, city, postal)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -162,6 +162,80 @@ $addressHours = is_array($defaultAddressInfo) ? (string)($defaultAddressInfo[1] 
 <script src="<?php echo htmlspecialchars($assetsUrl, ENT_QUOTES); ?>/js/main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+      (function() {
+            document.addEventListener('click', function(e) {
+                  var swatch = e.target.closest('.color-option');
+                  if (!swatch) return;
+                  var group = swatch.closest('.option-group');
+                  if (!group) return;
+                  var selected = group.querySelector('.selected-option');
+                  var all = group.querySelectorAll('.color-option');
+                  for (var i = 0; i < all.length; i++) {
+                        all[i].classList.remove('active');
+                  }
+                  swatch.classList.add('active');
+                  if (selected) {
+                        var name = swatch.getAttribute('data-color') || swatch.textContent || '';
+                        selected.textContent = name;
+                  }
+            });
+
+            document.addEventListener('click', function(e) {
+                  var sz = e.target.closest('.size-option');
+                  if (!sz) return;
+                  var group = sz.closest('.option-group');
+                  if (!group) return;
+                  var selected = group.querySelector('.selected-option');
+                  var all = group.querySelectorAll('.size-option');
+                  for (var i = 0; i < all.length; i++) {
+                        all[i].classList.remove('active');
+                  }
+                  sz.classList.add('active');
+                  if (selected) {
+                        var name = sz.getAttribute('data-size') || sz.textContent || '';
+                        selected.textContent = name;
+                  }
+            });
+
+            // Add to cart submission
+            document.addEventListener('click', function(e) {
+                  var btn = e.target.closest('.add-to-cart-btn');
+                  if (!btn) return;
+                  e.preventDefault();
+                  var root = btn.closest('.product-info-wrapper');
+                  if (!root) root = document;
+                  var colorActive = root.querySelector('.color-option.active');
+                  var sizeActive = root.querySelector('.size-option.active');
+                  var qtyInput = root.querySelector('.quantity-input');
+                  var color = colorActive ? (colorActive.getAttribute('data-color') || '') : '';
+                  var size = sizeActive ? (sizeActive.getAttribute('data-size') || '') : '';
+                  var qty = qtyInput ? parseInt(qtyInput.value || '1', 10) : 1;
+                  qty = isNaN(qty) || qty < 1 ? 1 : qty;
+                  var productId = parseInt(btn.getAttribute('data-product-id') || '0', 10);
+
+                  var form = document.createElement('form');
+                  form.method = 'post';
+                  form.action = '<?php echo htmlspecialchars(($__CONFIG['site']['base_url'] ?? '/') . '?p=cart', ENT_QUOTES); ?>';
+
+                  var f = function(n, v) {
+                        var i = document.createElement('input');
+                        i.type = 'hidden';
+                        i.name = n;
+                        i.value = v;
+                        form.appendChild(i);
+                  };
+                  f('form', 'add_to_cart');
+                  f('product_id', String(productId));
+                  f('color', color);
+                  f('size', size);
+                  f('qty', String(qty));
+
+                  document.body.appendChild(form);
+                  form.submit();
+            });
+      })();
+</script>
 </body>
 
 </html>

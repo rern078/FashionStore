@@ -21,6 +21,34 @@ $adminEmail = $contact['adminEmail'] ?? '';
 $adminPhone = $contact['adminPhone'] ?? '';
 // end currencies logic
 
+// Mini cart summary for header
+$miniCartItems = [];
+$miniCartCount = 0;
+$miniCartSubtotal = 0.0;
+$sidHeader = session_id();
+if ($sidHeader === '') {
+      session_start();
+      $sidHeader = session_id();
+}
+$cartHeader = db_one('SELECT id FROM carts WHERE session_id=?', [$sidHeader]);
+if ($cartHeader) {
+      $cartIdHeader = (int)$cartHeader['id'];
+      $miniCartItems = db_all(
+            "SELECT ci.id AS cart_item_id, ci.qty, ci.unit_price, p.title, p.slug, p.featured_image\n" .
+                  "FROM cart_items ci\n" .
+                  "JOIN variants v ON v.id = ci.variant_id\n" .
+                  "JOIN products p ON p.id = v.product_id\n" .
+                  "WHERE ci.cart_id = ?\n" .
+                  "ORDER BY ci.id DESC\n" .
+                  "LIMIT 5",
+            [$cartIdHeader]
+      );
+      foreach ($miniCartItems as $mci) {
+            $miniCartCount += (int)($mci['qty'] ?? 0);
+            $miniCartSubtotal += (float)($mci['unit_price'] ?? 0) * (int)($mci['qty'] ?? 0);
+      }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -200,66 +228,39 @@ $adminPhone = $contact['adminPhone'] ?? '';
                                           <button class="header-action-btn" data-bs-toggle="dropdown">
                                                 <i class="bi bi-cart3"></i>
                                                 <span class="action-text d-none d-md-inline-block">Cart</span>
-                                                <span class="badge">3</span>
+                                                <span class="badge"><?php echo (int)$miniCartCount; ?></span>
                                           </button>
                                           <div class="dropdown-menu cart-dropdown-menu">
                                                 <div class="dropdown-header">
-                                                      <h6>Shopping Cart (3)</h6>
+                                                      <h6>Shopping Cart (<?php echo (int)$miniCartCount; ?>)</h6>
                                                 </div>
                                                 <div class="dropdown-body">
                                                       <div class="cart-items">
-                                                            <!-- Cart Item 1 -->
-                                                            <div class="cart-item">
-                                                                  <div class="cart-item-image">
-                                                                        <img src="assets/img/product/product-1.webp"
-                                                                              alt="Product" class="img-fluid">
-                                                                  </div>
-                                                                  <div class="cart-item-content">
-                                                                        <h6 class="cart-item-title">Wireless Headphones
-                                                                        </h6>
-                                                                        <div class="cart-item-meta">1 × $89.99</div>
-                                                                  </div>
-                                                                  <button class="cart-item-remove">
-                                                                        <i class="bi bi-x"></i>
-                                                                  </button>
-                                                            </div>
-
-                                                            <!-- Cart Item 2 -->
-                                                            <div class="cart-item">
-                                                                  <div class="cart-item-image">
-                                                                        <img src="assets/img/product/product-2.webp"
-                                                                              alt="Product" class="img-fluid">
-                                                                  </div>
-                                                                  <div class="cart-item-content">
-                                                                        <h6 class="cart-item-title">Smart Watch</h6>
-                                                                        <div class="cart-item-meta">1 × $129.99</div>
-                                                                  </div>
-                                                                  <button class="cart-item-remove">
-                                                                        <i class="bi bi-x"></i>
-                                                                  </button>
-                                                            </div>
-
-                                                            <!-- Cart Item 3 -->
-                                                            <div class="cart-item">
-                                                                  <div class="cart-item-image">
-                                                                        <img src="assets/img/product/product-3.webp"
-                                                                              alt="Product" class="img-fluid">
-                                                                  </div>
-                                                                  <div class="cart-item-content">
-                                                                        <h6 class="cart-item-title">Bluetooth Speaker
-                                                                        </h6>
-                                                                        <div class="cart-item-meta">1 × $59.99</div>
-                                                                  </div>
-                                                                  <button class="cart-item-remove">
-                                                                        <i class="bi bi-x"></i>
-                                                                  </button>
-                                                            </div>
+                                                            <?php if (empty($miniCartItems)) { ?>
+                                                                  <div class="text-center text-muted py-3">No items in cart</div>
+                                                            <?php } else { ?>
+                                                                  <?php foreach ($miniCartItems as $mc) {
+                                                                        $img = (string)($mc['featured_image'] ?? '');
+                                                                        if ($img === '') $img = 'assets/img/product/product-1.webp';
+                                                                        $imgSrc = (strpos($img, 'admin/') === 0 || strpos($img, '/admin') === 0 || strpos($img, 'assets/') === 0) ? $img : ('admin/' . $img);
+                                                                  ?>
+                                                                        <div class="cart-item">
+                                                                              <div class="cart-item-image">
+                                                                                    <img src="admin/<?php echo htmlspecialchars($imgSrc, ENT_QUOTES); ?>" alt="Product" class="img-fluid">
+                                                                              </div>
+                                                                              <div class="cart-item-content">
+                                                                                    <h6 class="cart-item-title"><?php echo htmlspecialchars((string)($mc['title'] ?? ''), ENT_QUOTES); ?></h6>
+                                                                                    <div class="cart-item-meta"><?php echo (int)$mc['qty']; ?> × <?php echo $currentCurrencySymbol . number_format((float)$mc['unit_price'], 2); ?></div>
+                                                                              </div>
+                                                                        </div>
+                                                                  <?php } ?>
+                                                            <?php } ?>
                                                       </div>
                                                 </div>
                                                 <div class="dropdown-footer">
                                                       <div class="cart-total">
                                                             <span>Total:</span>
-                                                            <span class="cart-total-price">$279.97</span>
+                                                            <span class="cart-total-price"><?php echo $currentCurrencySymbol . number_format($miniCartSubtotal, 2); ?></span>
                                                       </div>
                                                       <div class="cart-actions">
                                                             <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=cart" class="btn btn-outline-primary">View

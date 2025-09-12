@@ -1,5 +1,169 @@
+<?php
+$sid = session_id();
+if ($sid === '') {
+      session_start();
+      $sid = session_id();
+}
+$checkoutCartItems = [];
+$checkoutSubtotal = 0.0;
+$cart = db_one('SELECT id FROM carts WHERE session_id=?', [$sid]);
+if ($cart) {
+      $rows = db_all(
+            "SELECT ci.id AS cart_item_id, ci.qty, ci.unit_price, v.color, v.size, p.title, p.featured_image\n" .
+                  "FROM cart_items ci\n" .
+                  "JOIN variants v ON v.id = ci.variant_id\n" .
+                  "JOIN products p ON p.id = v.product_id\n" .
+                  "WHERE ci.cart_id = ?\n" .
+                  "ORDER BY ci.id DESC",
+            [(int)$cart['id']]
+      );
+      foreach ($rows as $r) {
+            $checkoutCartItems[] = $r;
+            $checkoutSubtotal += (float)($r['unit_price'] ?? 0) * (int)($r['qty'] ?? 0);
+      }
+}
+$currencySymbol = isset($currentCurrencySymbol) ? (string)$currentCurrencySymbol : '$';
+// Handle promo code apply/remove
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+      $form = (string)($_POST['form'] ?? '');
+      if ($form === 'apply_promo') {
+            $code = strtoupper(trim((string)($_POST['promo_code'] ?? '')));
+            if ($code !== '' && $checkoutSubtotal > 0) {
+                  $promo = db_one('SELECT id, code, type, value, starts_at, ends_at, min_subtotal FROM promotions WHERE code = ? LIMIT 1', [$code]);
+                  $now = date('Y-m-d H:i:s');
+                  $ok = false;
+                  if ($promo) {
+                        $starts = (string)($promo['starts_at'] ?? '');
+                        $ends = (string)($promo['ends_at'] ?? '');
+                        if (($starts === '' || $now >= $starts) && ($ends === '' || $now <= $ends)) {
+                              $minSub = $promo['min_subtotal'] !== null ? (float)$promo['min_subtotal'] : null;
+                              if ($minSub === null || $checkoutSubtotal >= $minSub) {
+                                    // Evaluate simple rules (country, include_product_slug, include_category_slug)
+                                    $rules = db_all('SELECT rule_type, rule_value FROM promotion_rules WHERE promotion_id=?', [(int)$promo['id']]);
+                                    $passes = true;
+                                    $hasIncludeRule = false;
+                                    $includePass = false;
+                                    $sessCountry = isset($_SESSION['checkout_country']) && $_SESSION['checkout_country'] !== '' ? strtoupper((string)$_SESSION['checkout_country']) : null;
+                                    foreach ($rules as $r) {
+                                          $type = (string)$r['rule_type'];
+                                          $val = (string)$r['rule_value'];
+                                          if ($type === 'country') {
+                                                if ($sessCountry !== null && strtoupper($val) !== $sessCountry) {
+                                                      $passes = false;
+                                                      break;
+                                                }
+                                          } elseif ($type === 'include_product_slug') {
+                                                $hasIncludeRule = true;
+                                                $cnt = db_one('SELECT COUNT(*) AS c FROM cart_items ci JOIN variants v ON v.id=ci.variant_id JOIN products p ON p.id=v.product_id WHERE ci.cart_id=? AND p.slug=?', [(int)$cart['id'], $val]);
+                                                if ((int)($cnt['c'] ?? 0) > 0) {
+                                                      $includePass = true;
+                                                }
+                                          } elseif ($type === 'include_category_slug') {
+                                                $hasIncludeRule = true;
+                                                $cnt = db_one('SELECT COUNT(*) AS c FROM cart_items ci JOIN variants v ON v.id=ci.variant_id JOIN products p ON p.id=v.product_id JOIN product_categories pc ON pc.product_id=p.id JOIN categories c ON c.id=pc.category_id WHERE ci.cart_id=? AND c.slug=?', [(int)$cart['id'], $val]);
+                                                if ((int)($cnt['c'] ?? 0) > 0) {
+                                                      $includePass = true;
+                                                }
+                                          }
+                                    }
+                                    if ($hasIncludeRule && !$includePass) {
+                                          $passes = false;
+                                    }
+                                    if ($passes) {
+                                          $ok = true;
+                                    }
+                              }
+                        }
+                  }
+                  if ($ok) {
+                        $_SESSION['promo_code'] = (string)$promo['code'];
+                        $_SESSION['promo_type'] = (string)$promo['type'];
+                        $_SESSION['promo_value'] = (float)$promo['value'];
+                        header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=checkout&promo=applied'));
+                        exit;
+                  } else {
+                        $_SESSION['promo_code'] = null;
+                        unset($_SESSION['promo_code']);
+                        $_SESSION['promo_type'] = null;
+                        unset($_SESSION['promo_type']);
+                        $_SESSION['promo_value'] = null;
+                        unset($_SESSION['promo_value']);
+                        header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=checkout&promo=invalid'));
+                        exit;
+                  }
+            }
+      } elseif ($form === 'remove_promo') {
+            $_SESSION['promo_code'] = null;
+            unset($_SESSION['promo_code']);
+            $_SESSION['promo_type'] = null;
+            unset($_SESSION['promo_type']);
+            $_SESSION['promo_value'] = null;
+            unset($_SESSION['promo_value']);
+            header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=checkout&promo=removed'));
+            exit;
+      }
+}
+// Shipping: pick the cheapest active method by sort_order/base_cost and apply free threshold
+$shippingAmount = 0.0;
+$shippingLabel = 'Shipping';
+$shippingRow = db_one('SELECT name, code, base_cost, min_subtotal_free FROM shipping_methods WHERE is_active = 1 ORDER BY sort_order ASC, base_cost ASC LIMIT 1');
+if ($shippingRow) {
+      $shippingLabel = 'Shipping (' . (string)($shippingRow['code'] ?? 'Method') . ')';
+      $baseCost = (float)($shippingRow['base_cost'] ?? 0);
+      $minFree = $shippingRow['min_subtotal_free'] !== null ? (float)$shippingRow['min_subtotal_free'] : null;
+      if ($checkoutSubtotal > 0) {
+            $shippingAmount = ($minFree !== null && $checkoutSubtotal >= $minFree) ? 0.0 : $baseCost;
+      }
+}
+// Tax: find first active rate matching session-provided location or fallback to country 'US'
+$taxCountry = isset($_SESSION['checkout_country']) && $_SESSION['checkout_country'] !== '' ? strtoupper((string)$_SESSION['checkout_country']) : 'US';
+$taxState = isset($_SESSION['checkout_state']) ? (string)$_SESSION['checkout_state'] : null;
+$taxCity = isset($_SESSION['checkout_city']) ? (string)$_SESSION['checkout_city'] : null;
+$taxPostal = isset($_SESSION['checkout_postal']) ? (string)$_SESSION['checkout_postal'] : null;
+$taxAmount = 0.0;
+$taxRow = db_one(
+      "SELECT rate_percent FROM tax_rates\n" .
+            "WHERE is_active = 1\n" .
+            "  AND (country IS NULL OR country = ?)\n" .
+            "  AND (state IS NULL OR state = ? OR ? IS NULL)\n" .
+            "  AND (city IS NULL OR city = ? OR ? IS NULL)\n" .
+            "  AND (postal IS NULL OR postal = ? OR ? IS NULL)\n" .
+            "ORDER BY sort_order ASC,\n" .
+            "  (country IS NOT NULL) DESC, (state IS NOT NULL) DESC, (city IS NOT NULL) DESC, (postal IS NOT NULL) DESC\n" .
+            "LIMIT 1",
+      [
+            $taxCountry,
+            $taxState,
+            $taxState,
+            $taxCity,
+            $taxCity,
+            $taxPostal,
+            $taxPostal,
+      ]
+);
+if ($taxRow) {
+      $ratePct = (float)($taxRow['rate_percent'] ?? 0);
+      if ($ratePct > 0 && $checkoutSubtotal > 0) {
+            $taxAmount = ($checkoutSubtotal * $ratePct) / 100.0;
+      }
+}
+// Promo application to amounts
+$discountAmount = 0.0;
+if (!empty($_SESSION['promo_code'])) {
+      $ptype = (string)($_SESSION['promo_type'] ?? '');
+      $pval = (float)($_SESSION['promo_value'] ?? 0);
+      if ($ptype === 'percentage' && $pval > 0) {
+            $discountAmount = ($checkoutSubtotal * $pval) / 100.0;
+      } elseif ($ptype === 'fixed' && $pval > 0) {
+            $discountAmount = min($pval, $checkoutSubtotal);
+      } elseif ($ptype === 'free_shipping') {
+            $discountAmount = 0.0;
+            $shippingAmount = 0.0;
+      }
+}
+$orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $taxAmount;
+?>
 <main class="main">
-
       <!-- Page Title -->
       <div class="page-title light-background">
             <div class="container">
@@ -359,65 +523,68 @@
 
                                     <div class="order-summary-content">
                                           <div class="order-items">
-                                                <div class="order-item">
-                                                      <div class="order-item-image">
-                                                            <img src="assets/img/product/product-1.webp"
-                                                                  alt="Product" class="img-fluid">
-                                                      </div>
-                                                      <div class="order-item-details">
-                                                            <h4>Lorem Ipsum Dolor</h4>
-                                                            <p class="order-item-variant">Color: Black | Size: M
-                                                            </p>
-                                                            <div class="order-item-price">
-                                                                  <span class="quantity">1 ×</span>
-                                                                  <span class="price">$89.99</span>
+                                                <?php if (empty($checkoutCartItems)) { ?>
+                                                      <div class="text-muted text-center py-3">Your cart is empty.</div>
+                                                <?php } else { ?>
+                                                      <?php foreach ($checkoutCartItems as $ci) {
+                                                            $img = (string)($ci['featured_image'] ?? '');
+                                                            if ($img === '') $img = 'assets/img/product/product-1.webp';
+                                                            $imgSrc = (strpos($img, 'admin/') === 0 || strpos($img, '/admin') === 0 || strpos($img, 'assets/') === 0) ? $img : ('admin/' . $img);
+                                                            $variantText = trim(((string)($ci['color'] ?? '')) . ' ' . ((string)($ci['size'] ?? '')));
+                                                      ?>
+                                                            <div class="order-item">
+                                                                  <div class="order-item-image">
+                                                                        <img src="admin/<?php echo htmlspecialchars($imgSrc, ENT_QUOTES); ?>" alt="Product" class="img-fluid">
+                                                                  </div>
+                                                                  <div class="order-item-details">
+                                                                        <h4><?php echo htmlspecialchars((string)($ci['title'] ?? ''), ENT_QUOTES); ?></h4>
+                                                                        <p class="order-item-variant"><?php echo htmlspecialchars($variantText !== '' ? $variantText : '—', ENT_QUOTES); ?></p>
+                                                                        <div class="order-item-price">
+                                                                              <span class="quantity"><?php echo (int)$ci['qty']; ?> ×</span>
+                                                                              <span class="price"><?php echo $currencySymbol . number_format((float)$ci['unit_price'], 2); ?></span>
+                                                                        </div>
+                                                                  </div>
                                                             </div>
-                                                      </div>
-                                                </div>
-
-                                                <div class="order-item">
-                                                      <div class="order-item-image">
-                                                            <img src="assets/img/product/product-2.webp"
-                                                                  alt="Product" class="img-fluid">
-                                                      </div>
-                                                      <div class="order-item-details">
-                                                            <h4>Sit Amet Consectetur</h4>
-                                                            <p class="order-item-variant">Color: White | Size: L
-                                                            </p>
-                                                            <div class="order-item-price">
-                                                                  <span class="quantity">2 ×</span>
-                                                                  <span class="price">$59.99</span>
-                                                            </div>
-                                                      </div>
-                                                </div>
+                                                      <?php } ?>
+                                                <?php } ?>
                                           </div>
 
                                           <div class="order-totals">
                                                 <div class="order-subtotal d-flex justify-content-between">
                                                       <span>Subtotal</span>
-                                                      <span>$209.97</span>
+                                                      <span><?php echo $currencySymbol . number_format($checkoutSubtotal, 2); ?></span>
                                                 </div>
                                                 <div class="order-shipping d-flex justify-content-between">
-                                                      <span>Shipping</span>
-                                                      <span>$9.99</span>
+                                                      <span><?php echo htmlspecialchars($shippingLabel, ENT_QUOTES); ?></span>
+                                                      <span><?php echo $currencySymbol . number_format($shippingAmount, 2); ?></span>
                                                 </div>
                                                 <div class="order-tax d-flex justify-content-between">
                                                       <span>Tax</span>
-                                                      <span>$21.00</span>
+                                                      <span><?php echo $currencySymbol . number_format($taxAmount, 2); ?></span>
                                                 </div>
                                                 <div class="order-total d-flex justify-content-between">
                                                       <span>Total</span>
-                                                      <span>$240.96</span>
+                                                      <span><?php echo $currencySymbol . number_format($orderTotal, 2); ?></span>
                                                 </div>
                                           </div>
 
                                           <div class="promo-code mt-3">
-                                                <div class="input-group">
-                                                      <input type="text" class="form-control"
-                                                            placeholder="Promo Code" aria-label="Promo Code">
-                                                      <button class="btn btn-outline-primary"
-                                                            type="button">Apply</button>
-                                                </div>
+                                                <form method="post" class="input-group" style="gap:8px;">
+                                                      <input type="hidden" name="form" value="apply_promo">
+                                                      <input type="text" class="form-control" name="promo_code" placeholder="Promo Code" aria-label="Promo Code" value="<?php echo htmlspecialchars((string)($_SESSION['promo_code'] ?? ''), ENT_QUOTES); ?>">
+                                                      <button class="btn btn-outline-primary" type="submit">Apply</button>
+                                                      <?php if (!empty($_SESSION['promo_code'])) { ?>
+                                                            <button class="btn btn-outline-secondary" type="submit" formaction="<?php echo htmlspecialchars(($__CONFIG['site']['base_url'] ?? '/') . '?p=checkout', ENT_QUOTES); ?>" formmethod="post" name="form" value="remove_promo">Remove</button>
+                                                      <?php } ?>
+                                                </form>
+                                                <?php if (!empty($_GET['promo']) && $_GET['promo'] === 'invalid') { ?>
+                                                      <div class="text-danger small mt-2">Invalid or ineligible promo code.</div>
+                                                <?php } ?>
+                                                <?php if (!empty($_SESSION['promo_code']) && $discountAmount > 0) { ?>
+                                                      <div class="text-success small mt-2">Applied <?php echo htmlspecialchars((string)$_SESSION['promo_code'], ENT_QUOTES); ?>: -<?php echo $currencySymbol . number_format($discountAmount, 2); ?></div>
+                                                <?php } elseif (!empty($_SESSION['promo_code']) && $shippingAmount === 0 && (string)($_SESSION['promo_type'] ?? '') === 'free_shipping') { ?>
+                                                      <div class="text-success small mt-2">Free shipping applied (<?php echo htmlspecialchars((string)$_SESSION['promo_code'], ENT_QUOTES); ?>)</div>
+                                                <?php } ?>
                                           </div>
 
                                           <div class="secure-checkout mt-4">

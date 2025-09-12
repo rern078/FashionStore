@@ -17,18 +17,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
             exit;
       }
 
-      db_exec('INSERT INTO promotions (code, type, value, starts_at, ends_at, min_subtotal, max_uses, per_user_limit) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
-            substr($code, 0, 50),
-            $type,
-            $value,
-            $startsAt !== '' ? $startsAt : null,
-            $endsAt !== '' ? $endsAt : null,
-            $minSubtotal !== '' ? (float)$minSubtotal : null,
-            $maxUses !== '' ? (int)$maxUses : null,
-            $perUser !== '' ? (int)$perUser : null
-      ]);
-      header('Location: /admin/?p=promotions&added=1');
-      exit;
+      try {
+            db_exec('INSERT INTO promotions (code, type, value, starts_at, ends_at, min_subtotal, max_uses, per_user_limit) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
+                  substr($code, 0, 50),
+                  $type,
+                  $value,
+                  $startsAt !== '' ? $startsAt : null,
+                  $endsAt !== '' ? $endsAt : null,
+                  $minSubtotal !== '' ? (float)$minSubtotal : null,
+                  $maxUses !== '' ? (int)$maxUses : null,
+                  $perUser !== '' ? (int)$perUser : null
+            ]);
+            header('Location: /admin/?p=promotions&added=1');
+            exit;
+      } catch (Throwable $e) {
+            header('Location: /admin/?p=promotions&error=' . urlencode('Error: ' . $e->getMessage()));
+            exit;
+      }
 }
 
 // Delete Promotion
@@ -58,19 +63,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
             exit;
       }
 
-      db_exec('UPDATE promotions SET code=?, type=?, value=?, starts_at=?, ends_at=?, min_subtotal=?, max_uses=?, per_user_limit=? WHERE id=?', [
-            substr($code, 0, 50),
-            $type,
-            $value,
-            $startsAt !== '' ? $startsAt : null,
-            $endsAt !== '' ? $endsAt : null,
-            $minSubtotal !== '' ? (float)$minSubtotal : null,
-            $maxUses !== '' ? (int)$maxUses : null,
-            $perUser !== '' ? (int)$perUser : null,
-            $id
-      ]);
-      header('Location: /admin/?p=promotions&updated=1');
-      exit;
+      try {
+            db_exec('UPDATE promotions SET code=?, type=?, value=?, starts_at=?, ends_at=?, min_subtotal=?, max_uses=?, per_user_limit=? WHERE id=?', [
+                  substr($code, 0, 50),
+                  $type,
+                  $value,
+                  $startsAt !== '' ? $startsAt : null,
+                  $endsAt !== '' ? $endsAt : null,
+                  $minSubtotal !== '' ? (float)$minSubtotal : null,
+                  $maxUses !== '' ? (int)$maxUses : null,
+                  $perUser !== '' ? (int)$perUser : null,
+                  $id
+            ]);
+            header('Location: /admin/?p=promotions&updated=1');
+            exit;
+      } catch (Throwable $e) {
+            header('Location: /admin/?p=promotions&error=' . urlencode('Error: ' . $e->getMessage()));
+            exit;
+      }
 }
 
 // Add Rule

@@ -3062,6 +3062,7 @@ section,
 .product-list .product-filters ul {
   gap: 10px;
 }
+
 .product-list .product-filters ul li {
   padding: 8px 20px;
   font-size: 14px;
@@ -3083,7 +3084,7 @@ section,
   background-color: var(--accent-color);
 }
 
-.product-list .product-filters ul li.filter-active a{
+.product-list .product-filters ul li.filter-active a {
   color: var(--contrast-color);
 }
 
@@ -5049,9 +5050,9 @@ section,
 /*--------------------------------------------------------------
 # Category Pagination Section
 --------------------------------------------------------------*/
-.category-pagination {
+/* .category-pagination {
   padding-top: 0;
-}
+} */
 
 .category-pagination nav {
   position: relative;
@@ -13006,11 +13007,13 @@ section,
   border-radius: 0;
   line-height: 1.8;
 }
-#track-order .form-control:focus{
+
+#track-order .form-control:focus {
   outline: none;
   box-shadow: none;
 }
-#track-order .form-control{
+
+#track-order .form-control {
   border-radius: 0;
   line-height: 1.8;
 }

@@ -280,3 +280,187 @@ function getActiveProductsPaginated(int $limit = 8, int $offset = 0, ?string $ca
       }
       return is_array($rows) ? $rows : [];
 }
+
+/**
+ * Get a single active product by its slug. Returns null if not found or inactive.
+ */
+function getProductBySlug(string $slug): ?array
+{
+      $slug = trim($slug);
+      if ($slug === '') {
+            return null;
+      }
+      try {
+            $row = db_one(
+                  "SELECT id, title, slug, description, price, discount_percent, featured_image, stock_qty, brand, gender, care, status\n" .
+                        "FROM products\n" .
+                        "WHERE slug = ? AND (status IS NULL OR status = 'active')\n" .
+                        "LIMIT 1",
+                  [$slug]
+            );
+            return $row ?: null;
+      } catch (Throwable $e) {
+            return null;
+      }
+}
+
+/**
+ * Get a single active product by its id. Returns null if not found or inactive.
+ */
+function getProductById(int $id): ?array
+{
+      $id = (int)$id;
+      if ($id <= 0) {
+            return null;
+      }
+      try {
+            $row = db_one(
+                  "SELECT id, title, slug, description, price, discount_percent, featured_image, stock_qty, brand, gender, care, status\n" .
+                        "FROM products\n" .
+                        "WHERE id = ? AND (status IS NULL OR status = 'active')\n" .
+                        "LIMIT 1",
+                  [$id]
+            );
+            return $row ?: null;
+      } catch (Throwable $e) {
+            return null;
+      }
+}
+
+/**
+ * Return additional image URLs for a product if available.
+ * Falls back to an empty array if the table does not exist.
+ */
+function getProductImages(int $productId): array
+{
+      $productId = (int)$productId;
+      if ($productId <= 0) {
+            return [];
+      }
+      try {
+            $rows = db_all(
+                  "SELECT image_url\n" .
+                        "FROM product_images\n" .
+                        "WHERE product_id = ?\n" .
+                        "ORDER BY position ASC, id ASC",
+                  [$productId]
+            );
+            $images = [];
+            foreach ($rows as $r) {
+                  $url = (string)($r['image_url'] ?? '');
+                  if ($url !== '') {
+                        $images[] = $url;
+                  }
+            }
+            return $images;
+      } catch (Throwable $e) {
+            return [];
+      }
+}
+
+/**
+ * Get the primary category name for a product, if any.
+ */
+function getProductCategory(int $productId): ?string
+{
+      $productId = (int)$productId;
+      if ($productId <= 0) {
+            return null;
+      }
+      try {
+            $row = db_one(
+                  "SELECT c.name AS category_name\n" .
+                        "FROM product_categories pc\n" .
+                        "JOIN categories c ON c.id = pc.category_id\n" .
+                        "WHERE pc.product_id = ?\n" .
+                        "LIMIT 1",
+                  [$productId]
+            );
+            return $row['category_name'] ?? null;
+      } catch (Throwable $e) {
+            return null;
+      }
+}
+
+/**
+ * Get the subcategory name for a product, if any.
+ */
+function getProductSubcategory(int $productId): ?string
+{
+      $productId = (int)$productId;
+      if ($productId <= 0) {
+            return null;
+      }
+      try {
+            $row = db_one(
+                  "SELECT s.name AS subcategory_name\n" .
+                        "FROM product_subcategories ps\n" .
+                        "JOIN subcategories s ON s.id = ps.subcategory_id\n" .
+                        "WHERE ps.product_id = ?\n" .
+                        "LIMIT 1",
+                  [$productId]
+            );
+            return $row['subcategory_name'] ?? null;
+      } catch (Throwable $e) {
+            return null;
+      }
+}
+
+/**
+ * Return distinct size labels available for a product from variants.
+ */
+function getVariantSizes(int $productId): array
+{
+      $productId = (int)$productId;
+      if ($productId <= 0) {
+            return [];
+      }
+      try {
+            $rows = db_all(
+                  'SELECT DISTINCT size FROM variants WHERE product_id = ? AND size IS NOT NULL AND size <> "" ORDER BY size',
+                  [$productId]
+            );
+            $sizes = [];
+            foreach ($rows as $r) {
+                  $sz = (string)($r['size'] ?? '');
+                  if ($sz !== '') {
+                        $sizes[] = $sz;
+                  }
+            }
+            return $sizes;
+      } catch (Throwable $e) {
+            return [];
+      }
+}
+
+
+function getVariantColors(int $productId): array
+{
+      $productId = (int)$productId;
+      if ($productId <= 0) {
+            return [];
+      }
+      try {
+            $rows = db_all(
+                  "SELECT DISTINCT COALESCE(c.name, v.color) AS name, c.hex AS hex\n" .
+                        "FROM variants v\n" .
+                        "LEFT JOIN colors c ON c.id = v.color_id\n" .
+                        "WHERE v.product_id = ? AND (v.color_id IS NOT NULL OR (v.color IS NOT NULL AND v.color <> ''))\n" .
+                        "ORDER BY name",
+                  [$productId]
+            );
+            $colors = [];
+            foreach ($rows as $r) {
+                  $name = (string)($r['name'] ?? '');
+                  if ($name !== '') {
+                        $colors[] = [
+                              'name' => $name,
+                              'hex' => (string)($r['hex'] ?? '')
+                        ];
+                  }
+            }
+            return $colors;
+      } catch (Throwable $e) {
+            return [];
+      }
+}

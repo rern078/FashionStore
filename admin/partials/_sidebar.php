@@ -57,7 +57,7 @@
             <a class="nav-link" href="/admin/?p=inventory">Inventory</a>
           </li>
           <li class="nav-item <?php echo $__ROUTE === 'colors' ? 'active' : ''; ?>">
-            <a class="nav-link" href="/admin/?p=colors">Colors</a>  
+            <a class="nav-link" href="/admin/?p=colors">Colors</a>
           </li>
           <li class="nav-item <?php echo $__ROUTE === 'sizes' ? 'active' : ''; ?>">
             <a class="nav-link" href="/admin/?p=sizes">Sizes</a>
@@ -81,6 +81,12 @@
       <a class="nav-link" href="/admin/?p=promotions">
         <span class="menu-title">Promotions</span>
         <i class="mdi mdi-sale menu-icon"></i>
+      </a>
+    </li>
+    <li class="nav-item <?php echo $__ROUTE === 'promotion_rules' ? 'active' : ''; ?>">
+      <a class="nav-link" href="/admin/?p=promotion_rules">
+        <span class="menu-title">Promotion Rules</span>
+        <i class="mdi mdi-filter-variant menu-icon"></i>
       </a>
     </li>
     <li class="nav-item <?php echo $__ROUTE === 'orders' ? 'active' : ''; ?>">
@@ -154,6 +160,12 @@
           </li>
           <li class="nav-item <?php echo $__ROUTE === 'addresses' ? 'active' : ''; ?>">
             <a class="nav-link" href="/admin/?p=addresses">Addresses</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'shipping_methods' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=shipping_methods">Shipping Methods</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'tax_rates' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=tax_rates">Tax Rates</a>
           </li>
         </ul>
       </div>

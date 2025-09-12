@@ -1,13 +1,50 @@
+<?php
+$slug = isset($_GET['slug']) ? trim((string)$_GET['slug']) : '';
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$product = null;
+if ($slug !== '') {
+      $product = getProductBySlug($slug);
+}
+if (!$product && $id > 0) {
+      $product = getProductById($id);
+}
+if (!$product) {
+      echo '<main class="main"><section class="section"><div class="container"><div class="alert alert-warning">Product not found.</div></div></section></main>';
+      return;
+}
+$title = (string)($product['title'] ?? 'Product');
+$price = (float)($product['price'] ?? 0);
+$discountPercent = isset($product['discount_percent']) && $product['discount_percent'] !== null ? (float)$product['discount_percent'] : null;
+$sale = ($discountPercent !== null && $discountPercent > 0) ? max(0.0, $price * (1 - ($discountPercent / 100))) : null;
+$inStock = (int)($product['stock_qty'] ?? 0) > 0;
+$stockQty = max(0, (int)($product['stock_qty'] ?? 0));
+$featuredImage = (string)($product['featured_image'] ?? '');
+$images = getProductImages((int)$product['id']);
+if ($featuredImage !== '') {
+      array_unshift($images, $featuredImage);
+}
+if (empty($images)) {
+      $images = ['assets/img/product/product-1.webp'];
+}
+$mainImage = $images[0];
+if (strpos($mainImage, 'admin/') !== 0 && strpos($mainImage, '/admin') !== 0 && strpos($mainImage, 'assets/') !== 0) {
+      $mainImage = 'admin/' . $mainImage;
+}
+$currencySymbol = isset($currentCurrencySymbol) ? (string)$currentCurrencySymbol : '$';
+// Load sizes from variants for this product
+$variantSizes = getVariantSizes((int)$product['id']);
+
+?>
 <main class="main">
       <div class="page-title light-background">
             <div class="container">
                   <nav class="breadcrumbs">
                         <ol>
-                              <li><a href="index.html">Home</a></li>
+                              <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'] ?? '/', ENT_QUOTES); ?>?p=home">Home</a></li>
                               <li class="current">Product Details</li>
                         </ol>
                   </nav>
-                  <h1>Product Details</h1>
+                  <h1><?php echo htmlspecialchars($title, ENT_QUOTES); ?></h1>
             </div>
       </div>
 
@@ -18,41 +55,23 @@
                               <div class="product-gallery">
                                     <div class="thumbnails-vertical">
                                           <div class="thumbnails-container">
-                                                <div class="thumbnail-item active"
-                                                      data-image="assets/img/product/product-details-1.webp">
-                                                      <img src="assets/img/product/product-details-1.webp"
-                                                            alt="Product Thumbnail" class="img-fluid">
-                                                </div>
-                                                <div class="thumbnail-item"
-                                                      data-image="assets/img/product/product-details-2.webp">
-                                                      <img src="assets/img/product/product-details-2.webp"
-                                                            alt="Product Thumbnail" class="img-fluid">
-                                                </div>
-                                                <div class="thumbnail-item"
-                                                      data-image="assets/img/product/product-details-3.webp">
-                                                      <img src="assets/img/product/product-details-3.webp"
-                                                            alt="Product Thumbnail" class="img-fluid">
-                                                </div>
-                                                <div class="thumbnail-item"
-                                                      data-image="assets/img/product/product-details-4.webp">
-                                                      <img src="assets/img/product/product-details-4.webp"
-                                                            alt="Product Thumbnail" class="img-fluid">
-                                                </div>
-                                                <div class="thumbnail-item"
-                                                      data-image="assets/img/product/product-details-5.webp">
-                                                      <img src="assets/img/product/product-details-5.webp"
-                                                            alt="Product Thumbnail" class="img-fluid">
-                                                </div>
+                                                <?php foreach ($images as $index => $img) {
+                                                      $active = $index === 0 ? ' active' : '';
+                                                      $src = (strpos($img, 'admin/') === 0 || strpos($img, '/admin') === 0 || strpos($img, 'assets/') === 0) ? $img : ('admin/' . $img); ?>
+                                                      <div class="thumbnail-item<?php echo $active; ?>" data-image="<?php echo htmlspecialchars($src, ENT_QUOTES); ?>">
+                                                            <img src="admin/<?php echo htmlspecialchars($src, ENT_QUOTES); ?>" alt="<?php echo htmlspecialchars($title, ENT_QUOTES); ?>" class="img-fluid">
+                                                      </div>
+                                                <?php } ?>
                                           </div>
                                     </div>
 
                                     <!-- Main Image -->
                                     <div class="main-image-wrapper">
                                           <div class="image-zoom-container">
-                                                <img src="assets/img/product/product-details-1.webp"
-                                                      alt="Product Image" class="img-fluid main-image drift-zoom"
+                                                <img src="admin/<?php echo htmlspecialchars($mainImage, ENT_QUOTES); ?>"
+                                                      alt="<?php echo htmlspecialchars($title, ENT_QUOTES); ?>" class="img-fluid main-image drift-zoom"
                                                       id="main-product-image"
-                                                      data-zoom="assets/img/product/product-details-1.webp">
+                                                      data-zoom="<?php echo htmlspecialchars($mainImage, ENT_QUOTES); ?>">
                                                 <div class="zoom-overlay">
                                                       <i class="bi bi-zoom-in"></i>
                                                 </div>
@@ -75,7 +94,7 @@
                                     <!-- Product Meta -->
                                     <div class="product-meta">
                                           <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <span class="product-category">Headphones</span>
+                                                <span class="product-category"><?php echo htmlspecialchars(getProductCategory((int)($product['id'] ?? 0)) ?? '—', ENT_QUOTES); ?></span>
                                                 <div class="product-share">
                                                       <button class="share-btn" aria-label="Share product">
                                                             <i class="bi bi-share"></i>
@@ -93,9 +112,7 @@
                                                 </div>
                                           </div>
 
-                                          <h1 class="product-title">Lorem Ipsum Wireless Noise Cancelling
-                                                Headphones</h1>
-
+                                          <h1 class="product-title"><?php echo htmlspecialchars($title, ENT_QUOTES); ?></h1>
                                           <div class="product-rating">
                                                 <div class="stars">
                                                       <i class="bi bi-star-fill"></i>
@@ -112,22 +129,32 @@
                                     <!-- Product Price -->
                                     <div class="product-price-container">
                                           <div class="price-wrapper">
-                                                <span class="current-price">$249.99</span>
-                                                <span class="original-price">$299.99</span>
+                                                <?php if ($sale !== null && $sale > 0 && $sale < $price) { ?>
+                                                      <span class="current-price"><?php echo $currencySymbol . number_format($sale, 2); ?></span>
+                                                      <span class="original-price"><?php echo $currencySymbol . number_format($price, 2); ?></span>
+                                                <?php } else { ?>
+                                                      <span class="current-price"><?php echo $currencySymbol . number_format($price, 2); ?></span>
+                                                <?php } ?>
                                           </div>
-                                          <span class="discount-badge">Save 17%</span>
+                                          <?php if ($sale !== null && $sale > 0 && $sale < $price) {
+                                                $savePct = round((($price - $sale) / max(0.01, $price)) * 100); ?>
+                                                <span class="discount-badge">Save <?php echo (int)$savePct; ?>%</span>
+                                          <?php } ?>
                                           <div class="stock-info">
-                                                <i class="bi bi-check-circle-fill"></i>
-                                                <span>In Stock</span>
-                                                <span class="stock-count">(24 items left)</span>
+                                                <?php if ($inStock) { ?>
+                                                      <i class="bi bi-check-circle-fill"></i>
+                                                      <span>In Stock</span>
+                                                      <span class="stock-count">(<?php echo (int)$stockQty; ?> items left)</span>
+                                                <?php } else { ?>
+                                                      <i class="bi bi-x-circle-fill"></i>
+                                                      <span>Out of Stock</span>
+                                                <?php } ?>
                                           </div>
                                     </div>
 
                                     <!-- Product Description -->
                                     <div class="product-short-description">
-                                          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum
-                                                at lacus congue, suscipit elit nec, tincidunt orci. Phasellus
-                                                egestas nisi vitae lectus imperdiet venenatis.</p>
+                                          <p><?php echo nl2br(htmlspecialchars((string)($product['description'] ?? ''), ENT_QUOTES)); ?></p>
                                     </div>
 
                                     <!-- Product Options -->
@@ -136,25 +163,27 @@
                                           <div class="option-group">
                                                 <div class="option-header">
                                                       <h6 class="option-title">Color</h6>
-                                                      <span class="selected-option">Black</span>
+                                                      <?php $variantColors = getVariantColors((int)($product['id'] ?? 0));
+                                                      $firstColor = $variantColors[0]['name'] ?? ''; ?>
+                                                      <span class="selected-option"><?php echo htmlspecialchars($firstColor !== '' ? $firstColor : '—', ENT_QUOTES); ?></span>
                                                 </div>
                                                 <div class="color-options">
-                                                      <div class="color-option active" data-color="Black"
-                                                            style="background-color: #222;">
-                                                            <i class="bi bi-check"></i>
-                                                      </div>
-                                                      <div class="color-option" data-color="Silver"
-                                                            style="background-color: #C0C0C0;">
-                                                            <i class="bi bi-check"></i>
-                                                      </div>
-                                                      <div class="color-option" data-color="Blue"
-                                                            style="background-color: #1E3A8A;">
-                                                            <i class="bi bi-check"></i>
-                                                      </div>
-                                                      <div class="color-option" data-color="Rose Gold"
-                                                            style="background-color: #B76E79;">
-                                                            <i class="bi bi-check"></i>
-                                                      </div>
+                                                      <?php if (!empty($variantColors)) {
+                                                            foreach ($variantColors as $idx => $col) {
+                                                                  $active = $idx === 0 ? ' active' : '';
+                                                                  $name = (string)($col['name'] ?? '');
+                                                                  $hex = (string)($col['hex'] ?? '');
+                                                                  $styleHex = $hex !== '' ? $hex : '#222'; ?>
+                                                                  <div class="color-option<?php echo $active; ?>" data-color="<?php echo htmlspecialchars($name, ENT_QUOTES); ?>"
+                                                                        style="background-color: <?php echo htmlspecialchars($styleHex, ENT_QUOTES); ?>;">
+                                                                        <i class="bi bi-check"></i>
+                                                                  </div>
+                                                            <?php }
+                                                      } else { ?>
+                                                            <div class="color-option active" data-color="Default" style="background-color: #222;">
+                                                                  <i class="bi bi-check"></i>
+                                                            </div>
+                                                      <?php } ?>
                                                 </div>
                                           </div>
 
@@ -162,12 +191,19 @@
                                           <div class="option-group">
                                                 <div class="option-header">
                                                       <h6 class="option-title">Size</h6>
-                                                      <span class="selected-option">M</span>
+                                                      <span class="selected-option"><?php echo htmlspecialchars($variantSizes[0] ?? '', ENT_QUOTES); ?></span>
                                                 </div>
                                                 <div class="size-options">
-                                                      <div class="size-option" data-size="S">S</div>
-                                                      <div class="size-option active" data-size="M">M</div>
-                                                      <div class="size-option" data-size="L">L</div>
+                                                      <?php if (!empty($variantSizes)) {
+                                                            foreach ($variantSizes as $idx => $sz) {
+                                                                  $active = $idx === 0 ? ' active' : ''; ?>
+                                                                  <div class="size-option<?php echo $active; ?>" data-size="<?php echo htmlspecialchars($sz, ENT_QUOTES); ?>"><?php echo htmlspecialchars($sz, ENT_QUOTES); ?></div>
+                                                            <?php }
+                                                      } else { ?>
+                                                            <div class="size-option" data-size="S">S</div>
+                                                            <div class="size-option active" data-size="M">M</div>
+                                                            <div class="size-option" data-size="L">L</div>
+                                                      <?php } ?>
                                                 </div>
                                           </div>
 
@@ -179,7 +215,7 @@
                                                             <i class="bi bi-dash"></i>
                                                       </button>
                                                       <input type="number" class="quantity-input" value="1"
-                                                            min="1" max="24">
+                                                            min="1" max="<?php echo (int)max(1, $stockQty); ?>">
                                                       <button class="quantity-btn increase">
                                                             <i class="bi bi-plus"></i>
                                                       </button>
@@ -189,12 +225,12 @@
 
                                     <!-- Action Buttons -->
                                     <div class="product-actions">
-                                          <button class="btn btn-primary add-to-cart-btn">
+                                          <button class="btn btn-primary add-to-cart-btn" data-product-id="<?php echo (int)($product['id'] ?? 0); ?>" <?php echo $inStock ? '' : ' disabled'; ?>>
                                                 <i class="bi bi-cart-plus"></i> Add to Cart
                                           </button>
-                                          <button class="btn btn-outline-primary buy-now-btn">
+                                          <a class="btn btn-outline-primary buy-now-btn" href="<?php echo htmlspecialchars(($__CONFIG['site']['base_url'] ?? '/') . '?p=checkout', ENT_QUOTES); ?>" <?php echo $inStock ? '' : ' aria-disabled="true"'; ?>>
                                                 <i class="bi bi-lightning-fill"></i> Buy Now
-                                          </button>
+                                          </a>
                                           <button class="btn btn-outline-secondary wishlist-btn"
                                                 aria-label="Add to wishlist">
                                                 <i class="bi bi-heart"></i>
@@ -234,11 +270,11 @@
                         <div class="container">
                               <div class="sticky-content">
                                     <div class="product-preview">
-                                          <img src="assets/img/product/product-details-1.webp" alt="Product"
+                                          <img src="admin/<?php echo htmlspecialchars($mainImage, ENT_QUOTES); ?>" alt="Product"
                                                 class="product-thumbnail">
                                           <div class="product-info">
-                                                <h5 class="product-title">Lorem Ipsum Wireless Headphones</h5>
-                                                <div class="product-price">$249.99</div>
+                                                <h5 class="product-title"><?php echo htmlspecialchars($title, ENT_QUOTES); ?></h5>
+                                                <div class="product-price"><?php echo $currencySymbol . number_format(($sale !== null && $sale > 0 && $sale < $price) ? $sale : $price, 2); ?></div>
                                           </div>
                                     </div>
                                     <div class="sticky-actions">
@@ -247,12 +283,12 @@
                                                       <i class="bi bi-dash"></i>
                                                 </button>
                                                 <input type="number" class="quantity-input" value="1" min="1"
-                                                      max="24">
+                                                      max="<?php echo (int)max(1, $stockQty); ?>">
                                                 <button class="quantity-btn increase">
                                                       <i class="bi bi-plus"></i>
                                                 </button>
                                           </div>
-                                          <button class="btn btn-primary add-to-cart-btn">
+                                          <button class="btn btn-primary add-to-cart-btn" <?php echo $inStock ? '' : ' disabled'; ?>>
                                                 <i class="bi bi-cart-plus"></i> Add to Cart
                                           </button>
                                     </div>
@@ -277,58 +313,7 @@
                                                 <div class="accordion-body">
                                                       <div class="product-description">
                                                             <h4>Product Overview</h4>
-                                                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing
-                                                                  elit. Vestibulum at lacus congue, suscipit elit
-                                                                  nec, tincidunt orci. Phasellus egestas nisi
-                                                                  vitae lectus imperdiet venenatis. Suspendisse
-                                                                  vulputate quam diam, et consectetur augue
-                                                                  condimentum in. Aenean dapibus urna eget nisi
-                                                                  pharetra, in iaculis nulla blandit. Praesent at
-                                                                  consectetur sem, sed sollicitudin nibh. Ut
-                                                                  interdum risus ac nulla placerat aliquet.</p>
-
-                                                            <div class="row mt-4">
-                                                                  <div class="col-md-6">
-                                                                        <h4>Key Features</h4>
-                                                                        <ul class="feature-list">
-                                                                              <li><i class="bi bi-check-circle"></i>
-                                                                                    Lorem ipsum dolor sit amet,
-                                                                                    consectetur adipiscing elit
-                                                                              </li>
-                                                                              <li><i class="bi bi-check-circle"></i>
-                                                                                    Vestibulum at lacus congue,
-                                                                                    suscipit elit nec, tincidunt
-                                                                                    orci</li>
-                                                                              <li><i class="bi bi-check-circle"></i>
-                                                                                    Phasellus egestas nisi vitae
-                                                                                    lectus imperdiet venenatis
-                                                                              </li>
-                                                                              <li><i class="bi bi-check-circle"></i>
-                                                                                    Suspendisse vulputate quam
-                                                                                    diam, et consectetur augue
-                                                                              </li>
-                                                                              <li><i class="bi bi-check-circle"></i>
-                                                                                    Aenean dapibus urna eget nisi
-                                                                                    pharetra, in iaculis nulla
-                                                                              </li>
-                                                                        </ul>
-                                                                  </div>
-                                                                  <div class="col-md-6">
-                                                                        <h4>What's in the Box</h4>
-                                                                        <ul class="feature-list">
-                                                                              <li><i class="bi bi-box"></i> Lorem
-                                                                                    Ipsum Wireless Headphones</li>
-                                                                              <li><i class="bi bi-box"></i>
-                                                                                    Carrying Case</li>
-                                                                              <li><i class="bi bi-box"></i> USB-C
-                                                                                    Charging Cable</li>
-                                                                              <li><i class="bi bi-box"></i> 3.5mm
-                                                                                    Audio Cable</li>
-                                                                              <li><i class="bi bi-box"></i> User
-                                                                                    Manual</li>
-                                                                        </ul>
-                                                                  </div>
-                                                            </div>
+                                                            <p><?php echo nl2br(htmlspecialchars((string)($product['description'] ?? ''), ENT_QUOTES)); ?></p>
                                                       </div>
                                                 </div>
                                           </div>

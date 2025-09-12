@@ -2,13 +2,18 @@
 require_once __DIR__ . '/../config/function.php';
 
 $products = db_all('SELECT id, title FROM products ORDER BY id DESC');
+// Load colors and sizes for selects
+$colors = db_all('SELECT id, name, hex FROM colors ORDER BY name ASC');
+$sizes = db_all('SELECT id, label, sort_order FROM sizes ORDER BY sort_order ASC, label ASC');
 
 // Add variant
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 'add_variant') {
       $productId = (int)($_POST['product_id'] ?? 0);
       $sku = trim($_POST['sku'] ?? '');
-      $color = trim($_POST['color'] ?? '');
-      $size = trim($_POST['size'] ?? '');
+      $colorId = (int)($_POST['color_id'] ?? 0);
+      $sizeId = (int)($_POST['size_id'] ?? 0);
+      $color = '';
+      $size = '';
       $material = trim($_POST['material'] ?? '');
       $price = isset($_POST['price']) ? (float)$_POST['price'] : 0.0;
       $compareAt = isset($_POST['compare_at_price']) && $_POST['compare_at_price'] !== '' ? (float)$_POST['compare_at_price'] : null;
@@ -26,11 +31,27 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
             exit;
       }
 
-      db_exec('INSERT INTO variants (product_id, sku, color, size, material, price, compare_at_price, weight, barcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+      // Resolve color/size labels from IDs
+      if ($colorId > 0) {
+            $c = db_one('SELECT name FROM colors WHERE id=?', [$colorId]);
+            if ($c && !empty($c['name'])) {
+                  $color = (string)$c['name'];
+            }
+      }
+      if ($sizeId > 0) {
+            $s = db_one('SELECT label FROM sizes WHERE id=?', [$sizeId]);
+            if ($s && !empty($s['label'])) {
+                  $size = (string)$s['label'];
+            }
+      }
+
+      db_exec('INSERT INTO variants (product_id, sku, color, color_id, size, size_id, material, price, compare_at_price, weight, barcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
             $productId,
             $sku,
             $color !== '' ? $color : null,
+            $colorId > 0 ? $colorId : null,
             $size !== '' ? $size : null,
+            $sizeId > 0 ? $sizeId : null,
             $material !== '' ? $material : null,
             $price,
             $compareAt,
@@ -57,8 +78,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
       $id = (int)($_POST['id'] ?? 0);
       $productId = (int)($_POST['product_id'] ?? 0);
       $sku = trim($_POST['sku'] ?? '');
-      $color = trim($_POST['color'] ?? '');
-      $size = trim($_POST['size'] ?? '');
+      $colorId = (int)($_POST['color_id'] ?? 0);
+      $sizeId = (int)($_POST['size_id'] ?? 0);
+      $color = '';
+      $size = '';
       $material = trim($_POST['material'] ?? '');
       $price = isset($_POST['price']) ? (float)$_POST['price'] : 0.0;
       $compareAt = isset($_POST['compare_at_price']) && $_POST['compare_at_price'] !== '' ? (float)$_POST['compare_at_price'] : null;
@@ -76,11 +99,27 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
             exit;
       }
 
-      db_exec('UPDATE variants SET product_id=?, sku=?, color=?, size=?, material=?, price=?, compare_at_price=?, weight=?, barcode=? WHERE id=?', [
+      // Resolve color/size labels from IDs
+      if ($colorId > 0) {
+            $c = db_one('SELECT name FROM colors WHERE id=?', [$colorId]);
+            if ($c && !empty($c['name'])) {
+                  $color = (string)$c['name'];
+            }
+      }
+      if ($sizeId > 0) {
+            $s = db_one('SELECT label FROM sizes WHERE id=?', [$sizeId]);
+            if ($s && !empty($s['label'])) {
+                  $size = (string)$s['label'];
+            }
+      }
+
+      db_exec('UPDATE variants SET product_id=?, sku=?, color=?, color_id=?, size=?, size_id=?, material=?, price=?, compare_at_price=?, weight=?, barcode=? WHERE id=?', [
             $productId,
             $sku,
             $color !== '' ? $color : null,
+            $colorId > 0 ? $colorId : null,
             $size !== '' ? $size : null,
+            $sizeId > 0 ? $sizeId : null,
             $material !== '' ? $material : null,
             $price,
             $compareAt,
@@ -142,7 +181,7 @@ $totalRow = db_one('SELECT COUNT(*) AS c FROM variants');
 $total = (int)($totalRow['c'] ?? 0);
 $totalPages = max(1, (int)ceil($total / $perPage));
 
-$variants = db_all('SELECT v.id, v.product_id, v.sku, v.color, v.size, v.material, v.price, v.compare_at_price, v.weight, v.barcode, p.title AS product_title FROM variants v JOIN products p ON p.id=v.product_id ORDER BY v.id DESC LIMIT ? OFFSET ?', [$perPage, $offset]);
+$variants = db_all('SELECT v.id, v.product_id, v.sku, v.color, v.color_id, v.size, v.size_id, v.material, v.price, v.compare_at_price, v.weight, v.barcode, p.title AS product_title FROM variants v JOIN products p ON p.id=v.product_id ORDER BY v.id DESC LIMIT ? OFFSET ?', [$perPage, $offset]);
 
 ?>
 
@@ -264,11 +303,21 @@ $variants = db_all('SELECT v.id, v.product_id, v.sku, v.color, v.size, v.materia
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
                                                                                           <label class="form-label">Color</label>
-                                                                                          <input type="text" name="color" class="form-control" value="<?php echo htmlspecialchars($v['color'] ?? '', ENT_QUOTES); ?>">
+                                                                                          <select name="color_id" class="form-select">
+                                                                                                <option value="0">— None —</option>
+                                                                                                <?php foreach ($colors as $c): ?>
+                                                                                                      <option value="<?php echo (int)$c['id']; ?>" <?php echo ((int)($v['color_id'] ?? 0) === (int)$c['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($c['name'], ENT_QUOTES); ?></option>
+                                                                                                <?php endforeach; ?>
+                                                                                          </select>
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
                                                                                           <label class="form-label">Size</label>
-                                                                                          <input type="text" name="size" class="form-control" value="<?php echo htmlspecialchars($v['size'] ?? '', ENT_QUOTES); ?>">
+                                                                                          <select name="size_id" class="form-select">
+                                                                                                <option value="0">— None —</option>
+                                                                                                <?php foreach ($sizes as $s): ?>
+                                                                                                      <option value="<?php echo (int)$s['id']; ?>" <?php echo ((int)($v['size_id'] ?? 0) === (int)$s['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($s['label'], ENT_QUOTES); ?></option>
+                                                                                                <?php endforeach; ?>
+                                                                                          </select>
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
                                                                                           <label class="form-label">Material</label>
@@ -362,11 +411,21 @@ $variants = db_all('SELECT v.id, v.product_id, v.sku, v.color, v.size, v.materia
                                     </div>
                                     <div class="col-md-4 mb-3">
                                           <label class="form-label">Color</label>
-                                          <input type="text" name="color" class="form-control">
+                                          <select name="color_id" class="form-select">
+                                                <option value="0">— None —</option>
+                                                <?php foreach ($colors as $c): ?>
+                                                      <option value="<?php echo (int)$c['id']; ?>"><?php echo htmlspecialchars($c['name'], ENT_QUOTES); ?></option>
+                                                <?php endforeach; ?>
+                                          </select>
                                     </div>
                                     <div class="col-md-4 mb-3">
                                           <label class="form-label">Size</label>
-                                          <input type="text" name="size" class="form-control">
+                                          <select name="size_id" class="form-select">
+                                                <option value="0">— None —</option>
+                                                <?php foreach ($sizes as $s): ?>
+                                                      <option value="<?php echo (int)$s['id']; ?>"><?php echo htmlspecialchars($s['label'], ENT_QUOTES); ?></option>
+                                                <?php endforeach; ?>
+                                          </select>
                                     </div>
                                     <div class="col-md-4 mb-3">
                                           <label class="form-label">Material</label>
