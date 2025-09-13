@@ -207,307 +207,304 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
                                     </div>
                               </div>
 
-                              <!-- Checkout Forms Container -->
                               <div class="checkout-forms" data-aos="fade-up" data-aos-delay="150">
-                                    <!-- Step 1: Customer Information -->
-                                    <div class="checkout-form active" data-form="1">
-                                          <div class="form-header">
-                                                <h3>Customer Information</h3>
-                                                <p>Please enter your contact details</p>
-                                          </div>
-                                          <form class="checkout-form-element">
-                                                <div class="row">
-                                                      <div class="col-md-6 form-group">
-                                                            <label for="first-name">First Name</label>
-                                                            <input type="text" name="first-name"
-                                                                  class="form-control" id="first-name"
-                                                                  placeholder="Your First Name" required="">
-                                                      </div>
-                                                      <div class="col-md-6 form-group mt-3 mt-md-0">
-                                                            <label for="last-name">Last Name</label>
-                                                            <input type="text" name="last-name"
-                                                                  class="form-control" id="last-name"
-                                                                  placeholder="Your Last Name" required="">
-                                                      </div>
+                                    <form method="post" id="checkout-form">
+                                          <div class="checkout-form active" data-form="1">
+                                                <div class="form-header">
+                                                      <h3>Customer Information</h3>
+                                                      <p>Please enter your contact details</p>
                                                 </div>
-                                                <div class="form-group mt-3">
-                                                      <label for="email">Email Address</label>
-                                                      <input type="email" class="form-control" name="email"
-                                                            id="email" placeholder="Your Email" required="">
-                                                </div>
-                                                <div class="form-group mt-3">
-                                                      <label for="phone">Phone Number</label>
-                                                      <input type="tel" class="form-control" name="phone"
-                                                            id="phone" placeholder="Your Phone Number"
-                                                            required="">
-                                                </div>
-                                                <div class="text-end mt-4">
-                                                      <button type="button" class="btn btn-primary next-step"
-                                                            data-next="2">Continue to Shipping</button>
-                                                </div>
-                                          </form>
-                                    </div>
-
-                                    <!-- Step 2: Shipping Address -->
-                                    <div class="checkout-form" data-form="2">
-                                          <div class="form-header">
-                                                <h3>Shipping Address</h3>
-                                                <p>Where should we deliver your order?</p>
-                                          </div>
-                                          <form class="checkout-form-element">
-                                                <div class="form-group">
-                                                      <label for="address">Street Address</label>
-                                                      <input type="text" class="form-control" name="address"
-                                                            id="address" placeholder="Street Address" required="">
-                                                </div>
-                                                <div class="form-group mt-3">
-                                                      <label for="apartment">Apartment, Suite, etc.
-                                                            (optional)</label>
-                                                      <input type="text" class="form-control" name="apartment"
-                                                            id="apartment"
-                                                            placeholder="Apartment, Suite, Unit, etc.">
-                                                </div>
-                                                <div class="row mt-3">
-                                                      <div class="col-md-4 form-group">
-                                                            <label for="city">City</label>
-                                                            <input type="text" name="city" class="form-control"
-                                                                  id="city" placeholder="City" required="">
-                                                      </div>
-                                                      <div class="col-md-4 form-group mt-3 mt-md-0">
-                                                            <label for="state">State</label>
-                                                            <input type="text" name="state" class="form-control"
-                                                                  id="state" placeholder="State" required="">
-                                                      </div>
-                                                      <div class="col-md-4 form-group mt-3 mt-md-0">
-                                                            <label for="zip">ZIP Code</label>
-                                                            <input type="text" name="zip" class="form-control"
-                                                                  id="zip" placeholder="ZIP Code" required="">
-                                                      </div>
-                                                </div>
-                                                <div class="form-group mt-3">
-                                                      <label for="country">Country</label>
-                                                      <select class="form-select" id="country" name="country"
-                                                            required="">
-                                                            <option value="">Select Country</option>
-                                                            <option value="US">United States</option>
-                                                            <option value="CA">Canada</option>
-                                                            <option value="UK">United Kingdom</option>
-                                                            <option value="AU">Australia</option>
-                                                            <option value="DE">Germany</option>
-                                                            <option value="FR">France</option>
-                                                      </select>
-                                                </div>
-                                                <div class="form-check mt-3">
-                                                      <input class="form-check-input" type="checkbox"
-                                                            id="save-address" name="save-address">
-                                                      <label class="form-check-label" for="save-address">
-                                                            Save this address for future orders
-                                                      </label>
-                                                </div>
-                                                <div class="d-flex justify-content-between mt-4">
-                                                      <button type="button"
-                                                            class="btn btn-outline-secondary prev-step"
-                                                            data-prev="1">Back to Information</button>
-                                                      <button type="button" class="btn btn-primary next-step"
-                                                            data-next="3">Continue to Payment</button>
-                                                </div>
-                                          </form>
-                                    </div>
-
-                                    <!-- Step 3: Payment Method -->
-                                    <div class="checkout-form" data-form="3">
-                                          <div class="form-header">
-                                                <h3>Payment Method</h3>
-                                                <p>Choose how you'd like to pay</p>
-                                          </div>
-                                          <form class="checkout-form-element">
-                                                <div class="payment-methods">
-                                                      <div class="payment-method active">
-                                                            <div class="payment-method-header">
-                                                                  <div class="form-check">
-                                                                        <input class="form-check-input"
-                                                                              type="radio" name="payment-method"
-                                                                              id="credit-card" checked="">
-                                                                        <label class="form-check-label"
-                                                                              for="credit-card">
-                                                                              Credit / Debit Card
-                                                                        </label>
-                                                                  </div>
-                                                                  <div class="payment-icons">
-                                                                        <i class="bi bi-credit-card-2-front"></i>
-                                                                        <i class="bi bi-credit-card"></i>
-                                                                  </div>
+                                                <div class="checkout-form-element">
+                                                      <div class="row">
+                                                            <div class="col-md-6 form-group">
+                                                                  <label for="first-name">First Name</label>
+                                                                  <input type="text" name="first-name"
+                                                                        class="form-control" id="first-name"
+                                                                        placeholder="Your First Name" required="">
                                                             </div>
-                                                            <div class="payment-method-body">
-                                                                  <div class="row">
-                                                                        <div class="col-12 form-group">
-                                                                              <label for="card-number">Card
-                                                                                    Number</label>
-                                                                              <input type="text"
-                                                                                    class="form-control"
-                                                                                    name="card-number"
-                                                                                    id="card-number"
-                                                                                    placeholder="1234 5678 9012 3456"
-                                                                                    required="">
+                                                            <div class="col-md-6 form-group mt-3 mt-md-0">
+                                                                  <label for="last-name">Last Name</label>
+                                                                  <input type="text" name="last-name"
+                                                                        class="form-control" id="last-name"
+                                                                        placeholder="Your Last Name" required="">
+                                                            </div>
+                                                      </div>
+                                                      <div class="form-group mt-3">
+                                                            <label for="email">Email Address</label>
+                                                            <input type="email" class="form-control" name="email"
+                                                                  id="email" placeholder="Your Email" required="">
+                                                      </div>
+                                                      <div class="form-group mt-3">
+                                                            <label for="phone">Phone Number</label>
+                                                            <input type="tel" class="form-control" name="phone"
+                                                                  id="phone" placeholder="Your Phone Number"
+                                                                  required="">
+                                                      </div>
+                                                      <div class="text-end mt-4">
+                                                            <button type="button" class="btn btn-primary next-step"
+                                                                  data-next="2">Continue to Shipping</button>
+                                                      </div>
+                                                </div>
+                                          </div>
+
+                                          <div class="checkout-form" data-form="2">
+                                                <div class="form-header">
+                                                      <h3>Shipping Address</h3>
+                                                      <p>Where should we deliver your order?</p>
+                                                </div>
+                                                <form class="checkout-form-element">
+                                                      <div class="form-group">
+                                                            <label for="address">Street Address</label>
+                                                            <input type="text" class="form-control" name="address"
+                                                                  id="address" placeholder="Street Address" required="">
+                                                      </div>
+                                                      <div class="form-group mt-3">
+                                                            <label for="apartment">Apartment, Suite, etc.
+                                                                  (optional)</label>
+                                                            <input type="text" class="form-control" name="apartment"
+                                                                  id="apartment"
+                                                                  placeholder="Apartment, Suite, Unit, etc.">
+                                                      </div>
+                                                      <div class="row mt-3">
+                                                            <div class="col-md-4 form-group">
+                                                                  <label for="city">City</label>
+                                                                  <input type="text" name="city" class="form-control"
+                                                                        id="city" placeholder="City" required="">
+                                                            </div>
+                                                            <div class="col-md-4 form-group mt-3 mt-md-0">
+                                                                  <label for="state">State</label>
+                                                                  <input type="text" name="state" class="form-control"
+                                                                        id="state" placeholder="State" required="">
+                                                            </div>
+                                                            <div class="col-md-4 form-group mt-3 mt-md-0">
+                                                                  <label for="zip">ZIP Code</label>
+                                                                  <input type="text" name="zip" class="form-control"
+                                                                        id="zip" placeholder="ZIP Code" required="">
+                                                            </div>
+                                                      </div>
+                                                      <div class="form-group mt-3">
+                                                            <label for="country">Country</label>
+                                                            <select class="form-select" id="country" name="country"
+                                                                  required="">
+                                                                  <option value="">Select Country</option>
+                                                                  <option value="US">United States</option>
+                                                                  <option value="CA">Canada</option>
+                                                                  <option value="UK">United Kingdom</option>
+                                                                  <option value="AU">Australia</option>
+                                                                  <option value="DE">Germany</option>
+                                                                  <option value="FR">France</option>
+                                                            </select>
+                                                      </div>
+                                                      <div class="form-check mt-3">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                  id="save-address" name="save-address">
+                                                            <label class="form-check-label" for="save-address">
+                                                                  Save this address for future orders
+                                                            </label>
+                                                      </div>
+                                                      <div class="d-flex justify-content-between mt-4">
+                                                            <button type="button"
+                                                                  class="btn btn-outline-secondary prev-step"
+                                                                  data-prev="1">Back to Information</button>
+                                                            <button type="button" class="btn btn-primary next-step"
+                                                                  data-next="3">Continue to Payment</button>
+                                                      </div>
+                                                </form>
+                                          </div>
+
+                                          <div class="checkout-form" data-form="3">
+                                                <div class="form-header">
+                                                      <h3>Payment Method</h3>
+                                                      <p>Choose how you'd like to pay</p>
+                                                </div>
+                                                <form class="checkout-form-element">
+                                                      <div class="payment-methods">
+                                                            <div class="payment-method active">
+                                                                  <div class="payment-method-header">
+                                                                        <div class="form-check">
+                                                                              <input class="form-check-input"
+                                                                                    type="radio" name="payment-method"
+                                                                                    id="credit-card" checked="">
+                                                                              <label class="form-check-label"
+                                                                                    for="credit-card">
+                                                                                    Credit / Debit Card
+                                                                              </label>
+                                                                        </div>
+                                                                        <div class="payment-icons">
+                                                                              <i class="bi bi-credit-card-2-front"></i>
+                                                                              <i class="bi bi-credit-card"></i>
                                                                         </div>
                                                                   </div>
-                                                                  <div class="row mt-3">
-                                                                        <div class="col-md-6 form-group">
-                                                                              <label for="expiry">Expiration
-                                                                                    Date</label>
-                                                                              <input type="text"
-                                                                                    class="form-control"
-                                                                                    name="expiry" id="expiry"
-                                                                                    placeholder="MM/YY"
-                                                                                    required="">
+                                                                  <div class="payment-method-body">
+                                                                        <div class="row">
+                                                                              <div class="col-12 form-group">
+                                                                                    <label for="card-number">Card
+                                                                                          Number</label>
+                                                                                    <input type="text"
+                                                                                          class="form-control"
+                                                                                          name="card-number"
+                                                                                          id="card-number"
+                                                                                          placeholder="1234 5678 9012 3456"
+                                                                                          required="">
+                                                                              </div>
                                                                         </div>
-                                                                        <div
-                                                                              class="col-md-6 form-group mt-3 mt-md-0">
-                                                                              <label for="cvv">Security Code
-                                                                                    (CVV)</label>
-                                                                              <input type="text"
-                                                                                    class="form-control"
-                                                                                    name="cvv" id="cvv"
-                                                                                    placeholder="123" required="">
+                                                                        <div class="row mt-3">
+                                                                              <div class="col-md-6 form-group">
+                                                                                    <label for="expiry">Expiration
+                                                                                          Date</label>
+                                                                                    <input type="text"
+                                                                                          class="form-control"
+                                                                                          name="expiry" id="expiry"
+                                                                                          placeholder="MM/YY"
+                                                                                          required="">
+                                                                              </div>
+                                                                              <div
+                                                                                    class="col-md-6 form-group mt-3 mt-md-0">
+                                                                                    <label for="cvv">Security Code
+                                                                                          (CVV)</label>
+                                                                                    <input type="text"
+                                                                                          class="form-control"
+                                                                                          name="cvv" id="cvv"
+                                                                                          placeholder="123" required="">
+                                                                              </div>
+                                                                        </div>
+                                                                        <div class="form-group mt-3">
+                                                                              <label for="card-name">Name on
+                                                                                    Card</label>
+                                                                              <input type="text" class="form-control"
+                                                                                    name="card-name" id="card-name"
+                                                                                    placeholder="John Doe" required="">
                                                                         </div>
                                                                   </div>
-                                                                  <div class="form-group mt-3">
-                                                                        <label for="card-name">Name on
-                                                                              Card</label>
-                                                                        <input type="text" class="form-control"
-                                                                              name="card-name" id="card-name"
-                                                                              placeholder="John Doe" required="">
+                                                            </div>
+
+                                                            <div class="payment-method mt-3">
+                                                                  <div class="payment-method-header">
+                                                                        <div class="form-check">
+                                                                              <input class="form-check-input"
+                                                                                    type="radio" name="payment-method"
+                                                                                    id="paypal">
+                                                                              <label class="form-check-label"
+                                                                                    for="paypal">
+                                                                                    PayPal
+                                                                              </label>
+                                                                        </div>
+                                                                        <div class="payment-icons">
+                                                                              <i class="bi bi-paypal"></i>
+                                                                        </div>
+                                                                  </div>
+                                                                  <div class="payment-method-body d-none">
+                                                                        <p>You will be redirected to PayPal to complete
+                                                                              your purchase securely.</p>
+                                                                  </div>
+                                                            </div>
+
+                                                            <div class="payment-method mt-3">
+                                                                  <div class="payment-method-header">
+                                                                        <div class="form-check">
+                                                                              <input class="form-check-input"
+                                                                                    type="radio" name="payment-method"
+                                                                                    id="apple-pay">
+                                                                              <label class="form-check-label"
+                                                                                    for="apple-pay">
+                                                                                    Apple Pay
+                                                                              </label>
+                                                                        </div>
+                                                                        <div class="payment-icons">
+                                                                              <i class="bi bi-apple"></i>
+                                                                        </div>
+                                                                  </div>
+                                                                  <div class="payment-method-body d-none">
+                                                                        <p>You will be prompted to authorize payment
+                                                                              with Apple Pay.</p>
                                                                   </div>
                                                             </div>
                                                       </div>
-
-                                                      <div class="payment-method mt-3">
-                                                            <div class="payment-method-header">
-                                                                  <div class="form-check">
-                                                                        <input class="form-check-input"
-                                                                              type="radio" name="payment-method"
-                                                                              id="paypal">
-                                                                        <label class="form-check-label"
-                                                                              for="paypal">
-                                                                              PayPal
-                                                                        </label>
-                                                                  </div>
-                                                                  <div class="payment-icons">
-                                                                        <i class="bi bi-paypal"></i>
-                                                                  </div>
-                                                            </div>
-                                                            <div class="payment-method-body d-none">
-                                                                  <p>You will be redirected to PayPal to complete
-                                                                        your purchase securely.</p>
-                                                            </div>
+                                                      <div class="d-flex justify-content-between mt-4">
+                                                            <button type="button"
+                                                                  class="btn btn-outline-secondary prev-step"
+                                                                  data-prev="2">Back to Shipping</button>
+                                                            <button type="button" class="btn btn-primary next-step"
+                                                                  data-next="4">Review Order</button>
                                                       </div>
-
-                                                      <div class="payment-method mt-3">
-                                                            <div class="payment-method-header">
-                                                                  <div class="form-check">
-                                                                        <input class="form-check-input"
-                                                                              type="radio" name="payment-method"
-                                                                              id="apple-pay">
-                                                                        <label class="form-check-label"
-                                                                              for="apple-pay">
-                                                                              Apple Pay
-                                                                        </label>
-                                                                  </div>
-                                                                  <div class="payment-icons">
-                                                                        <i class="bi bi-apple"></i>
-                                                                  </div>
-                                                            </div>
-                                                            <div class="payment-method-body d-none">
-                                                                  <p>You will be prompted to authorize payment
-                                                                        with Apple Pay.</p>
-                                                            </div>
-                                                      </div>
-                                                </div>
-                                                <div class="d-flex justify-content-between mt-4">
-                                                      <button type="button"
-                                                            class="btn btn-outline-secondary prev-step"
-                                                            data-prev="2">Back to Shipping</button>
-                                                      <button type="button" class="btn btn-primary next-step"
-                                                            data-next="4">Review Order</button>
-                                                </div>
-                                          </form>
-                                    </div>
-
-                                    <!-- Step 4: Order Review -->
-                                    <div class="checkout-form" data-form="4">
-                                          <div class="form-header">
-                                                <h3>Review Your Order</h3>
-                                                <p>Please review your information before placing your order</p>
+                                                </form>
                                           </div>
-                                          <form class="checkout-form-element">
-                                                <div class="review-sections">
-                                                      <div class="review-section">
-                                                            <div class="review-section-header">
-                                                                  <h4>Contact Information</h4>
-                                                                  <button type="button" class="btn-edit"
-                                                                        data-edit="1">Edit</button>
+
+                                          <div class="checkout-form" data-form="4">
+                                                <div class="form-header">
+                                                      <h3>Review Your Order</h3>
+                                                      <p>Please review your information before placing your order</p>
+                                                </div>
+                                                <form class="checkout-form-element">
+                                                      <div class="review-sections">
+                                                            <div class="review-section">
+                                                                  <div class="review-section-header">
+                                                                        <h4>Contact Information</h4>
+                                                                        <button type="button" class="btn-edit"
+                                                                              data-edit="1">Edit</button>
+                                                                  </div>
+                                                                  <div class="review-section-content">
+                                                                        <p class="review-name">John Doe</p>
+                                                                        <p class="review-email"><a
+                                                                                    href="/cdn-cgi/l/email-protection"
+                                                                                    class="__cf_email__"
+                                                                                    data-cfemail="48222720262c272d082d30292538242d662b2725">[email&#160;protected]</a>
+                                                                        </p>
+                                                                        <p class="review-phone">+1 (555) 123-4567</p>
+                                                                  </div>
                                                             </div>
-                                                            <div class="review-section-content">
-                                                                  <p class="review-name">John Doe</p>
-                                                                  <p class="review-email"><a
-                                                                              href="/cdn-cgi/l/email-protection"
-                                                                              class="__cf_email__"
-                                                                              data-cfemail="48222720262c272d082d30292538242d662b2725">[email&#160;protected]</a>
-                                                                  </p>
-                                                                  <p class="review-phone">+1 (555) 123-4567</p>
+
+                                                            <div class="review-section mt-3">
+                                                                  <div class="review-section-header">
+                                                                        <h4>Shipping Address</h4>
+                                                                        <button type="button" class="btn-edit"
+                                                                              data-edit="2">Edit</button>
+                                                                  </div>
+                                                                  <div class="review-section-content">
+                                                                        <p>123 Main Street, Apt 4B</p>
+                                                                        <p>New York, NY 10001</p>
+                                                                        <p>United States</p>
+                                                                  </div>
+                                                            </div>
+
+                                                            <div class="review-section mt-3">
+                                                                  <div class="review-section-header">
+                                                                        <h4>Payment Method</h4>
+                                                                        <button type="button" class="btn-edit"
+                                                                              data-edit="3">Edit</button>
+                                                                  </div>
+                                                                  <div class="review-section-content">
+                                                                        <p><i class="bi bi-credit-card-2-front me-2"></i>
+                                                                              Credit Card ending in 3456</p>
+                                                                  </div>
                                                             </div>
                                                       </div>
 
-                                                      <div class="review-section mt-3">
-                                                            <div class="review-section-header">
-                                                                  <h4>Shipping Address</h4>
-                                                                  <button type="button" class="btn-edit"
-                                                                        data-edit="2">Edit</button>
-                                                            </div>
-                                                            <div class="review-section-content">
-                                                                  <p>123 Main Street, Apt 4B</p>
-                                                                  <p>New York, NY 10001</p>
-                                                                  <p>United States</p>
-                                                            </div>
+                                                      <div class="form-check mt-4">
+                                                            <input class="form-check-input" type="checkbox" id="terms"
+                                                                  name="terms" required="">
+                                                            <label class="form-check-label" for="terms">
+                                                                  I agree to the <a href="#" data-bs-toggle="modal"
+                                                                        data-bs-target="#termsModal">Terms and
+                                                                        Conditions</a> and <a href="#"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#privacyModal">Privacy
+                                                                        Policy</a>
+                                                            </label>
                                                       </div>
-
-                                                      <div class="review-section mt-3">
-                                                            <div class="review-section-header">
-                                                                  <h4>Payment Method</h4>
-                                                                  <button type="button" class="btn-edit"
-                                                                        data-edit="3">Edit</button>
-                                                            </div>
-                                                            <div class="review-section-content">
-                                                                  <p><i class="bi bi-credit-card-2-front me-2"></i>
-                                                                        Credit Card ending in 3456</p>
-                                                            </div>
+                                                      <div class="success-message d-none">Your order has been placed
+                                                            successfully! Thank you for your purchase.</div>
+                                                      <div class="d-flex justify-content-between mt-4">
+                                                            <button type="button"
+                                                                  class="btn btn-outline-secondary prev-step"
+                                                                  data-prev="3">Back to Payment</button>
+                                                            <button type="submit"
+                                                                  class="btn btn-success place-order-btn">Place
+                                                                  Order</button>
                                                       </div>
-                                                </div>
-
-                                                <div class="form-check mt-4">
-                                                      <input class="form-check-input" type="checkbox" id="terms"
-                                                            name="terms" required="">
-                                                      <label class="form-check-label" for="terms">
-                                                            I agree to the <a href="#" data-bs-toggle="modal"
-                                                                  data-bs-target="#termsModal">Terms and
-                                                                  Conditions</a> and <a href="#"
-                                                                  data-bs-toggle="modal"
-                                                                  data-bs-target="#privacyModal">Privacy
-                                                                  Policy</a>
-                                                      </label>
-                                                </div>
-                                                <div class="success-message d-none">Your order has been placed
-                                                      successfully! Thank you for your purchase.</div>
-                                                <div class="d-flex justify-content-between mt-4">
-                                                      <button type="button"
-                                                            class="btn btn-outline-secondary prev-step"
-                                                            data-prev="3">Back to Payment</button>
-                                                      <button type="submit"
-                                                            class="btn btn-success place-order-btn">Place
-                                                            Order</button>
-                                                </div>
-                                          </form>
-                                    </div>
+                                                </form>
+                                          </div>
+                                    </form>
                               </div>
                         </div>
 
