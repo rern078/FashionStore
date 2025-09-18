@@ -246,12 +246,60 @@
 
   ecommerceCartTools();
 
-  /**
-   * Initiate glightbox
-   */
-  const glightbox = GLightbox({
-    selector: '.glightbox'
+  // Lightweight Add-to-Cart handler for category/product grids
+  document.addEventListener('click', async function (e) {
+    const btn = e.target.closest('.add-to-cart-btn');
+    if (!btn) return;
+
+    // If button is inside a form that posts to cart, prefer AJAX and prevent navigation
+    const form = btn.closest('form');
+    const productIdAttr = btn.getAttribute('data-product-id');
+    const productId = productIdAttr ? parseInt(productIdAttr, 10) : null;
+    if (form && productId && !isNaN(productId)) {
+      e.preventDefault();
+      try {
+        const fd = new FormData();
+        fd.append('form', 'add_to_cart');
+        fd.append('product_id', String(productId));
+        fd.append('qty', '1');
+        fd.append('ajax', '1');
+        const resp = await fetch(form.action || (window.location.origin + '/?p=cart'), {
+          method: 'POST',
+          body: fd,
+          credentials: 'same-origin'
+        });
+        const data = await resp.json();
+        if (data && data.ok) {
+          // Update header mini-cart badge if present
+          const badge = document.querySelector('.cart-dropdown .badge');
+          if (badge && typeof data.cart_item_count === 'number') {
+            badge.textContent = String(data.cart_item_count);
+          }
+          // Provide quick feedback (optional toast replacement)
+          btn.classList.add('added');
+          const originalText = btn.textContent;
+          btn.textContent = 'Added';
+          setTimeout(() => {
+            btn.textContent = originalText || 'Add to Cart';
+            btn.classList.remove('added');
+          }, 1200);
+        }
+      } catch (_) {
+        // ignore
+      }
+    }
   });
+
+  /**
+   * Initiate glightbox (guard if library not loaded)
+   */
+  if (typeof GLightbox !== 'undefined') {
+    const glightbox = GLightbox({
+      selector: '.glightbox'
+    });
+  } else {
+    console.warn('GLightbox is not loaded');
+  }
 
   /**
    * Product Image Zoom and Thumbnail Functionality
@@ -672,58 +720,50 @@
       });
     });
 
-    // Validate current step before moving forward (aligning with order_addresses requirements)
+    // Validate current step before moving forward (honor [required] on fields in the step)
     function validateStep(stepNumber) {
       let isValid = true;
       const container = document.querySelector(`.checkout-form[data-form="${stepNumber}"]`);
       if (!container) return true;
 
-      // Helpers
-      function check(el) {
-        if (!el) return;
-        const val = (el.value || '').trim();
-        if (!val) {
-          el.classList.add('is-invalid');
-          isValid = false;
-        } else {
-          el.classList.remove('is-invalid');
-        }
-      }
+      const requiredFields = container.querySelectorAll('input[required], select[required], textarea[required]');
+      let firstInvalid = null;
 
-      if (stepNumber === 1) {
-        // Customer info (collects parts of order_addresses.full_name + optional email/phone)
-        check(container.querySelector('#first-name'));
-        check(container.querySelector('#last-name'));
-        check(container.querySelector('#email'));
-        check(container.querySelector('#phone'));
-      } else if (stepNumber === 2) {
-        // Shipping address: order_addresses required fields
-        check(container.querySelector('#address'));  // line1
-        check(container.querySelector('#city'));
-        check(container.querySelector('#zip'));
-        const country = container.querySelector('#country');
-        if (!country || !country.value) {
-          if (country) country.classList.add('is-invalid');
+      const isElementVisible = (el) => {
+        if (!el) return false;
+        // Skip if inside a hidden section (e.g., .d-none payment body)
+        if (el.closest('.d-none')) return false;
+        // Skip if not in layout flow
+        if (el.offsetParent === null && window.getComputedStyle(el).position !== 'fixed') return false;
+        return true;
+      };
+
+      requiredFields.forEach((field) => {
+        if (!isElementVisible(field)) return; // ignore hidden required fields
+
+        let ok = true;
+        const tag = field.tagName.toLowerCase();
+        const type = (field.getAttribute('type') || '').toLowerCase();
+        if (type === 'checkbox' || type === 'radio') {
+          ok = field.checked === true;
+        } else if (tag === 'select') {
+          ok = (field.value || '').trim() !== '';
+        } else {
+          ok = (field.value || '').trim() !== '';
+        }
+
+        if (!ok) {
+          field.classList.add('is-invalid');
+          if (!firstInvalid) firstInvalid = field;
           isValid = false;
         } else {
-          country.classList.remove('is-invalid');
+          field.classList.remove('is-invalid');
         }
-        // state is optional per schema; apartment optional
-      } else if (stepNumber === 3) {
-        // Basic payment fields
-        check(container.querySelector('#card-number'));
-        check(container.querySelector('#expiry'));
-        check(container.querySelector('#cvv'));
-        check(container.querySelector('#card-name'));
-      } else if (stepNumber === 4) {
-        // Terms must be checked
-        const terms = container.querySelector('#terms');
-        if (terms && !terms.checked) {
-          terms.classList.add('is-invalid');
-          isValid = false;
-        } else if (terms) {
-          terms.classList.remove('is-invalid');
-        }
+      });
+
+      if (!isValid && firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstInvalid.focus({ preventScroll: true });
       }
 
       return isValid;

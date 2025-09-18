@@ -5,6 +5,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
       $color = trim((string)($_POST['color'] ?? ''));
       $size = trim((string)($_POST['size'] ?? ''));
       $qty = max(1, (int)($_POST['qty'] ?? 1));
+      $isAjax = isset($_POST['ajax']) && (string)$_POST['ajax'] === '1';
 
       if ($productId > 0 && $qty > 0) {
             // Ensure session cart exists
@@ -49,13 +50,42 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
                         db_exec('INSERT INTO cart_items (cart_id, variant_id, qty, unit_price) VALUES (?, ?, ?, ?)', [$cartId, $variantId, $qty, $unitPrice]);
                   }
 
+                  if ($isAjax) {
+                        // compute new mini cart count and subtotal
+                        $miniCount = 0;
+                        $miniSubtotal = 0.0;
+                        $rows = db_all('SELECT qty, unit_price FROM cart_items WHERE cart_id=?', [$cartId]);
+                        foreach ($rows as $r) {
+                              $q = (int)($r['qty'] ?? 0);
+                              $p = (float)($r['unit_price'] ?? 0);
+                              $miniCount += $q;
+                              $miniSubtotal += $q * $p;
+                        }
+                        header('Content-Type: application/json');
+                        echo json_encode([
+                              'ok' => true,
+                              'cart_item_count' => $miniCount,
+                              'subtotal' => $miniSubtotal,
+                        ]);
+                        exit;
+                  }
                   header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=cart&added=1'));
                   exit;
             } else {
+                  if ($isAjax) {
+                        header('Content-Type: application/json');
+                        echo json_encode(['ok' => false, 'error' => 'No variant found']);
+                        exit;
+                  }
                   header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=cart&error=No%20variant%20found'));
                   exit;
             }
       } else {
+            if ($isAjax) {
+                  header('Content-Type: application/json');
+                  echo json_encode(['ok' => false, 'error' => 'Invalid data']);
+                  exit;
+            }
             header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=cart&error=Invalid%20data'));
             exit;
       }

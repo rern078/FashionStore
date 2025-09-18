@@ -101,6 +101,252 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             unset($_SESSION['promo_value']);
             header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=checkout&promo=removed'));
             exit;
+      } elseif ($form === 'place_order') {
+            // Basic validation of required fields
+            $first = trim((string)($_POST['first-name'] ?? ''));
+            $last = trim((string)($_POST['last-name'] ?? ''));
+            $email = trim((string)($_POST['email'] ?? ''));
+            $phone = trim((string)($_POST['phone'] ?? ''));
+            $line1 = trim((string)($_POST['address'] ?? ''));
+            $line2 = trim((string)($_POST['apartment'] ?? ''));
+            $cityPost = trim((string)($_POST['city'] ?? ''));
+            $statePost = trim((string)($_POST['state'] ?? ''));
+            $postalPost = trim((string)($_POST['zip'] ?? ''));
+            $countryPost = strtoupper(trim((string)($_POST['country'] ?? '')));
+            $termsOk = isset($_POST['terms']);
+            $paymentMethod = (string)($_POST['payment-method'] ?? 'card');
+
+            if ($first === '' || $last === '' || $email === '' || $phone === '' || $line1 === '' || $cityPost === '' || $postalPost === '' || $countryPost === '' || !$termsOk) {
+                  header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=checkout&error=missing'));
+                  exit;
+            }
+
+            // Refresh session location for tax logic
+            $_SESSION['checkout_country'] = $countryPost;
+            $_SESSION['checkout_state'] = $statePost !== '' ? $statePost : null;
+            $_SESSION['checkout_city'] = $cityPost !== '' ? $cityPost : null;
+            $_SESSION['checkout_postal'] = $postalPost !== '' ? $postalPost : null;
+
+            // Recompute amounts based on current cart and location
+            $cartRow = db_one('SELECT id FROM carts WHERE session_id=?', [$sid]);
+            if (!$cartRow) {
+                  header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=cart'));
+                  exit;
+            }
+            $cartId = (int)$cartRow['id'];
+            $items = db_all('SELECT variant_id, qty, unit_price FROM cart_items WHERE cart_id=? ORDER BY id ASC', [$cartId]);
+            if (empty($items)) {
+                  header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=cart'));
+                  exit;
+            }
+
+            $subtotal = 0.0;
+            foreach ($items as $it) {
+                  $subtotal += (float)($it['unit_price'] ?? 0) * (int)($it['qty'] ?? 0);
+            }
+
+            // Shipping
+            $shippingAmountX = 0.0;
+            $shippingRowX = db_one('SELECT name, code, base_cost, min_subtotal_free FROM shipping_methods WHERE is_active = 1 ORDER BY sort_order ASC, base_cost ASC LIMIT 1');
+            if ($shippingRowX) {
+                  $baseCostX = (float)($shippingRowX['base_cost'] ?? 0);
+                  $minFreeX = $shippingRowX['min_subtotal_free'] !== null ? (float)$shippingRowX['min_subtotal_free'] : null;
+                  $shippingAmountX = ($minFreeX !== null && $subtotal >= $minFreeX) ? 0.0 : $baseCostX;
+            }
+
+            // Tax (use posted address)
+            $taxAmountX = 0.0;
+            $tx = db_one(
+                  "SELECT rate_percent FROM tax_rates\n" .
+                        "WHERE is_active = 1\n" .
+                        "  AND (country IS NULL OR country = ?)\n" .
+                        "  AND (state IS NULL OR state = ? OR ? IS NULL)\n" .
+                        "  AND (city IS NULL OR city = ? OR ? IS NULL)\n" .
+                        "  AND (postal IS NULL OR postal = ? OR ? IS NULL)\n" .
+                        "ORDER BY sort_order ASC, (country IS NOT NULL) DESC, (state IS NOT NULL) DESC, (city IS NOT NULL) DESC, (postal IS NOT NULL) DESC\n" .
+                        "LIMIT 1",
+                  [
+                        $countryPost,
+                        $statePost,
+                        $statePost,
+                        $cityPost,
+                        $cityPost,
+                        $postalPost,
+                        $postalPost,
+                  ]
+            );
+            if ($tx) {
+                  $ratePctX = (float)($tx['rate_percent'] ?? 0);
+                  if ($ratePctX > 0 && $subtotal > 0) {
+                        $taxAmountX = ($subtotal * $ratePctX) / 100.0;
+                  }
+            }
+
+            // Promotion
+            $discountX = 0.0;
+            if (!empty($_SESSION['promo_code'])) {
+                  $ptype = (string)($_SESSION['promo_type'] ?? '');
+                  $pval = (float)($_SESSION['promo_value'] ?? 0);
+                  if ($ptype === 'percentage' && $pval > 0) {
+                        $discountX = ($subtotal * $pval) / 100.0;
+                  } elseif ($ptype === 'fixed' && $pval > 0) {
+                        $discountX = min($pval, $subtotal);
+                  } elseif ($ptype === 'free_shipping') {
+                        $discountX = 0.0;
+                        $shippingAmountX = 0.0;
+                  }
+            }
+
+            $grand = max(0, $subtotal - $discountX) + $shippingAmountX + $taxAmountX;
+            $currencyCode = strtoupper((string)($_SESSION['currency'] ?? 'USD'));
+
+            // Determine user id (existing session or create a new customer)
+            $userId = (int)($_SESSION['user']['id'] ?? 0);
+            if ($userId <= 0) {
+                  $name = trim($first . ' ' . $last);
+                  $randPass = bin2hex(random_bytes(8));
+                  $hash = password_hash($randPass, PASSWORD_DEFAULT);
+                  db_exec('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)', [
+                        $name,
+                        $email,
+                        ($phone === '' ? null : $phone),
+                        $hash,
+                        'customer'
+                  ]);
+                  $userId = db_last_insert_id();
+                  $_SESSION['user'] = [
+                        'id' => (int)$userId,
+                        'name' => (string)$name,
+                        'email' => (string)$email,
+                        'role' => 'customer',
+                  ];
+            }
+
+            // Place order in a transaction
+            $pdo = db();
+            try {
+                  $pdo->beginTransaction();
+
+                  // Unique order number
+                  $orderNumber = 'FS' . date('YmdHis') . '-' . random_int(100, 999);
+                  // Ensure uniqueness loop (very unlikely collision)
+                  while (db_one('SELECT id FROM orders WHERE order_number=?', [$orderNumber])) {
+                        $orderNumber = 'FS' . date('YmdHis') . '-' . random_int(100, 999);
+                  }
+
+                  db_exec('INSERT INTO orders (user_id, order_number, status, subtotal, discount_total, shipping_total, tax_total, grand_total, currency, placed_at, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                        $userId,
+                        substr($orderNumber, 0, 30),
+                        'pending',
+                        $subtotal,
+                        $discountX,
+                        $shippingAmountX,
+                        $taxAmountX,
+                        $grand,
+                        substr($currencyCode, 0, 3),
+                        date('Y-m-d H:i:s'),
+                        'unpaid'
+                  ]);
+                  $orderId = db_last_insert_id();
+
+                  // Optional: also store a flat snapshot into checkout_orders if such table exists
+                  try {
+                        // Probe table existence; will throw if not present
+                        db_one('SELECT 1 FROM checkout_orders LIMIT 1');
+                        // Parse limited card metadata safely (no PAN/CVV storage)
+                        $cardNumberRaw = isset($_POST['card-number']) ? preg_replace('~[^0-9]~', '', (string)$_POST['card-number']) : '';
+                        $cardLast4 = strlen($cardNumberRaw) >= 4 ? substr($cardNumberRaw, -4) : null;
+                        $expiryRaw = (string)($_POST['expiry'] ?? '');
+                        $expMonth = null;
+                        $expYear = null;
+                        if (preg_match('~^(\d{2})\/(\d{2})$~', $expiryRaw, $m)) {
+                              $expMonth = (int)$m[1];
+                              $expYear = 2000 + (int)$m[2];
+                        }
+                        $cardName = trim((string)($_POST['card-name'] ?? ''));
+
+                        db_exec(
+                              'INSERT INTO checkout_orders (
+                                    first_name, last_name, email, phone,
+                                    address_line1, address_line2, city, state, postal_code, country_code,
+                                    payment_method, card_last4, card_exp_month, card_exp_year, card_name,
+                                    terms_accepted
+                              ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                              [
+                                    $first,
+                                    $last,
+                                    $email,
+                                    $phone,
+                                    $line1,
+                                    ($line2 !== '' ? $line2 : null),
+                                    $cityPost,
+                                    ($statePost !== '' ? $statePost : null),
+                                    $postalPost,
+                                    substr($countryPost, 0, 2),
+                                    ($paymentMethod === 'paypal' ? 'paypal' : ($paymentMethod === 'apple_pay' ? 'apple_pay' : 'card')),
+                                    $cardLast4,
+                                    $expMonth,
+                                    $expYear,
+                                    ($cardName !== '' ? $cardName : null),
+                                    $termsOk ? 1 : 0,
+                              ]
+                        );
+                  } catch (Throwable $e) {
+                        // Silently ignore if table does not exist or any error occurs
+                  }
+
+                  // Shipping address snapshot
+                  db_exec('INSERT INTO order_addresses (order_id, address_type, full_name, email, phone, line1, line2, city, state, postal, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                        $orderId,
+                        'shipping',
+                        trim($first . ' ' . $last),
+                        $email,
+                        $phone,
+                        $line1,
+                        ($line2 !== '' ? $line2 : null),
+                        $cityPost,
+                        ($statePost !== '' ? $statePost : null),
+                        $postalPost,
+                        substr($countryPost, 0, 2)
+                  ]);
+
+                  // Order items from cart
+                  foreach ($items as $it) {
+                        db_exec('INSERT INTO order_items (order_id, variant_id, qty, unit_price, discount_amount, tax_amount) VALUES (?, ?, ?, ?, ?, ?)', [
+                              $orderId,
+                              (int)$it['variant_id'],
+                              (int)$it['qty'],
+                              (float)$it['unit_price'],
+                              0.0,
+                              0.0
+                        ]);
+                  }
+
+                  // Payment placeholder
+                  $provider = ($paymentMethod === 'paypal' ? 'paypal' : ($paymentMethod === 'apple_pay' ? 'apple_pay' : 'card'));
+                  db_exec('INSERT INTO payments (order_id, provider, provider_txn_id, amount, status, captured_at) VALUES (?, ?, ?, ?, ?, ?)', [
+                        $orderId,
+                        $provider,
+                        null,
+                        $grand,
+                        'pending',
+                        null
+                  ]);
+
+                  // Clear cart
+                  db_exec('DELETE FROM cart_items WHERE cart_id=?', [$cartId]);
+
+                  $pdo->commit();
+
+                  header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=checkout&placed=1&order=' . urlencode($orderNumber)));
+                  exit;
+            } catch (Throwable $e) {
+                  if ($pdo->inTransaction()) {
+                        $pdo->rollBack();
+                  }
+                  header('Location: ' . (($__CONFIG['site']['base_url'] ?? '/') . '?p=checkout&error=failed'));
+                  exit;
+            }
       }
 }
 // Shipping: pick the cheapest active method by sort_order/base_cost and apply free threshold
@@ -209,6 +455,7 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
 
                               <div class="checkout-forms" data-aos="fade-up" data-aos-delay="150">
                                     <form method="post" id="checkout-form">
+                                          <input type="hidden" name="form" value="place_order">
                                           <div class="checkout-form active" data-form="1">
                                                 <div class="form-header">
                                                       <h3>Customer Information</h3>
@@ -252,7 +499,7 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
                                                       <h3>Shipping Address</h3>
                                                       <p>Where should we deliver your order?</p>
                                                 </div>
-                                                <form class="checkout-form-element">
+                                                <div class="checkout-form-element">
                                                       <div class="form-group">
                                                             <label for="address">Street Address</label>
                                                             <input type="text" class="form-control" name="address"
@@ -309,7 +556,7 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
                                                             <button type="button" class="btn btn-primary next-step"
                                                                   data-next="3">Continue to Payment</button>
                                                       </div>
-                                                </form>
+                                                </div>
                                           </div>
 
                                           <div class="checkout-form" data-form="3">
@@ -317,14 +564,14 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
                                                       <h3>Payment Method</h3>
                                                       <p>Choose how you'd like to pay</p>
                                                 </div>
-                                                <form class="checkout-form-element">
+                                                <div class="checkout-form-element">
                                                       <div class="payment-methods">
                                                             <div class="payment-method active">
                                                                   <div class="payment-method-header">
                                                                         <div class="form-check">
                                                                               <input class="form-check-input"
                                                                                     type="radio" name="payment-method"
-                                                                                    id="credit-card" checked="">
+                                                                                    id="credit-card" value="card" checked="">
                                                                               <label class="form-check-label"
                                                                                     for="credit-card">
                                                                                     Credit / Debit Card
@@ -383,7 +630,7 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
                                                                         <div class="form-check">
                                                                               <input class="form-check-input"
                                                                                     type="radio" name="payment-method"
-                                                                                    id="paypal">
+                                                                                    id="paypal" value="paypal">
                                                                               <label class="form-check-label"
                                                                                     for="paypal">
                                                                                     PayPal
@@ -404,7 +651,7 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
                                                                         <div class="form-check">
                                                                               <input class="form-check-input"
                                                                                     type="radio" name="payment-method"
-                                                                                    id="apple-pay">
+                                                                                    id="apple-pay" value="apple_pay">
                                                                               <label class="form-check-label"
                                                                                     for="apple-pay">
                                                                                     Apple Pay
@@ -427,7 +674,7 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
                                                             <button type="button" class="btn btn-primary next-step"
                                                                   data-next="4">Review Order</button>
                                                       </div>
-                                                </form>
+                                                </div>
                                           </div>
 
                                           <div class="checkout-form" data-form="4">
@@ -435,7 +682,7 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
                                                       <h3>Review Your Order</h3>
                                                       <p>Please review your information before placing your order</p>
                                                 </div>
-                                                <form class="checkout-form-element">
+                                                <div class="checkout-form-element">
                                                       <div class="review-sections">
                                                             <div class="review-section">
                                                                   <div class="review-section-header">
@@ -502,7 +749,7 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
                                                                   class="btn btn-success place-order-btn">Place
                                                                   Order</button>
                                                       </div>
-                                                </form>
+                                                </div>
                                           </div>
                                     </form>
                               </div>
@@ -513,6 +760,15 @@ $orderTotal = max(0, $checkoutSubtotal - $discountAmount) + $shippingAmount + $t
                               <div class="order-summary" data-aos="fade-left" data-aos-delay="200">
                                     <div class="order-summary-header">
                                           <h3>Order Summary</h3>
+                                          <?php if (!empty($_GET['placed']) && !empty($_GET['order'])) { ?>
+                                                <div class="alert alert-success mt-2" role="alert">
+                                                      Order placed successfully. Your order number is <strong><?php echo htmlspecialchars((string)$_GET['order'], ENT_QUOTES); ?></strong>.
+                                                </div>
+                                          <?php } elseif (!empty($_GET['error'])) { ?>
+                                                <div class="alert alert-danger mt-2" role="alert">
+                                                      Unable to place order. Please try again.
+                                                </div>
+                                          <?php } ?>
                                           <button type="button" class="btn-toggle-summary d-lg-none">
                                                 <i class="bi bi-chevron-down"></i>
                                           </button>
