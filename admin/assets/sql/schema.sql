@@ -491,3 +491,34 @@ CREATE TABLE social_links (
   UNIQUE KEY uniq_platform_label (platform, label),
   INDEX idx_social_active_position (is_active, position)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Finance: Income & Expenses
+CREATE TABLE finance_categories (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  type ENUM('income','expense') NOT NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_finance_categories (name, type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE finance_entries (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  entry_date DATE NOT NULL,
+  type ENUM('income','expense') NOT NULL,
+  category_id BIGINT UNSIGNED NULL,
+  amount DECIMAL(12,2) NOT NULL,
+  currency CHAR(3) NOT NULL DEFAULT 'USD',
+  description VARCHAR(500) NULL,
+  reference_type ENUM('order','payment','return','shipment','other') NULL,
+  reference_id BIGINT UNSIGNED NULL,
+  created_by BIGINT UNSIGNED NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_finance_entries_category FOREIGN KEY (category_id) REFERENCES finance_categories(id) ON DELETE SET NULL,
+  CONSTRAINT fk_finance_entries_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_finance_entries_date (entry_date),
+  INDEX idx_finance_entries_type (type),
+  INDEX idx_finance_entries_category (category_id),
+  INDEX idx_finance_entries_ref (reference_type, reference_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

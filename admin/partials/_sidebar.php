@@ -13,6 +13,23 @@
         <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
       </a>
     </li>
+    <li class="nav-item <?php echo $__ROUTE === 'finance_entries' || $__ROUTE === 'finance_categories' ? 'active' : ''; ?>">
+      <a class="nav-link" data-bs-toggle="collapse" href="#ui-finance" aria-expanded="false" aria-controls="ui-finance">
+        <span class="menu-title">Finance</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-cash-multiple menu-icon"></i>
+      </a>
+      <div class="collapse" id="ui-finance">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item <?php echo $__ROUTE === 'finance_entries' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=finance_entries">Income & Expenses</a>
+          </li>
+          <li class="nav-item <?php echo $__ROUTE === 'finance_categories' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=finance_categories">Finance Categories</a>
+          </li>
+        </ul>
+      </div>
+    </li>
     <li class="nav-item <?php echo $__ROUTE === 'dashboard' ? 'active' : ''; ?>">
       <a class="nav-link" href="/admin/?p=dashboard">
         <span class="menu-title">Dashboard</span>

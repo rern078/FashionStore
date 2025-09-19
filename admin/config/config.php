@@ -42,5 +42,7 @@ return [
             'social_links' => 'pages/social_links.php',
             'shipping_methods' => 'pages/shipping_methods.php',
             'tax_rates' => 'pages/tax_rates.php',
+            'finance_entries' => 'pages/finance_entries.php',
+            'finance_categories' => 'pages/finance_categories.php',
       ],
 ];

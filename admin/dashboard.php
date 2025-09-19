@@ -1,9 +1,77 @@
-<?php
+<?php require_once __DIR__ . '/config/function.php';
+$currencyCode = strtoupper((string)($_SESSION['currency'] ?? 'USD'));
+$monthStart = date('Y-m-01');
+$totalsMonth = null;
+try {
+      $totalsMonth = db_one(
+            "SELECT 
+                  SUM(CASE WHEN type='income' THEN amount ELSE 0 END) AS income_total,
+                  SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) AS expense_total
+             FROM finance_entries
+             WHERE currency = ? AND entry_date >= ?",
+            [$currencyCode, $monthStart]
+      );
+} catch (Throwable $e) {
+      $totalsMonth = ['income_total' => 0, 'expense_total' => 0];
+}
+$monthIncome = (float)($totalsMonth['income_total'] ?? 0);
+$monthExpense = (float)($totalsMonth['expense_total'] ?? 0);
+$monthNet = $monthIncome - $monthExpense;
 
-/** @var array $__CONFIG */
-/** @var string $__ROUTE */
+// Weekly metrics
+$sevenDaysAgo = date('Y-m-d H:i:s', time() - 7 * 24 * 60 * 60);
+$weeklySales = 0.0;
+$weeklyOrders = 0;
+$visitorsOnline = 0;
+try {
+      $row = db_one(
+            "SELECT SUM(p.amount) AS total
+             FROM payments p
+             JOIN orders o ON o.id = p.order_id
+             WHERE p.status = 'captured' AND p.captured_at IS NOT NULL AND p.captured_at >= ? AND o.currency = ?",
+            [$sevenDaysAgo, $currencyCode]
+      );
+      $weeklySales = (float)($row['total'] ?? 0);
+} catch (Throwable $e) {
+      $weeklySales = 0.0;
+}
+try {
+      $row = db_one(
+            "SELECT COUNT(*) AS c FROM orders WHERE placed_at IS NOT NULL AND placed_at >= ? AND status <> 'cancelled'",
+            [$sevenDaysAgo]
+      );
+      $weeklyOrders = (int)($row['c'] ?? 0);
+} catch (Throwable $e) {
+      $weeklyOrders = 0;
+}
+try {
+      $onlineSince = date('Y-m-d H:i:s', time() - 5 * 60);
+      $row = db_one(
+            "SELECT COUNT(DISTINCT session_id) AS c FROM carts WHERE updated_at >= ?",
+            [$onlineSince]
+      );
+      $visitorsOnline = (int)($row['c'] ?? 0);
+} catch (Throwable $e) {
+      $visitorsOnline = 0;
+}
+
+// Today sales (captured payments today in current currency)
+$todaySales = 0.0;
+try {
+      $todayStart = date('Y-m-d 00:00:00');
+      $tomorrowStart = date('Y-m-d 00:00:00', time() + 24 * 60 * 60);
+      $row = db_one(
+            "SELECT SUM(p.amount) AS total
+             FROM payments p
+             JOIN orders o ON o.id = p.order_id
+             WHERE p.status = 'captured' AND p.captured_at >= ? AND p.captured_at < ? AND o.currency = ?",
+            [$todayStart, $tomorrowStart, $currencyCode]
+      );
+      $todaySales = (float)($row['total'] ?? 0);
+} catch (Throwable $e) {
+      $todaySales = 0.0;
+}
 ?>
-
 <div class="page-header">
       <h3 class="page-title">
             <span class="page-title-icon bg-gradient-primary text-white me-2">
@@ -18,6 +86,47 @@
             </ul>
       </nav>
 </div>
+</div>
+<div class="row">
+      <div class="col-md-4 stretch-card grid-margin">
+            <div class="card bg-gradient-success card-img-holder text-white">
+                  <div class="card-body">
+                        <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
+                        <h4 class="font-weight-normal mb-3">This Month Income <i class="mdi mdi-cash mdi-24px float-end"></i></h4>
+                        <h2 class="mb-0">$ <?php echo number_format($monthIncome, 2); ?> <?php echo htmlspecialchars($currencyCode, ENT_QUOTES); ?></h2>
+                  </div>
+            </div>
+      </div>
+      <div class="col-md-4 stretch-card grid-margin">
+            <div class="card bg-gradient-danger card-img-holder text-white">
+                  <div class="card-body">
+                        <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
+                        <h4 class="font-weight-normal mb-3">This Month Expenses <i class="mdi mdi-cash-remove mdi-24px float-end"></i></h4>
+                        <h2 class="mb-0">$ <?php echo number_format($monthExpense, 2); ?> <?php echo htmlspecialchars($currencyCode, ENT_QUOTES); ?></h2>
+                  </div>
+            </div>
+      </div>
+      <div class="col-md-4 stretch-card grid-margin">
+            <div class="card bg-gradient-info card-img-holder text-white">
+                  <div class="card-body">
+                        <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
+                        <h4 class="font-weight-normal mb-3">This Month Net <i class="mdi mdi-scale-balance mdi-24px float-end"></i></h4>
+                        <h2 class="mb-0">$ <?php echo number_format($monthNet, 2); ?> <?php echo htmlspecialchars($currencyCode, ENT_QUOTES); ?></h2>
+                  </div>
+            </div>
+      </div>
+</div>
+<div class="row">
+      <div class="col-md-4 stretch-card grid-margin">
+            <div class="card bg-gradient-primary card-img-holder text-white">
+                  <div class="card-body">
+                        <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
+                        <h4 class="font-weight-normal mb-3">Today's Sales <i class="mdi mdi-cash-multiple mdi-24px float-end"></i></h4>
+                        <h2 class="mb-0">$ <?php echo number_format($todaySales, 2); ?> <?php echo htmlspecialchars($currencyCode, ENT_QUOTES); ?></h2>
+                  </div>
+            </div>
+      </div>
+</div>
 <div class="row">
       <div class="col-md-4 stretch-card grid-margin">
             <div class="card bg-gradient-danger card-img-holder text-white">
@@ -25,8 +134,8 @@
                         <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
                         <h4 class="font-weight-normal mb-3">Weekly Sales <i class="mdi mdi-chart-line mdi-24px float-end"></i>
                         </h4>
-                        <h2 class="mb-5">$ 15,0000</h2>
-                        <h6 class="card-text">Increased by 60%</h6>
+                        <h2 class="mb-0">$ <?php echo number_format($weeklySales, 2); ?> <?php echo htmlspecialchars($currencyCode, ENT_QUOTES); ?></h2>
+                        <h6 class="card-text">Last 7 days</h6>
                   </div>
             </div>
       </div>
@@ -36,8 +145,8 @@
                         <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
                         <h4 class="font-weight-normal mb-3">Weekly Orders <i class="mdi mdi-bookmark-outline mdi-24px float-end"></i>
                         </h4>
-                        <h2 class="mb-5">45,6334</h2>
-                        <h6 class="card-text">Decreased by 10%</h6>
+                        <h2 class="mb-0"><?php echo (int)$weeklyOrders; ?></h2>
+                        <h6 class="card-text">Placed last 7 days</h6>
                   </div>
             </div>
       </div>
@@ -47,8 +156,8 @@
                         <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
                         <h4 class="font-weight-normal mb-3">Visitors Online <i class="mdi mdi-diamond mdi-24px float-end"></i>
                         </h4>
-                        <h2 class="mb-5">95,5741</h2>
-                        <h6 class="card-text">Increased by 5%</h6>
+                        <h2 class="mb-0"><?php echo (int)$visitorsOnline; ?></h2>
+                        <h6 class="card-text">Active past 5 minutes</h6>
                   </div>
             </div>
       </div>

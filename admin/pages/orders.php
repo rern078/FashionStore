@@ -108,7 +108,16 @@ $totalRow = db_one('SELECT COUNT(*) AS c FROM orders');
 $total = (int)($totalRow['c'] ?? 0);
 $totalPages = max(1, (int)ceil($total / $perPage));
 
-$rows = db_all('SELECT o.id, o.order_number, o.status, o.subtotal, o.discount_total, o.shipping_total, o.tax_total, o.grand_total, o.currency, o.placed_at, o.payment_status, u.name, u.email, u.id AS user_id FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.id DESC LIMIT ? OFFSET ?', [$perPage, $offset]);
+$rows = db_all(
+      'SELECT 
+            o.id, o.order_number, o.status, o.subtotal, o.discount_total, o.shipping_total, o.tax_total, o.grand_total, o.currency, o.placed_at, o.payment_status,
+            u.name, u.email, u.id AS user_id,
+            (SELECT SUM(p.amount) FROM payments p WHERE p.order_id = o.id AND p.status = "captured") AS captured_total
+       FROM orders o 
+       JOIN users u ON u.id=o.user_id 
+       ORDER BY o.id DESC LIMIT ? OFFSET ?',
+      [$perPage, $offset]
+);
 ?>
 
 <div class="page-header">
@@ -151,6 +160,8 @@ $rows = db_all('SELECT o.id, o.order_number, o.status, o.subtotal, o.discount_to
                                                 <th>User</th>
                                                 <th>Status</th>
                                                 <th>Total</th>
+                                                <th>Captured</th>
+                                                <th>Balance</th>
                                                 <th>Currency</th>
                                                 <th>Placed</th>
                                                 <th>Payment</th>
@@ -166,6 +177,9 @@ $rows = db_all('SELECT o.id, o.order_number, o.status, o.subtotal, o.discount_to
                                                       <td><?php echo htmlspecialchars(($r['name'] ?? '') . ' (' . ($r['email'] ?? '') . ')', ENT_QUOTES); ?></td>
                                                       <td><label class="badge badge-<?php echo $r['status'] === 'paid' || $r['status'] === 'fulfilled' ? 'success' : ($r['status'] === 'cancelled' ? 'danger' : 'warning'); ?>"><?php echo htmlspecialchars($r['status'], ENT_QUOTES); ?></label></td>
                                                       <td><?php echo number_format((float)($r['grand_total'] ?? 0), 2); ?></td>
+                                                      <td><?php echo number_format((float)($r['captured_total'] ?? 0), 2); ?></td>
+                                                      <td><?php $bal = (float)($r['grand_total'] ?? 0) - (float)($r['captured_total'] ?? 0);
+                                                            echo number_format($bal, 2); ?></td>
                                                       <td><?php echo htmlspecialchars($r['currency'] ?? '', ENT_QUOTES); ?></td>
                                                       <td><?php echo htmlspecialchars($r['placed_at'] ?? '', ENT_QUOTES); ?></td>
                                                       <td><?php echo htmlspecialchars($r['payment_status'] ?? '', ENT_QUOTES); ?></td>

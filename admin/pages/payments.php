@@ -53,6 +53,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
 // List
 if ($orderId > 0) {
       $rows = db_all('SELECT id, order_id, provider, provider_txn_id, amount, status, captured_at FROM payments WHERE order_id=? ORDER BY id DESC', [$orderId]);
+      $orderSummary = db_one('SELECT grand_total, currency FROM orders WHERE id = ?', [$orderId]);
+      $capturedSumRow = db_one('SELECT SUM(amount) AS total FROM payments WHERE order_id=? AND status = "captured"', [$orderId]);
+      $capturedSum = (float)($capturedSumRow['total'] ?? 0);
+      $grandTotal = (float)($orderSummary['grand_total'] ?? 0);
+      $orderCurrency = (string)($orderSummary['currency'] ?? '');
+      $balance = $grandTotal - $capturedSum;
 } else {
       $rows = db_all('SELECT id, order_id, provider, provider_txn_id, amount, status, captured_at FROM payments ORDER BY id DESC');
 }
@@ -68,6 +74,31 @@ if ($orderId > 0) {
             </ol>
       </nav>
 </div>
+
+<?php if ($orderId > 0): ?>
+      <div class="row mb-3">
+            <div class="col-lg-12">
+                  <div class="card">
+                        <div class="card-body d-flex flex-wrap gap-3 align-items-center">
+                              <h4 class="card-title mb-0">Order #<?php echo (int)$orderId; ?> Summary</h4>
+                              <div class="ms-auto"></div>
+                              <div>
+                                    <span class="text-muted me-2">Total:</span>
+                                    <strong><?php echo number_format($grandTotal, 2) . ' ' . htmlspecialchars($orderCurrency, ENT_QUOTES); ?></strong>
+                              </div>
+                              <div>
+                                    <span class="text-muted me-2">Captured:</span>
+                                    <strong class="text-success"><?php echo number_format($capturedSum, 2) . ' ' . htmlspecialchars($orderCurrency, ENT_QUOTES); ?></strong>
+                              </div>
+                              <div>
+                                    <span class="text-muted me-2">Balance:</span>
+                                    <strong class="text-<?php echo $balance <= 0 ? 'success' : 'warning'; ?>"><?php echo number_format($balance, 2) . ' ' . htmlspecialchars($orderCurrency, ENT_QUOTES); ?></strong>
+                              </div>
+                        </div>
+                  </div>
+            </div>
+      </div>
+<?php endif; ?>
 
 <?php if (!empty($_GET['added'])): ?><div class="alert alert-success" role="alert">Payment added.</div><?php endif; ?>
 <?php if (!empty($_GET['updated'])): ?><div class="alert alert-success" role="alert">Payment updated.</div><?php endif; ?>
