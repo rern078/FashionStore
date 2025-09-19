@@ -33,6 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                               $adminBase = (string)$adminConf['site']['base_url'];
                         }
                   }
+                  // Support redirect back after login
+                  $next = isset($_GET['next']) ? (string)$_GET['next'] : '';
+                  if ($next !== '' && strpos($next, '://') === false) {
+                        header('Location: ' . $next);
+                        exit;
+                  }
                   if (isset($user['role']) && (string)$user['role'] === 'admin') {
                         header('Location: ' . $adminBase);
                   } else {
@@ -103,7 +109,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                           <div class="signup-link text-center">
                                                 <span>Don't have an account?</span>
-                                                <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=register">Sign up for free</a>
+                                                <?php $nextParam = isset($_GET['next']) ? '&next=' . rawurlencode((string)$_GET['next']) : ''; ?>
+                                                <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=register<?php echo $nextParam; ?>">Sign up for free</a>
                                           </div>
                                     </form>
                               </div>

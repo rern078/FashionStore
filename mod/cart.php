@@ -7,6 +7,25 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['form'] ?? '') === 
       $qty = max(1, (int)($_POST['qty'] ?? 1));
       $isAjax = isset($_POST['ajax']) && (string)$_POST['ajax'] === '1';
 
+      // Require login before allowing add to cart
+      $sidCheck = session_id();
+      if ($sidCheck === '') {
+            session_start();
+      }
+      $userId = (int)($_SESSION['user']['id'] ?? 0);
+      if ($userId <= 0) {
+            $baseUrlX = isset($__CONFIG['site']['base_url']) ? (string)$__CONFIG['site']['base_url'] : '/';
+            $currentUrl = isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER'] !== '' ? (string)$_SERVER['HTTP_REFERER'] : ($baseUrlX . '?p=products');
+            $loginUrl = $baseUrlX . '?p=login&next=' . rawurlencode($currentUrl);
+            if ($isAjax) {
+                  header('Content-Type: application/json');
+                  echo json_encode(['ok' => false, 'require_login' => true, 'login_url' => $loginUrl]);
+                  exit;
+            }
+            header('Location: ' . $loginUrl);
+            exit;
+      }
+
       if ($productId > 0 && $qty > 0) {
             // Ensure session cart exists
             $sid = session_id();

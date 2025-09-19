@@ -288,7 +288,7 @@ $variantSizes = getVariantSizes((int)$product['id']);
                                                       <i class="bi bi-plus"></i>
                                                 </button>
                                           </div>
-                                          <button class="btn btn-primary add-to-cart-btn" <?php echo $inStock ? '' : ' disabled'; ?>>
+                                          <button class="btn btn-primary add-to-cart-btn" data-product-id="<?php echo (int)($product['id'] ?? 0); ?>" <?php echo $inStock ? '' : ' disabled'; ?>>
                                                 <i class="bi bi-cart-plus"></i> Add to Cart
                                           </button>
                                     </div>

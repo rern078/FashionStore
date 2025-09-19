@@ -241,7 +241,12 @@ $baseUrl = (string)($__CONFIG['site']['base_url'] ?? '/');
                                                       <img src="admin/<?php echo htmlspecialchars($image, ENT_QUOTES); ?>" alt="<?php echo htmlspecialchars($name, ENT_QUOTES); ?> Hover"
                                                             class="img-fluid hover-img">
                                                       <div class="product-overlay">
-                                                            <a href="#" class="btn-cart"><i class="bi bi-cart-plus"></i> Add to Cart</a>
+                                                            <form method="post" action="<?php echo htmlspecialchars(($__CONFIG['site']['base_url'] ?? '/') . '?p=cart', ENT_QUOTES); ?>" style="display:inline;">
+                                                                  <input type="hidden" name="form" value="add_to_cart">
+                                                                  <input type="hidden" name="product_id" value="<?php echo (int)$id; ?>">
+                                                                  <input type="hidden" name="qty" value="1">
+                                                                  <button type="button" class="btn-cart add-to-cart-btn" data-product-id="<?php echo (int)$id; ?>"><i class="bi bi-cart-plus"></i> Add to Cart</button>
+                                                            </form>
                                                             <div class="product-actions">
                                                                   <a href="#" class="action-btn"><i class="bi bi-heart"></i></a>
                                                                   <a href="<?php echo htmlspecialchars($href, ENT_QUOTES); ?>" class="action-btn"><i class="bi bi-eye"></i></a>

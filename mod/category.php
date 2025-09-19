@@ -397,7 +397,7 @@ $baseUrl = (string)($__CONFIG['site']['base_url'] ?? '/');
                                                                                           <input type="hidden" name="form" value="add_to_cart">
                                                                                           <input type="hidden" name="product_id" value="<?php echo (int)$id; ?>">
                                                                                           <input type="hidden" name="qty" value="1">
-                                                                                          <button type="submit" class="add-to-cart-btn" data-product-id="<?php echo (int)$id; ?>">Add to Cart</button>
+                                                                                          <button type="button" class="add-to-cart-btn" data-product-id="<?php echo (int)$id; ?>">Add to Cart</button>
                                                                                     </form>
                                                                               </div>
                                                                         </div>

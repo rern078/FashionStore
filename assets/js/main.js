@@ -263,12 +263,16 @@
         fd.append('product_id', String(productId));
         fd.append('qty', '1');
         fd.append('ajax', '1');
-        const resp = await fetch(form.action || (window.location.origin + '/?p=cart'), {
+        const resp = await fetch(form.action || ('?p=cart'), {
           method: 'POST',
           body: fd,
           credentials: 'same-origin'
         });
         const data = await resp.json();
+        if (data && data.require_login && data.login_url) {
+          window.location.href = data.login_url;
+          return;
+        }
         if (data && data.ok) {
           // Update header mini-cart badge if present
           const badge = document.querySelector('.cart-dropdown .badge');
@@ -276,6 +280,55 @@
             badge.textContent = String(data.cart_item_count);
           }
           // Provide quick feedback (optional toast replacement)
+          btn.classList.add('added');
+          const originalText = btn.textContent;
+          btn.textContent = 'Added';
+          setTimeout(() => {
+            btn.textContent = originalText || 'Add to Cart';
+            btn.classList.remove('added');
+          }, 1200);
+        }
+      } catch (_) {
+        // ignore
+      }
+      return;
+    }
+
+    // Handle product detail (no form): collect color, size, qty
+    if (productId && !isNaN(productId)) {
+      e.preventDefault();
+      try {
+        const root = btn.closest('.product-info-wrapper') || document;
+        const colorActive = root.querySelector('.color-option.active');
+        const sizeActive = root.querySelector('.size-option.active');
+        const qtyInput = root.querySelector('.quantity-input');
+        const color = colorActive ? (colorActive.getAttribute('data-color') || '') : '';
+        const size = sizeActive ? (sizeActive.getAttribute('data-size') || '') : '';
+        let qty = qtyInput ? parseInt(qtyInput.value || '1', 10) : 1;
+        qty = isNaN(qty) || qty < 1 ? 1 : qty;
+
+        const fd = new FormData();
+        fd.append('form', 'add_to_cart');
+        fd.append('product_id', String(productId));
+        fd.append('color', color);
+        fd.append('size', size);
+        fd.append('qty', String(qty));
+        fd.append('ajax', '1');
+        const resp = await fetch(('?p=cart'), {
+          method: 'POST',
+          body: fd,
+          credentials: 'same-origin'
+        });
+        const data = await resp.json();
+        if (data && data.require_login && data.login_url) {
+          window.location.href = data.login_url;
+          return;
+        }
+        if (data && data.ok) {
+          const badge = document.querySelector('.cart-dropdown .badge');
+          if (badge && typeof data.cart_item_count === 'number') {
+            badge.textContent = String(data.cart_item_count);
+          }
           btn.classList.add('added');
           const originalText = btn.textContent;
           btn.textContent = 'Added';

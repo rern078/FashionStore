@@ -35,6 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'role' => 'customer',
                   ];
                   $frontendBase = isset($__CONFIG['site']['base_url']) ? (string)$__CONFIG['site']['base_url'] : '/';
+                  // Support redirect back after registration
+                  $next = isset($_GET['next']) ? (string)$_GET['next'] : '';
+                  if ($next !== '' && strpos($next, '://') === false) {
+                        header('Location: ' . $next);
+                        exit;
+                  }
                   // New customers go to frontend home
                   header('Location: ' . $frontendBase);
                   exit;
@@ -163,7 +169,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                           </div>
 
                                           <div class="text-center">
-                                                <p class="mb-0">Already have an account? <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=login">Sign in</a>
+                                                <?php $nextParam = isset($_GET['next']) ? '&next=' . rawurlencode((string)$_GET['next']) : ''; ?>
+                                                <p class="mb-0">Already have an account? <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=login<?php echo $nextParam; ?>">Sign in</a>
                                                 </p>
                                           </div>
 
