@@ -71,6 +71,32 @@ try {
 } catch (Throwable $e) {
       $todaySales = 0.0;
 }
+
+// This month sales (captured payments this month in current currency)
+$monthSales = 0.0;
+try {
+      $monthStartDt = date('Y-m-01 00:00:00');
+      $nextMonthStartDt = date('Y-m-01 00:00:00', strtotime('+1 month'));
+      $row = db_one(
+            "SELECT SUM(p.amount) AS total\n             FROM payments p\n             JOIN orders o ON o.id = p.order_id\n             WHERE p.status = 'captured' AND p.captured_at >= ? AND p.captured_at < ? AND o.currency = ?",
+            [$monthStartDt, $nextMonthStartDt, $currencyCode]
+      );
+      $monthSales = (float)($row['total'] ?? 0);
+} catch (Throwable $e) {
+      $monthSales = 0.0;
+}
+
+// All-time total sales (captured payments in current currency)
+$totalSales = 0.0;
+try {
+      $row = db_one(
+            "SELECT SUM(p.amount) AS total\n             FROM payments p\n             JOIN orders o ON o.id = p.order_id\n             WHERE p.status = 'captured' AND o.currency = ?",
+            [$currencyCode]
+      );
+      $totalSales = (float)($row['total'] ?? 0);
+} catch (Throwable $e) {
+      $totalSales = 0.0;
+}
 ?>
 <div class="page-header">
       <h3 class="page-title">
@@ -123,6 +149,24 @@ try {
                         <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
                         <h4 class="font-weight-normal mb-3">Today's Sales <i class="mdi mdi-cash-multiple mdi-24px float-end"></i></h4>
                         <h2 class="mb-0">$ <?php echo number_format($todaySales, 2); ?> <?php echo htmlspecialchars($currencyCode, ENT_QUOTES); ?></h2>
+                  </div>
+            </div>
+      </div>
+      <div class="col-md-4 stretch-card grid-margin">
+            <div class="card bg-gradient-warning card-img-holder text-white">
+                  <div class="card-body">
+                        <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
+                        <h4 class="font-weight-normal mb-3">This Month Total <i class="mdi mdi-cash-multiple mdi-24px float-end"></i></h4>
+                        <h2 class="mb-0">$ <?php echo number_format($monthSales, 2); ?> <?php echo htmlspecialchars($currencyCode, ENT_QUOTES); ?></h2>
+                  </div>
+            </div>
+      </div>
+      <div class="col-md-4 stretch-card grid-margin">
+            <div class="card bg-gradient-success card-img-holder text-white">
+                  <div class="card-body">
+                        <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
+                        <h4 class="font-weight-normal mb-3">Total Sales <i class="mdi mdi-cash-multiple mdi-24px float-end"></i></h4>
+                        <h2 class="mb-0">$ <?php echo number_format($totalSales, 2); ?> <?php echo htmlspecialchars($currencyCode, ENT_QUOTES); ?></h2>
                   </div>
             </div>
       </div>

@@ -96,6 +96,16 @@ function fs_admin_brands_images_dir(): string
 }
 
 /**
+ * Get filesystem directory for admin banner images.
+ */
+function fs_admin_banners_images_dir(): string
+{
+      $adminRoot = dirname(__DIR__);
+      $dir = $adminRoot . '/assets/images/banners';
+      return $dir;
+}
+
+/**
  * Get URL prefix for admin assets.
  */
 function fs_admin_base_url_prefix(): string
@@ -185,6 +195,63 @@ function fs_save_uploaded_logo(string $fieldName = 'logo_file'): ?string
 
       // Build public URL
       $url = fs_admin_base_url_prefix() . '/assets/images/brands/' . $filename;
+      return $url;
+}
+
+/**
+ * Save uploaded banner image and return its public URL, or null if none uploaded.
+ */
+function fs_save_uploaded_banner(string $fieldName = 'image_file'): ?string
+{
+      if (!isset($_FILES[$fieldName]) || !is_array($_FILES[$fieldName])) {
+            return null;
+      }
+
+      $file = $_FILES[$fieldName];
+      if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            return null;
+      }
+
+      $maxBytes = 5 * 1024 * 1024; // 5 MB
+      if (($file['size'] ?? 0) <= 0 || $file['size'] > $maxBytes) {
+            return null;
+      }
+
+      $tmpPath = $file['tmp_name'] ?? '';
+      if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
+            return null;
+      }
+
+      $finfo = new finfo(FILEINFO_MIME_TYPE);
+      $mime = $finfo->file($tmpPath) ?: '';
+      $allowed = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            'image/svg+xml' => 'svg',
+      ];
+      if (!isset($allowed[$mime])) {
+            return null;
+      }
+
+      $ext = $allowed[$mime];
+      $origName = (string)($file['name'] ?? 'banner');
+      $base = pathinfo($origName, PATHINFO_FILENAME);
+      $base = strtolower(make_slug($base !== '' ? $base : 'banner'));
+      $base = $base !== '' ? $base : 'banner';
+
+      $filename = fs_sanitize_filename($base . '-' . time() . '-' . bin2hex(random_bytes(4)) . '.' . $ext);
+
+      $targetDir = fs_admin_banners_images_dir();
+      fs_ensure_directory($targetDir);
+      $targetPath = rtrim($targetDir, '/\\') . DIRECTORY_SEPARATOR . $filename;
+
+      if (!@move_uploaded_file($tmpPath, $targetPath)) {
+            return null;
+      }
+
+      $url = fs_admin_base_url_prefix() . '/assets/images/banners/' . $filename;
       return $url;
 }
 

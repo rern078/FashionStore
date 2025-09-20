@@ -13,8 +13,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
       $startsAt = trim($_POST['starts_at'] ?? '');
       $endsAt = trim($_POST['ends_at'] ?? '');
 
+      // Try to save uploaded file if provided
+      $uploadedUrl = fs_save_uploaded_banner('image_file');
+      if ($uploadedUrl) {
+            $imageUrl = $uploadedUrl;
+      }
+
       if ($imageUrl === '') {
-            header('Location: /admin/?p=banners&error=Image%20URL%20is%20required');
+            header('Location: /admin/?p=banners&error=Image%20is%20required');
             exit;
       }
       db_exec('INSERT INTO banners (title, subtitle, image_url, link_url, alt_text, position, is_active, starts_at, ends_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
@@ -36,6 +42,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_POST['form'] === 'delete_banner') {
       $id = (int)($_POST['id'] ?? 0);
       if ($id > 0) {
+            $cur = db_one('SELECT image_url FROM banners WHERE id = ?', [$id]);
+            if ($cur && !empty($cur['image_url'])) {
+                  fs_delete_admin_file_by_url($cur['image_url']);
+            }
             db_exec('DELETE FROM banners WHERE id = ?', [$id]);
       }
       header('Location: /admin/?p=banners&deleted=1');
@@ -54,11 +64,28 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['form']) && $_
       $isActive = isset($_POST['is_active']) ? 1 : 0;
       $startsAt = trim($_POST['starts_at'] ?? '');
       $endsAt = trim($_POST['ends_at'] ?? '');
-      if ($id > 0 && $imageUrl !== '') {
+
+      // If a new file was uploaded, prefer it and delete the old one
+      $newUploadUrl = fs_save_uploaded_banner('image_file');
+
+      if ($id > 0) {
+            $current = db_one('SELECT image_url FROM banners WHERE id = ?', [$id]);
+            $currentUrl = $current['image_url'] ?? '';
+            $newImageUrl = $newUploadUrl ?: $imageUrl;
+
+            if ($newUploadUrl && $currentUrl && $currentUrl !== $newUploadUrl) {
+                  fs_delete_admin_file_by_url($currentUrl);
+            }
+
+            if ($newImageUrl === '') {
+                  header('Location: /admin/?p=banners&error=Image%20is%20required');
+                  exit;
+            }
+
             db_exec('UPDATE banners SET title = ?, subtitle = ?, image_url = ?, link_url = ?, alt_text = ?, position = ?, is_active = ?, starts_at = ?, ends_at = ? WHERE id = ?', [
                   $title !== '' ? $title : null,
                   $subtitle !== '' ? $subtitle : null,
-                  $imageUrl,
+                  $newImageUrl,
                   $linkUrl !== '' ? $linkUrl : null,
                   $altText !== '' ? $altText : null,
                   $position > 0 ? $position : 1,
@@ -171,7 +198,7 @@ $rows = db_all('SELECT id, title, subtitle, image_url, link_url, alt_text, posit
                                                                         <h5 class="modal-title" id="editBannerModalLabel-<?php echo (int)$r['id']; ?>">Edit Banner</h5>
                                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                   </div>
-                                                                  <form method="post">
+                                                                  <form method="post" enctype="multipart/form-data">
                                                                         <input type="hidden" name="form" value="update_banner">
                                                                         <input type="hidden" name="id" value="<?php echo (int)$r['id']; ?>">
                                                                         <div class="modal-body">
@@ -184,8 +211,13 @@ $rows = db_all('SELECT id, title, subtitle, image_url, link_url, alt_text, posit
                                                                                     <input type="text" class="form-control" name="subtitle" value="<?php echo htmlspecialchars((string)$r['subtitle'], ENT_QUOTES); ?>">
                                                                               </div>
                                                                               <div class="mb-3">
-                                                                                    <label class="form-label">Image URL *</label>
-                                                                                    <input type="text" class="form-control" name="image_url" required value="<?php echo htmlspecialchars($r['image_url'], ENT_QUOTES); ?>">
+                                                                                    <label class="form-label">Image URL</label>
+                                                                                    <input type="text" class="form-control" name="image_url" value="<?php echo htmlspecialchars($r['image_url'], ENT_QUOTES); ?>">
+                                                                              </div>
+                                                                              <div class="mb-3">
+                                                                                    <label class="form-label">Or Upload Image</label>
+                                                                                    <input type="file" class="form-control" name="image_file" accept="image/*">
+                                                                                    <div class="form-text">Uploading a new image will replace the current one.</div>
                                                                               </div>
                                                                               <div class="mb-3">
                                                                                     <label class="form-label">Link URL</label>
@@ -238,7 +270,7 @@ $rows = db_all('SELECT id, title, subtitle, image_url, link_url, alt_text, posit
                         <h5 class="modal-title" id="addBannerModalLabel">Add Banner</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
-                  <form method="post">
+                  <form method="post" enctype="multipart/form-data">
                         <input type="hidden" name="form" value="add_banner">
                         <div class="modal-body">
                               <div class="mb-3">
@@ -250,8 +282,12 @@ $rows = db_all('SELECT id, title, subtitle, image_url, link_url, alt_text, posit
                                     <input type="text" class="form-control" name="subtitle">
                               </div>
                               <div class="mb-3">
-                                    <label class="form-label">Image URL *</label>
-                                    <input type="text" class="form-control" name="image_url" required>
+                                    <label class="form-label">Image URL</label>
+                                    <input type="text" class="form-control" name="image_url">
+                              </div>
+                              <div class="mb-3">
+                                    <label class="form-label">Or Upload Image</label>
+                                    <input type="file" class="form-control" name="image_file" accept="image/*">
                               </div>
                               <div class="mb-3">
                                     <label class="form-label">Link URL</label>
