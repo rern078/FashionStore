@@ -9,6 +9,13 @@ $assetsUrl = $site['assets_url'] ?? '/assets';
 $siteName = $site['name'] ?? 'Site';
 $charset = $site['charset'] ?? 'UTF-8';
 
+// Base URL for current language
+$baseUrlPrefix = rtrim((string)($site['base_url'] ?? '/'), '/');
+if ($baseUrlPrefix === '') {
+      $baseUrlPrefix = '/';
+}
+$langBase = isset($__LANG_BASE) ? (string)$__LANG_BASE : (rtrim($baseUrlPrefix, '/') . '/' . (isset($__LANG_CODE) ? (string)$__LANG_CODE : 'en') . '/');
+
 // Load currencies from DB for header dropdown
 $currencyData = getCurrencies();
 $currencies = $currencyData['currencies'] ?? [];
@@ -19,7 +26,21 @@ $contact = getContact();
 $socialLinks = $contact['socialLinks'] ?? [];
 $adminEmail = $contact['adminEmail'] ?? '';
 $adminPhone = $contact['adminPhone'] ?? '';
-// end currencies logic
+// Language dropdown data
+$currentLangCode = isset($__LANG_CODE) ? (string)$__LANG_CODE : (isset($_SESSION['lang']) ? (string)$_SESSION['lang'] : 'en');
+$supportedLangs = [
+      'en' => 'English',
+      'cn' => 'Chinese',
+      'kh' => 'Khmer',
+      'vn' => 'Vietnamese',
+      'lo' => 'Lao',
+      'ma' => 'Malay',
+      'ph' => 'Filipino',
+      'sp' => 'Spanish',
+      'fr' => 'French',
+      'gm' => 'German',
+];
+$currentLangLabel = isset($supportedLangs[$currentLangCode]) ? $supportedLangs[$currentLangCode] : 'English';
 
 // Mini cart summary for header
 $miniCartItems = [];
@@ -51,7 +72,7 @@ if ($cartHeader) {
 
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo htmlspecialchars($currentLangCode, ENT_QUOTES); ?>">
 
 <head>
       <?php
@@ -72,7 +93,7 @@ if ($cartHeader) {
                                     <div class="d-flex align-items-center">
                                           <div class="top-bar-item me-4">
                                                 <i class="bi bi-telephone-fill me-2"></i>
-                                                <span>Customer Support: </span>
+                                                <span><?php echo translate('Customer Support'); ?>: </span>
                                                 <a href="<?php echo htmlspecialchars($adminPhone !== '' ? 'tel:' . $adminPhone : 'tel:+855967797762', ENT_QUOTES); ?>"><?php echo htmlspecialchars($adminPhone !== '' ? $adminPhone : '+855 967 797 762', ENT_QUOTES); ?></a>
                                           </div>
                                           <div class="top-bar-item">
@@ -87,21 +108,24 @@ if ($cartHeader) {
                               <div class="col-lg-6">
                                     <div class="d-flex justify-content-end">
                                           <div class="top-bar-item me-4">
-                                                <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=track-order">
-                                                      <i class="bi bi-truck me-2"></i>Track Order
+                                                <a href="<?php echo htmlspecialchars($langBase . 'track-order', ENT_QUOTES); ?>">
+                                                      <i class="bi bi-truck me-2"></i><?php echo translate('Track Order'); ?>
                                                 </a>
                                           </div>
                                           <div class="top-bar-item dropdown me-4">
                                                 <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
-                                                      <i class="bi bi-translate me-2"></i>English
+                                                      <i class="bi bi-translate me-2"></i><?php echo htmlspecialchars($currentLangLabel, ENT_QUOTES); ?>
                                                 </a>
                                                 <ul class="dropdown-menu">
-                                                      <li><a class="dropdown-item" href="#"><i
-                                                                        class="bi bi-check2 me-2 selected-icon"></i>English</a>
-                                                      </li>
-                                                      <li><a class="dropdown-item" href="#">Español</a></li>
-                                                      <li><a class="dropdown-item" href="#">Français</a></li>
-                                                      <li><a class="dropdown-item" href="#">Deutsch</a></li>
+                                                      <?php foreach ($supportedLangs as $code => $label) { ?>
+                                                            <li>
+                                                                  <a class="dropdown-item" href="<?php echo htmlspecialchars(rtrim($baseUrlPrefix, '/') . '/' . $code . '/' . ($__ROUTE !== '' ? ltrim($__ROUTE, '/') : ''), ENT_QUOTES); ?>">
+                                                                        <?php if (strcasecmp($currentLangCode, $code) === 0) { ?><i class="bi bi-check2 me-2 selected-icon"></i><?php } ?>
+                                                                        <?php echo htmlspecialchars($label, ENT_QUOTES); ?>
+                                                                        <img src="<?php echo htmlspecialchars($assetsUrl, ENT_QUOTES); ?>/img/flags/<?php echo htmlspecialchars($code, ENT_QUOTES); ?>.png" alt="<?php echo htmlspecialchars($label, ENT_QUOTES); ?>" class="img-fluid flag-icon">
+                                                                  </a>
+                                                            </li>
+                                                      <?php } ?>
                                                 </ul>
                                           </div>
                                           <div class="top-bar-item dropdown">
@@ -120,7 +144,7 @@ if ($cartHeader) {
                                                                   </li>
                                                             <?php } ?>
                                                       <?php } else { ?>
-                                                            <li><span class="dropdown-item-text text-muted">No currencies</span></li>
+                                                            <li><span class="dropdown-item-text text-muted"><?php echo translate('No currencies'); ?></span></li>
                                                       <?php } ?>
                                                 </ul>
                                           </div>
@@ -135,15 +159,15 @@ if ($cartHeader) {
                   <div class="container-fluid container-xl">
                         <div class="header-container d-flex py-3 align-items-center justify-content-between">
                               <!-- Logo -->
-                              <a href="/" class="logo d-flex align-items-center">
-                                    <img src="assets/img/logo.png" alt="">
+                              <a href="<?php echo htmlspecialchars($langBase, ENT_QUOTES); ?>" class="logo d-flex align-items-center">
+                                    <img src="<?php echo htmlspecialchars($assetsUrl, ENT_QUOTES); ?>/img/logo.png" alt="">
                                     <!-- <h1 class="sitename">Ch-Fashion<span>Store</span></h1> -->
                               </a>
 
                               <!-- Search -->
                               <form class="search-form desktop-search-form">
                                     <div class="input-group">
-                                          <input type="text" class="form-control" placeholder="Search for products...">
+                                          <input type="text" class="form-control" placeholder="<?php echo translate('Search for products'); ?> ...">
                                           <button class="btn search-btn" type="submit">
                                                 <i class="bi bi-search"></i>
                                           </button>
@@ -164,62 +188,61 @@ if ($cartHeader) {
                                     <div class="dropdown account-dropdown">
                                           <button class="header-action-btn show" data-bs-toggle="dropdown">
                                                 <i class="bi bi-person"></i>
-                                                <span class="action-text d-none d-md-inline-block">Account</span>
+                                                <span class="action-text d-none d-md-inline-block"><?php echo translate('Account'); ?></span>
                                           </button>
                                           <div class="dropdown-menu">
                                                 <div class="dropdown-header">
-                                                      <h6>Welcome to <span class="sitename">FashionStore</span></h6>
-                                                      <p class="mb-0">Access account &amp; manage orders</p>
+                                                      <h6><?php echo translate('Welcome to'); ?> <span class="sitename"><?php echo $siteName; ?></span></h6>
+                                                      <p class="mb-0"><?php echo translate('Access account'); ?> &amp; <?php echo translate('Manage orders'); ?></p>
                                                 </div>
                                                 <div class="dropdown-body">
                                                       <a class="dropdown-item d-flex align-items-center"
-                                                            href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=account">
+                                                            href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>account">
                                                             <i class="bi bi-person-circle me-2"></i>
-                                                            <span>My Profile</span>
+                                                            <span><?php echo translate('My Profile'); ?></span>
                                                       </a>
                                                       <a class="dropdown-item d-flex align-items-center"
-                                                            href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=orders">
+                                                            href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>orders">
                                                             <i class="bi bi-bag-check me-2"></i>
-                                                            <span>My Orders</span>
+                                                            <span><?php echo translate('My Orders'); ?></span>
                                                       </a>
                                                       <a class="dropdown-item d-flex align-items-center"
-                                                            href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=wishlist">
+                                                            href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>wishlist">
                                                             <i class="bi bi-heart me-2"></i>
-                                                            <span>My Wishlist</span>
+                                                            <span><?php echo translate('My Wishlist'); ?></span>
                                                       </a>
                                                       <a class="dropdown-item d-flex align-items-center"
-                                                            href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=returns">
+                                                            href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>returns">
                                                             <i class="bi bi-arrow-return-left me-2"></i>
-                                                            <span>Returns &amp; Refunds</span>
+                                                            <span><?php echo translate('Returns &amp; Refunds'); ?></span>
                                                       </a>
                                                       <a class="dropdown-item d-flex align-items-center"
-                                                            href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=settings">
+                                                            href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>settings">
                                                             <i class="bi bi-gear me-2"></i>
-                                                            <span>Settings</span>
+                                                            <span><?php echo translate('Settings'); ?></span>
                                                       </a>
                                                 </div>
                                                 <div class="dropdown-footer">
                                                       <?php if (!empty($_SESSION['user'])) { ?>
                                                             <div class="mb-2 text-center">
-                                                                  <small>Signed in as
+                                                                  <small><?php echo translate('Signed in as'); ?>
                                                                         <strong><?php echo htmlspecialchars($_SESSION['user']['name'] ?? $_SESSION['user']['email'] ?? 'User', ENT_QUOTES); ?></strong>
                                                                   </small>
                                                             </div>
-                                                            <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=logout" class="btn btn-outline-primary w-100">Sign Out</a>
+                                                            <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>logout" class="btn btn-outline-primary w-100"><?php echo translate('Sign Out'); ?></a>
                                                       <?php } else { ?>
-                                                            <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=login" class="btn btn-primary w-100 mb-2">Sign
-                                                                  In</a>
-                                                            <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=register"
-                                                                  class="btn btn-outline-primary w-100">Register</a>
+                                                            <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>login" class="btn btn-primary w-100 mb-2"><?php echo translate('Sign In'); ?></a>
+                                                            <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>register"
+                                                                  class="btn btn-outline-primary w-100"><?php echo translate('Register'); ?></a>
                                                       <?php } ?>
                                                 </div>
                                           </div>
                                     </div>
 
                                     <!-- Wishlist -->
-                                    <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=wishlist" class="header-action-btn d-none d-md-flex">
+                                    <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>wishlist" class="header-action-btn d-none d-md-flex">
                                           <i class="bi bi-heart"></i>
-                                          <span class="action-text d-none d-md-inline-block">Wishlist</span>
+                                          <span class="action-text d-none d-md-inline-block"><?php echo translate('Wishlist'); ?></span>
                                           <span class="badge">0</span>
                                     </a>
 
@@ -227,17 +250,17 @@ if ($cartHeader) {
                                     <div class="dropdown cart-dropdown">
                                           <button class="header-action-btn" data-bs-toggle="dropdown">
                                                 <i class="bi bi-cart3"></i>
-                                                <span class="action-text d-none d-md-inline-block">Cart</span>
+                                                <span class="action-text d-none d-md-inline-block"><?php echo translate('Cart'); ?></span>
                                                 <span class="badge"><?php echo (int)$miniCartCount; ?></span>
                                           </button>
                                           <div class="dropdown-menu cart-dropdown-menu">
                                                 <div class="dropdown-header">
-                                                      <h6>Shopping Cart (<?php echo (int)$miniCartCount; ?>)</h6>
+                                                      <h6><?php echo translate('Shopping Cart'); ?> (<?php echo (int)$miniCartCount; ?>)</h6>
                                                 </div>
                                                 <div class="dropdown-body">
                                                       <div class="cart-items">
                                                             <?php if (empty($miniCartItems)) { ?>
-                                                                  <div class="text-center text-muted py-3">No items in cart</div>
+                                                                  <div class="text-center text-muted py-3"><?php echo translate('No items in cart'); ?></div>
                                                             <?php } else { ?>
                                                                   <?php foreach ($miniCartItems as $mc) {
                                                                         $img = (string)($mc['featured_image'] ?? '');
@@ -259,13 +282,13 @@ if ($cartHeader) {
                                                 </div>
                                                 <div class="dropdown-footer">
                                                       <div class="cart-total">
-                                                            <span>Total:</span>
+                                                            <span><?php echo translate('Total'); ?>:</span>
                                                             <span class="cart-total-price"><?php echo $currentCurrencySymbol . number_format($miniCartSubtotal, 2); ?></span>
                                                       </div>
                                                       <div class="cart-actions">
-                                                            <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=cart" class="btn btn-outline-primary">View
-                                                                  Cart</a>
-                                                            <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=checkout" class="btn btn-primary">Checkout</a>
+                                                            <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>cart" class="btn btn-outline-primary">
+                                                                  <?php echo translate('View Cart'); ?></a>
+                                                            <a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>checkout" class="btn btn-primary"><?php echo translate('Checkout'); ?></a>
                                                       </div>
                                                 </div>
                                           </div>
@@ -284,59 +307,59 @@ if ($cartHeader) {
                   <div class="container-fluid container-xl position-relative">
                         <nav id="navmenu" class="navmenu">
                               <ul>
-                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=home" class="<?php echo htmlspecialchars($__ROUTE == 'home' ? 'active' : '', ENT_QUOTES); ?>">Home</a></li>
-                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=category" class="<?php echo htmlspecialchars($__ROUTE == 'category' ? 'active' : '', ENT_QUOTES); ?>">Category</a></li>
-                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=products" class="<?php echo htmlspecialchars($__ROUTE == 'products' ? 'active' : '', ENT_QUOTES); ?>">Products</a></li>
-                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=cart" class="<?php echo htmlspecialchars($__ROUTE == 'cart' ? 'active' : '', ENT_QUOTES); ?>">Cart</a></li>
-                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=checkout" class="<?php echo htmlspecialchars($__ROUTE == 'checkout' ? 'active' : '', ENT_QUOTES); ?>">Checkout</a></li>
+                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>home" class="<?php echo htmlspecialchars($__ROUTE == 'home' ? 'active' : '', ENT_QUOTES); ?>"><?php echo translate('Home'); ?></a></li>
+                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>category" class="<?php echo htmlspecialchars($__ROUTE == 'category' ? 'active' : '', ENT_QUOTES); ?>"><?php echo translate('Category'); ?></a></li>
+                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>products" class="<?php echo htmlspecialchars($__ROUTE == 'products' ? 'active' : '', ENT_QUOTES); ?>"><?php echo translate('Products'); ?></a></li>
+                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>cart" class="<?php echo htmlspecialchars($__ROUTE == 'cart' ? 'active' : '', ENT_QUOTES); ?>"><?php echo translate('Cart'); ?></a></li>
+                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>checkout" class="<?php echo htmlspecialchars($__ROUTE == 'checkout' ? 'active' : '', ENT_QUOTES); ?>"><?php echo translate('Checkout'); ?></a></li>
 
-                                    <li class="products-megamenu-1"><a href="#"><span>Megamenu 1</span> <i
+                                    <li class="products-megamenu-1"><a href="#"><span><?php echo translate('Megamenu 1'); ?></span> <i
                                                       class="bi bi-chevron-down toggle-dropdown"></i></a>
                                           <ul class="mobile-megamenu">
-                                                <li><a href="#">Featured Products</a></li>
-                                                <li><a href="#">New Arrivals</a></li>
-                                                <li><a href="#">Sale Items</a></li>
-                                                <li class="dropdown"><a href="#"><span>Clothing</span> <i
+                                                <li><a href="#"><?php echo translate('Featured Products'); ?></a></li>
+                                                <li><a href="#"><?php echo translate('New Arrivals'); ?></a></li>
+                                                <li><a href="#"><?php echo translate('Sale Items'); ?></a></li>
+                                                <li class="dropdown"><a href="#"><span><?php echo translate('Clothing'); ?></span> <i
                                                                   class="bi bi-chevron-down toggle-dropdown"></i></a>
                                                       <ul>
-                                                            <li><a href="#">Men's Wear</a></li>
-                                                            <li><a href="#">Women's Wear</a></li>
-                                                            <li><a href="#">Kids Collection</a></li>
-                                                            <li><a href="#">Sportswear</a></li>
-                                                            <li><a href="#">Accessories</a></li>
+                                                            <li><a href="#"><?php echo translate('Men\'s Wear'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Women\'s Wear'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Kids Collection'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Sportswear'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Accessories'); ?></a></li>
                                                       </ul>
                                                 </li>
 
-                                                <li class="dropdown"><a href="#"><span>Electronics</span> <i
+                                                <li class="dropdown"><a href="#"><span><?php echo translate('Electronics'); ?></span> <i
                                                                   class="bi bi-chevron-down toggle-dropdown"></i></a>
                                                       <ul>
-                                                            <li><a href="#">Smartphones</a></li>
-                                                            <li><a href="#">Laptops</a></li>
-                                                            <li><a href="#">Audio Devices</a></li>
-                                                            <li><a href="#">Smart Home</a></li>
-                                                            <li><a href="#">Accessories</a></li>
+                                                            <li><a href="#"><?php echo translate('Smartphones'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Laptops'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Audio Devices'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Smart Home'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Accessories'); ?></a></li>
                                                       </ul>
                                                 </li>
 
-                                                <li class="dropdown"><a href="#"><span>Home &amp; Living</span> <i
+                                                <li class="dropdown"><a href="#"><span><?php echo translate('Home &amp; Living'); ?></span> <i
                                                                   class="bi bi-chevron-down toggle-dropdown"></i></a>
                                                       <ul>
-                                                            <li><a href="#">Furniture</a></li>
-                                                            <li><a href="#">Decor</a></li>
-                                                            <li><a href="#">Kitchen</a></li>
-                                                            <li><a href="#">Bedding</a></li>
-                                                            <li><a href="#">Lighting</a></li>
+                                                            <li><a href="#"><?php echo translate('Furniture'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Decor'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Kitchen'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Bedding'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Lighting'); ?></a></li>
                                                       </ul>
                                                 </li>
 
-                                                <li class="dropdown"><a href="#"><span>Beauty</span> <i
+                                                <li class="dropdown"><a href="#"><span><?php echo translate('Beauty'); ?></span> <i
                                                                   class="bi bi-chevron-down toggle-dropdown"></i></a>
                                                       <ul>
-                                                            <li><a href="#">Skincare</a></li>
-                                                            <li><a href="#">Makeup</a></li>
-                                                            <li><a href="#">Haircare</a></li>
-                                                            <li><a href="#">Fragrances</a></li>
-                                                            <li><a href="#">Personal Care</a></li>
+                                                            <li><a href="#"><?php echo translate('Skincare'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Makeup'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Haircare'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Fragrances'); ?></a></li>
+                                                            <li><a href="#"><?php echo translate('Personal Care'); ?></a></li>
                                                       </ul>
                                                 </li>
 
@@ -349,28 +372,28 @@ if ($cartHeader) {
                                                                         data-bs-toggle="tab"
                                                                         data-bs-target="#featured-content-1862"
                                                                         type="button" aria-selected="true"
-                                                                        role="tab">Featured</button>
+                                                                        role="tab"><?php echo translate('Featured'); ?></button>
                                                             </li>
                                                             <li class="nav-item" role="presentation">
                                                                   <button class="nav-link" id="new-tab"
                                                                         data-bs-toggle="tab"
                                                                         data-bs-target="#new-content-1862" type="button"
                                                                         aria-selected="false" tabindex="-1"
-                                                                        role="tab">New Arrivals</button>
+                                                                        role="tab"><?php echo translate('New Arrivals'); ?></button>
                                                             </li>
                                                             <li class="nav-item" role="presentation">
                                                                   <button class="nav-link" id="sale-tab"
                                                                         data-bs-toggle="tab"
                                                                         data-bs-target="#sale-content-1862"
                                                                         type="button" aria-selected="false"
-                                                                        tabindex="-1" role="tab">Sale</button>
+                                                                        tabindex="-1" role="tab"><?php echo translate('Sale'); ?></button>
                                                             </li>
                                                             <li class="nav-item" role="presentation">
                                                                   <button class="nav-link" id="category-tab"
                                                                         data-bs-toggle="tab"
                                                                         data-bs-target="#category-content-1862"
                                                                         type="button" aria-selected="false"
-                                                                        tabindex="-1" role="tab">Categories</button>
+                                                                        tabindex="-1" role="tab"><?php echo translate('Categories'); ?></button>
                                                             </li>
                                                       </ul>
                                                 </div>
@@ -389,10 +412,9 @@ if ($cartHeader) {
                                                                                     loading="lazy">
                                                                         </div>
                                                                         <div class="product-info">
-                                                                              <h5>Premium Headphones</h5>
+                                                                              <h5><?php echo translate('Premium Headphones'); ?></h5>
                                                                               <p class="price">$129.99</p>
-                                                                              <a href="#" class="btn-view">View
-                                                                                    Product</a>
+                                                                              <a href="#" class="btn-view"><?php echo tranSlate('View Product'); ?></a>
                                                                         </div>
                                                                   </div>
                                                                   <div class="product-card">
@@ -402,10 +424,9 @@ if ($cartHeader) {
                                                                                     loading="lazy">
                                                                         </div>
                                                                         <div class="product-info">
-                                                                              <h5>Smart Watch</h5>
+                                                                              <h5><?php echo translate('Smart Watch'); ?></h5>
                                                                               <p class="price">$199.99</p>
-                                                                              <a href="#" class="btn-view">View
-                                                                                    Product</a>
+                                                                              <a href="#" class="btn-view"><?php echo tranSlate('View Product'); ?></a>
                                                                         </div>
                                                                   </div>
                                                                   <div class="product-card">
@@ -910,8 +931,8 @@ if ($cartHeader) {
                                                 </div>
                                           </div>
                                     </li>
-                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=about" class="<?php echo htmlspecialchars($__ROUTE == 'about' ? 'active' : '', ENT_QUOTES); ?>">About Us</a></li>
-                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>?p=contact" class="<?php echo htmlspecialchars($__ROUTE == 'contact' ? 'active' : '', ENT_QUOTES); ?>">Contact Us</a></li>
+                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>about" class="<?php echo htmlspecialchars($__ROUTE == 'about' ? 'active' : '', ENT_QUOTES); ?>">About Us</a></li>
+                                    <li><a href="<?php echo htmlspecialchars($__CONFIG['site']['base_url'], ENT_QUOTES); ?>contact" class="<?php echo htmlspecialchars($__ROUTE == 'contact' ? 'active' : '', ENT_QUOTES); ?>">Contact Us</a></li>
                               </ul>
                         </nav>
                   </div>

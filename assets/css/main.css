@@ -1,17 +1,15 @@
-/**
-* Template Name: FashionStore
-* Template URL: https://bootstrapmade.com/fashion-store-bootstrap-template/
-* Updated: Aug 15 2025 with Bootstrap v5.3.7
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
-
 @charset "UTF-8";
 
 :root {
   --default-font: "Roboto", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --heading-font: "Quicksand", sans-serif;
   --nav-font: "Ubuntu", sans-serif;
+}
+
+:root[lang="kh"] {
+  --default-font: "Khmer OS Content", "Battambang", "Hanuman", sans-serif;
+  --heading-font: "Khmer OS Content", "Battambang", "Hanuman", sans-serif;
+  --nav-font: "Khmer OS Content", "Battambang", "Hanuman", sans-serif;
 }
 
 :root {
@@ -168,6 +166,15 @@ h6 {
   color: var(--accent-color);
   opacity: 1;
   width: 16px;
+}
+
+.header .top-bar .top-bar-item .flag-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-right: 8px;
+  position: absolute;
+  right: 5px;
 }
 
 .header .top-bar .dropdown-menu {

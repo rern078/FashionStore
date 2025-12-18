@@ -24,15 +24,11 @@ if (isset($_GET['set_currency'])) {
       }
 }
 
-if (!array_key_exists($route, $routes)) {
-      $primary = $route !== '' ? explode('/', $route)[0] : '';
-      if ($primary !== '' && array_key_exists($primary, $routes)) {
-            $route = $primary;
-      } else {
-            $route = '';
-      }
+// Load translation helper
+$__langHelper = __DIR__ . '/inc/lang.php';
+if (is_file($__langHelper)) {
+      include_once $__langHelper;
 }
-
 $moduleRel = $routes[$route] ?? 'index.php';
 $modulePath = __DIR__ . '/mod/' . $moduleRel;
 
