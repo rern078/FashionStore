@@ -1,4 +1,75 @@
 <?php
+
+/**
+ * Return languages from DB and derive current language information.
+ * - languages: array of rows (code, name, native_name, position, is_active)
+ * - activeCodes: array of active codes
+ * - codeToLabel: map code => display label (name fallback to code)
+ * - currentLangCode/currentLangLabel: derived from session or first active
+ */
+function getLanguages(): array
+{
+      try {
+            $rows = db_all('SELECT code, name, native_name, position, is_active FROM languages ORDER BY position ASC, id ASC');
+      } catch (Throwable $e) {
+            $rows = [];
+      }
+
+      $languages = is_array($rows) ? $rows : [];
+      $active = [];
+      $codeToLabel = [];
+      $codeToLabelActive = [];
+      foreach ($languages as $r) {
+            $code = strtolower((string)($r['code'] ?? ''));
+            if ($code === '') {
+                  continue;
+            }
+            $label = (string)($r['name'] ?: $code);
+            $codeToLabel[$code] = $label;
+            if ((int)($r['is_active'] ?? 0) === 1) {
+                  $active[] = $code;
+                  $codeToLabelActive[$code] = $label;
+            }
+      }
+
+      // Determine current language code
+      $defaultCode = $active[0] ?? 'en';
+      $currentLangCode = strtolower((string)($_SESSION['lang'] ?? $defaultCode));
+      if (!in_array($currentLangCode, $active, true)) {
+            $currentLangCode = $defaultCode;
+      }
+      $currentLangLabel = $codeToLabel[$currentLangCode] ?? strtoupper($currentLangCode);
+
+      return [
+            'languages' => $languages,
+            'activeCodes' => $active,
+            'codeToLabel' => $codeToLabel,
+            'codeToLabelActive' => $codeToLabelActive,
+            'currentLangCode' => $currentLangCode,
+            'currentLangLabel' => $currentLangLabel,
+      ];
+}
+
+/**
+ * Lightweight helper for inc/lang.php to read only active codes.
+ */
+function getActiveLanguageCodes(): array
+{
+      try {
+            $rows = db_all('SELECT code FROM languages WHERE is_active = 1 ORDER BY position ASC, id ASC');
+      } catch (Throwable $e) {
+            return [];
+      }
+      $codes = [];
+      foreach ($rows as $r) {
+            $code = strtolower((string)($r['code'] ?? ''));
+            if ($code !== '') {
+                  $codes[] = $code;
+            }
+      }
+      return $codes;
+}
+
 function getCurrencies()
 {
 

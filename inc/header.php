@@ -28,19 +28,14 @@ $adminEmail = $contact['adminEmail'] ?? '';
 $adminPhone = $contact['adminPhone'] ?? '';
 // Language dropdown data
 $currentLangCode = isset($__LANG_CODE) ? (string)$__LANG_CODE : (isset($_SESSION['lang']) ? (string)$_SESSION['lang'] : 'en');
-$supportedLangs = [
-      'en' => 'English',
-      'cn' => 'Chinese',
-      'kh' => 'Khmer',
-      'vn' => 'Vietnamese',
-      'lo' => 'Lao',
-      'ma' => 'Malay',
-      'ph' => 'Filipino',
-      'sp' => 'Spanish',
-      'fr' => 'French',
-      'gm' => 'German',
-];
-$currentLangLabel = isset($supportedLangs[$currentLangCode]) ? $supportedLangs[$currentLangCode] : 'English';
+// Load languages dynamically from DB
+$langsData = function_exists('getLanguages') ? getLanguages() : ['codeToLabelActive' => [], 'currentLangLabel' => 'English'];
+$supportedLangs = $langsData['codeToLabelActive'] ?? ($langsData['codeToLabel'] ?? []);
+if (!isset($supportedLangs[$currentLangCode]) && $currentLangCode !== '') {
+      // Ensure current code has a readable label fallback
+      $supportedLangs[$currentLangCode] = strtoupper($currentLangCode);
+}
+$currentLangLabel = $langsData['currentLangLabel'] ?? ($supportedLangs[$currentLangCode] ?? 'English');
 
 // Mini cart summary for header
 $miniCartItems = [];

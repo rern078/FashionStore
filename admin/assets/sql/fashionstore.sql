@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 06, 2025 at 04:42 AM
+-- Generation Time: Dec 19, 2025 at 02:29 AM
 -- Server version: 5.7.36
 -- PHP Version: 8.0.13
 
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `addresses` (
   `business_hours` text COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `idx_addresses_user` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `addresses`
@@ -103,7 +103,19 @@ CREATE TABLE IF NOT EXISTS `banners` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_banners_active_position` (`is_active`,`position`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `banners`
+--
+
+INSERT INTO `banners` (`id`, `title`, `subtitle`, `image_url`, `link_url`, `alt_text`, `position`, `is_active`, `starts_at`, `ends_at`, `created_at`, `updated_at`) VALUES
+(1, 'Testing', 'Testing', '/admin/assets/images/banners/slider1-1758332133-e48f65fa.png', NULL, 'Testing', 1, 1, '2025-09-20 08:35:00', '2025-09-26 08:35:00', '2025-09-20 01:35:33', '2025-09-20 01:35:33'),
+(2, 'Summer Sale', 'Up to 50% Off', '/admin/assets/images/carousel/banner_1.jpg', '/?p=products', 'Summer Sale Banner', 1, 1, NULL, NULL, '2025-09-20 01:41:11', '2025-09-20 01:41:11'),
+(3, 'New Arrivals', 'Latest Styles In', '/admin/assets/images/carousel/banner_2.jpg', '/?p=products', 'New Arrivals Banner', 2, 1, NULL, NULL, '2025-09-20 01:41:11', '2025-09-20 01:41:11'),
+(4, 'Men\'s Collection', 'Fresh Looks for Men', '/admin/assets/images/carousel/banner_3.jpg', '/?p=products', 'Men Collection Banner', 3, 1, NULL, NULL, '2025-09-20 01:41:11', '2025-09-20 01:41:11'),
+(5, 'Women\'s Collection', 'Trendy Picks for Her', '/admin/assets/images/carousel/banner_4.jpg', '/?p=products', 'Women Collection Banner', 4, 1, NULL, NULL, '2025-09-20 01:41:11', '2025-09-20 01:41:11'),
+(6, 'Accessories Picks', 'Complete Your Style', '/admin/assets/images/carousel/banner_5.jpg', '/?p=products', 'Accessories Banner', 5, 1, NULL, NULL, '2025-09-20 01:41:11', '2025-09-20 01:41:11');
 
 -- --------------------------------------------------------
 
@@ -161,7 +173,21 @@ CREATE TABLE IF NOT EXISTS `carts` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_cart_session` (`session_id`),
   KEY `idx_cart_user` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `carts`
+--
+
+INSERT INTO `carts` (`id`, `user_id`, `session_id`, `created_at`, `updated_at`, `currency`) VALUES
+(7, NULL, 't7i277mm4kvn75k0f79lvplv76', '2025-09-16 08:34:06', '2025-09-16 08:34:06', 'USD'),
+(8, NULL, 'tf9ru98asorq71qv3d0iu5q455', '2025-09-19 08:42:19', '2025-09-19 08:42:19', 'USD'),
+(9, NULL, 't8gr6ujt99ce1emvb458ef9kmv', '2025-09-19 09:05:37', '2025-09-19 09:05:37', 'USD'),
+(10, NULL, 'hb3sceq9tgh5cpmdaopvba3qos', '2025-09-19 10:05:31', '2025-09-19 10:05:31', 'USD'),
+(11, NULL, 'eejsoas6o9u03c4mng8mvdlrvh', '2025-09-19 10:22:33', '2025-09-19 10:22:33', 'USD'),
+(12, NULL, 'uvlfrfkpnid7qui63p4j2b1qet', '2025-09-19 10:51:32', '2025-09-19 10:51:32', 'USD'),
+(13, NULL, 'j0nvpguob23r16euta65gco85a', '2025-09-19 10:58:22', '2025-09-19 10:58:22', 'USD'),
+(14, NULL, 'p2fsh6q3qcc19g09827lbobvn0', '2025-09-20 01:59:38', '2025-09-20 01:59:38', 'USD');
 
 -- --------------------------------------------------------
 
@@ -180,7 +206,17 @@ CREATE TABLE IF NOT EXISTS `cart_items` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_cart_variant` (`cart_id`,`variant_id`),
   KEY `fk_cart_items_variant` (`variant_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `cart_items`
+--
+
+INSERT INTO `cart_items` (`id`, `cart_id`, `variant_id`, `qty`, `unit_price`, `applied_promo_code`) VALUES
+(24, 10, 9, 6, '34.00', NULL),
+(30, 11, 9, 2, '34.00', NULL),
+(32, 12, 9, 2, '34.00', NULL),
+(33, 13, 9, 2, '34.00', NULL);
 
 -- --------------------------------------------------------
 
@@ -197,7 +233,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`),
   KEY `fk_categories_parent` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `categories`
@@ -211,6 +247,47 @@ INSERT INTO `categories` (`id`, `name`, `slug`, `parent_id`) VALUES
 (5, 'Sports & Outdoors', 'sports-outdoors', NULL),
 (6, 'Books', 'books', NULL),
 (7, 'Toys & Games', 'toys-games', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `checkout_orders`
+--
+
+DROP TABLE IF EXISTS `checkout_orders`;
+CREATE TABLE IF NOT EXISTS `checkout_orders` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `address_line1` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `address_line2` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `city` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `state` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `postal_code` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `country_code` char(2) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payment_method` enum('card','paypal','apple_pay') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `card_last4` char(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `card_exp_month` tinyint(3) UNSIGNED DEFAULT NULL,
+  `card_exp_year` smallint(5) UNSIGNED DEFAULT NULL,
+  `card_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `terms_accepted` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_email` (`email`),
+  KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `checkout_orders`
+--
+
+INSERT INTO `checkout_orders` (`id`, `first_name`, `last_name`, `email`, `phone`, `address_line1`, `address_line2`, `city`, `state`, `postal_code`, `country_code`, `payment_method`, `card_last4`, `card_exp_month`, `card_exp_year`, `card_name`, `terms_accepted`, `created_at`) VALUES
+(1, 'Tieng', 'Chamrern', 'admin@gmail.com', '(096) 779-7762', 'Khan Sensok, Phnom Penh', 'Sales', 'Phnom Penh', 'cambodia', '12080', 'US', 'card', '4234', 42, 2034, 'Tieng chmarern', 1, '2025-09-16 07:56:57'),
+(2, 'Mao', 'Orio', 'chamrern@gmail.com', '(042) 342-2342', '1Khan Sensok, Phnom Penh', 'Designer', 'Phnom Penh', 'cambodia', '32423', 'CA', 'card', '2352', 52, 2035, 'Moa oere', 1, '2025-09-16 08:01:39'),
+(3, 'customer1', 'customer1', 'customer1@gmail.com', '(042) 423-5235', '1Khan Sensok, Phnom Penh', 'Designer', 'Phnom Penh', 'cambodia', '32423', 'DE', 'card', '6266', 23, 2042, 'customer1', 1, '2025-09-19 08:43:47'),
+(4, 'customer1', 'customer1', 'customer1@gmail.com', '(052) 523-5252', '1Khan Sensok, Phnom Penh', 'Designer', 'Phnom Penh', 'cambodia', '32423', 'CA', 'card', '6261', 34, 2015, 'customer1', 1, '2025-09-19 09:08:55');
 
 -- --------------------------------------------------------
 
@@ -310,12 +387,93 @@ CREATE TABLE IF NOT EXISTS `currencies` (
 --
 
 INSERT INTO `currencies` (`id`, `code`, `name`, `exchange_rate`, `symbol`, `decimal_places`, `position`, `is_default`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'USD', 'US Dollar', '1.000000', '$', 2, 'prefix', 0, 1, '2025-09-05 02:49:41', '2025-09-05 03:07:46'),
+(1, 'USD', 'US Dollar', '1.000000', '$', 2, 'prefix', 1, 1, '2025-09-05 02:49:41', '2025-09-12 07:26:58'),
 (2, 'EUR', 'Euro', '0.920000', '€', 2, 'suffix', 0, 1, '2025-09-05 02:49:41', '2025-09-05 03:24:44'),
 (3, 'GBP', 'British Pound', '0.800000', '£', 2, 'prefix', 0, 1, '2025-09-05 02:49:41', '2025-09-05 02:49:41'),
 (4, 'JPY', 'Japanese Yen', '150.000000', '¥', 0, 'prefix', 0, 1, '2025-09-05 02:49:41', '2025-09-05 02:49:41'),
 (5, 'INR', 'Indian Rupee', '83.000000', '₹', 2, 'prefix', 0, 1, '2025-09-05 02:49:41', '2025-09-05 02:49:41'),
-(6, 'KHR', 'KHR Riel', '4100.000000', '៛', 2, 'prefix', 1, 1, '2025-09-05 03:24:30', '2025-09-05 03:24:44');
+(6, 'KHR', 'KHR Riel', '4100.000000', '៛', 2, 'prefix', 0, 1, '2025-09-05 03:24:30', '2025-09-12 07:26:58');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `finance_categories`
+--
+
+DROP TABLE IF EXISTS `finance_categories`;
+CREATE TABLE IF NOT EXISTS `finance_categories` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('income','expense') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_finance_categories` (`name`,`type`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `finance_categories`
+--
+
+INSERT INTO `finance_categories` (`id`, `name`, `type`, `is_active`, `created_at`) VALUES
+(1, 'Product Sales', 'income', 1, '2025-09-19 08:27:41'),
+(2, 'Shipping Fees', 'income', 1, '2025-09-19 08:27:41'),
+(3, 'Misc Income', 'income', 1, '2025-09-19 08:27:41'),
+(4, 'Payment Gateway Fees', 'expense', 1, '2025-09-19 08:27:41'),
+(5, 'Returns/Refunds', 'expense', 1, '2025-09-19 08:27:41'),
+(6, 'Marketing', 'expense', 1, '2025-09-19 08:27:41'),
+(7, 'Salaries', 'expense', 1, '2025-09-19 08:27:41'),
+(8, 'Rent', 'expense', 1, '2025-09-19 08:27:41'),
+(9, 'Utilities', 'expense', 1, '2025-09-19 08:27:41');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `finance_entries`
+--
+
+DROP TABLE IF EXISTS `finance_entries`;
+CREATE TABLE IF NOT EXISTS `finance_entries` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `entry_date` date NOT NULL,
+  `type` enum('income','expense') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `currency` char(3) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'USD',
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reference_type` enum('order','payment','return','shipment','other') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reference_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_finance_entries_user` (`created_by`),
+  KEY `idx_finance_entries_date` (`entry_date`),
+  KEY `idx_finance_entries_type` (`type`),
+  KEY `idx_finance_entries_category` (`category_id`),
+  KEY `idx_finance_entries_ref` (`reference_type`,`reference_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `finance_entries`
+--
+
+INSERT INTO `finance_entries` (`id`, `entry_date`, `type`, `category_id`, `amount`, `currency`, `description`, `reference_type`, `reference_id`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, '2025-09-09', 'income', 1, '249.99', 'USD', 'Order FS-10021', 'order', 10021, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(2, '2025-09-10', 'income', 1, '189.50', 'USD', 'Order FS-10022', 'order', 10022, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(3, '2025-09-10', 'income', 2, '12.00', 'USD', 'Shipping collected FS-10022', 'order', 10022, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(4, '2025-09-11', 'income', 1, '315.00', 'USD', 'Order FS-10023', 'order', 10023, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(5, '2025-09-12', 'income', 3, '50.00', 'USD', 'Supplier rebate', 'other', NULL, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(6, '2025-09-17', 'income', 1, '420.00', 'USD', 'Order FS-10030', 'order', 10030, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(7, '2025-09-09', 'expense', 4, '5.00', 'USD', 'Stripe fee FS-10021', 'payment', 210021, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(8, '2025-09-10', 'expense', 4, '4.20', 'USD', 'Stripe fee FS-10022', 'payment', 210022, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(9, '2025-09-11', 'expense', 5, '39.99', 'USD', 'Partial refund FS-10020', 'return', 30012, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(10, '2025-09-13', 'expense', 6, '120.00', 'USD', 'Meta Ads - Prospecting', 'other', NULL, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(11, '2025-09-14', 'expense', 7, '800.00', 'USD', 'Weekly staff payout', 'other', NULL, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(12, '2025-09-16', 'expense', 8, '600.00', 'USD', 'Warehouse rent (prorated)', 'other', NULL, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(13, '2025-09-18', 'expense', 9, '85.75', 'USD', 'Electricity + Internet', 'other', NULL, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(14, '2025-09-19', 'expense', 4, '7.20', 'USD', 'Stripe fee FS-10030', 'payment', 210030, 1, '2025-09-19 08:27:41', '2025-09-19 08:27:41'),
+(15, '2025-09-19', 'income', 1, '3000.00', 'USD', NULL, 'other', 42334, NULL, '2025-09-19 08:31:25', '2025-09-19 08:31:25');
 
 -- --------------------------------------------------------
 
@@ -333,7 +491,95 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `low_stock_threshold` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `idx_inventory_variant` (`variant_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `languages`
+--
+
+DROP TABLE IF EXISTS `languages`;
+CREATE TABLE IF NOT EXISTS `languages` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `code` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `native_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `position` int(10) UNSIGNED NOT NULL DEFAULT '1',
+  `is_default` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_languages_code` (`code`),
+  KEY `idx_languages_active_position` (`is_active`,`position`)
+) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `languages`
+--
+
+INSERT INTO `languages` (`id`, `code`, `name`, `native_name`, `position`, `is_default`, `is_active`, `created_at`, `updated_at`) VALUES
+(6, 'kh', 'Khmer', 'ខ្មែរ', 1, 1, 1, '2025-12-19 01:41:15', '2025-12-19 02:06:27'),
+(7, 'en', 'English', 'English', 2, 0, 1, '2025-12-19 01:41:15', '2025-12-19 02:06:27'),
+(8, 'zh', 'Chinese', '中文', 3, 0, 1, '2025-12-19 01:41:15', '2025-12-19 02:06:27'),
+(9, 'es', 'Spanish', 'Español', 4, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:05:19'),
+(10, 'hi', 'Hindi', 'हिन्दी', 5, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:05:19'),
+(11, 'ar', 'Arabic', 'العربية', 6, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(12, 'bn', 'Bengali', 'বাংলা', 7, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:05:19'),
+(13, 'pt', 'Portuguese', 'Português', 8, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:05:19'),
+(14, 'ru', 'Russian', 'Русский', 9, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:05:19'),
+(15, 'ja', 'Japanese', '日本語', 10, 0, 1, '2025-12-19 01:41:15', '2025-12-19 02:06:27'),
+(16, 'pa', 'Punjabi', 'ਪੰਜਾਬੀ', 11, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(17, 'de', 'German', 'Deutsch', 12, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:05:19'),
+(18, 'jv', 'Javanese', 'Basa Jawa', 13, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(19, 'ko', 'Korean', '한국어', 14, 0, 1, '2025-12-19 01:41:15', '2025-12-19 02:06:27'),
+(20, 'fr', 'French', 'Français', 15, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:05:19'),
+(21, 'te', 'Telugu', 'తెలుగు', 16, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(22, 'mr', 'Marathi', 'मराठी', 17, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(23, 'ta', 'Tamil', 'தமிழ்', 18, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(24, 'ur', 'Urdu', 'اردو', 19, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(25, 'vi', 'Vietnamese', 'Tiếng Việt', 20, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(26, 'it', 'Italian', 'Italiano', 21, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:05:19'),
+(27, 'tr', 'Turkish', 'Türkçe', 22, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(28, 'th', 'Thai', 'ไทย', 23, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(29, 'gu', 'Gujarati', 'ગુજરાતી', 24, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(30, 'pl', 'Polish', 'Polski', 25, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(31, 'uk', 'Ukrainian', 'Українська', 26, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(32, 'ml', 'Malayalam', 'മലയാളം', 27, 0, 1, '2025-12-19 01:41:15', '2025-12-19 02:06:27'),
+(33, 'kn', 'Kannada', 'ಕನ್ನಡ', 28, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(34, 'or', 'Odia', 'ଓଡ଼ିଆ', 29, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(35, 'my', 'Burmese', 'မြန်မာဘာသာ', 30, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(36, 'fa', 'Persian', 'فارسی', 31, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(37, 'ps', 'Pashto', 'پښتو', 32, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(38, 'am', 'Amharic', 'አማርኛ', 33, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(39, 'ha', 'Hausa', 'Hausa', 34, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(40, 'yo', 'Yoruba', 'Yorùbá', 35, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(41, 'ig', 'Igbo', 'Asụsụ Igbo', 36, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(42, 'sw', 'Swahili', 'Kiswahili', 37, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(43, 'zu', 'Zulu', 'isiZulu', 38, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(44, 'af', 'Afrikaans', 'Afrikaans', 39, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(45, 'nl', 'Dutch', 'Nederlands', 40, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(46, 'sv', 'Swedish', 'Svenska', 41, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(47, 'no', 'Norwegian', 'Norsk', 42, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(48, 'da', 'Danish', 'Dansk', 43, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(49, 'fi', 'Finnish', 'Suomi', 44, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(50, 'el', 'Greek', 'Ελληνικά', 45, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(51, 'he', 'Hebrew', 'עברית', 46, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(52, 'hu', 'Hungarian', 'Magyar', 47, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(53, 'cs', 'Czech', 'Čeština', 48, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(54, 'ro', 'Romanian', 'Română', 49, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(55, 'bg', 'Bulgarian', 'Български', 50, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(56, 'sr', 'Serbian', 'Српски', 51, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(57, 'hr', 'Croatian', 'Hrvatski', 52, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(58, 'sk', 'Slovak', 'Slovenčina', 53, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(59, 'sl', 'Slovenian', 'Slovenščina', 54, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(60, 'lt', 'Lithuanian', 'Lietuvių', 55, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(61, 'lv', 'Latvian', 'Latviešu', 56, 0, 0, '2025-12-19 01:41:15', '2025-12-19 02:02:08'),
+(62, 'et', 'Estonian', 'Eesti', 57, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(63, 'is', 'Icelandic', 'Íslenska', 58, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(64, 'ga', 'Irish', 'Gaeilge', 59, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38'),
+(65, 'mt', 'Maltese', 'Malti', 60, 0, 0, '2025-12-19 01:41:15', '2025-12-19 01:47:38');
 
 -- --------------------------------------------------------
 
@@ -358,7 +604,52 @@ CREATE TABLE IF NOT EXISTS `orders` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `order_number` (`order_number`),
   KEY `idx_orders_user` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `order_number`, `status`, `subtotal`, `discount_total`, `shipping_total`, `tax_total`, `grand_total`, `currency`, `placed_at`, `payment_status`) VALUES
+(2, 1, 'FS20250916075657-425', 'pending', '156.00', '0.00', '2.99', '12.87', '171.86', 'USD', '2025-09-16 07:56:57', 'unpaid'),
+(3, 1, 'FS20250916080139-110', 'paid', '34.00', '0.00', '2.99', '0.00', '36.99', 'USD', '2025-09-16 08:01:39', 'authorized'),
+(4, 2, 'FS20250919084347-603', 'paid', '78.00', '0.00', '2.99', '0.00', '80.99', 'USD', '2025-09-19 08:43:47', 'captured'),
+(5, 2, 'FS20250919090855-955', 'paid', '136.00', '0.00', '2.99', '0.00', '138.99', 'USD', '2025-09-19 09:08:55', 'authorized');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_addresses`
+--
+
+DROP TABLE IF EXISTS `order_addresses`;
+CREATE TABLE IF NOT EXISTS `order_addresses` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `order_id` bigint(20) UNSIGNED NOT NULL,
+  `address_type` enum('shipping','billing') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'shipping',
+  `full_name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `line1` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `line2` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `city` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `state` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `postal` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `country` char(2) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_order_addresses_order` (`order_id`),
+  KEY `idx_order_addresses_type` (`order_id`,`address_type`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `order_addresses`
+--
+
+INSERT INTO `order_addresses` (`id`, `order_id`, `address_type`, `full_name`, `email`, `phone`, `line1`, `line2`, `city`, `state`, `postal`, `country`) VALUES
+(2, 2, 'shipping', 'Tieng Chamrern', 'admin@gmail.com', '(096) 779-7762', 'Khan Sensok, Phnom Penh', 'Sales', 'Phnom Penh', 'cambodia', '12080', 'US'),
+(3, 3, 'shipping', 'Mao Orio', 'chamrern@gmail.com', '(042) 342-2342', '1Khan Sensok, Phnom Penh', 'Designer', 'Phnom Penh', 'cambodia', '32423', 'CA'),
+(4, 4, 'shipping', 'customer1 customer1', 'customer1@gmail.com', '(042) 423-5235', '1Khan Sensok, Phnom Penh', 'Designer', 'Phnom Penh', 'cambodia', '32423', 'DE'),
+(5, 5, 'shipping', 'customer1 customer1', 'customer1@gmail.com', '(052) 523-5252', '1Khan Sensok, Phnom Penh', 'Designer', 'Phnom Penh', 'cambodia', '32423', 'CA');
 
 -- --------------------------------------------------------
 
@@ -380,6 +671,16 @@ CREATE TABLE IF NOT EXISTS `order_items` (
   KEY `idx_order_items_order` (`order_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `variant_id`, `qty`, `unit_price`, `discount_amount`, `tax_amount`) VALUES
+(2, 2, 6, 4, '39.00', '0.00', '0.00'),
+(3, 3, 9, 1, '34.00', '0.00', '0.00'),
+(4, 4, 6, 2, '39.00', '0.00', '0.00'),
+(5, 5, 9, 4, '34.00', '0.00', '0.00');
+
 -- --------------------------------------------------------
 
 --
@@ -397,7 +698,17 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `captured_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_payments_order` (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `order_id`, `provider`, `provider_txn_id`, `amount`, `status`, `captured_at`) VALUES
+(2, 2, 'card', NULL, '171.86', 'captured', '2025-09-19 15:54:00'),
+(3, 3, 'card', NULL, '36.99', 'captured', '2025-09-19 15:53:00'),
+(4, 4, 'card', NULL, '80.99', 'captured', '2025-09-19 15:52:00'),
+(5, 5, 'card', NULL, '138.99', 'captured', '2025-09-20 16:21:00');
 
 -- --------------------------------------------------------
 
@@ -433,34 +744,34 @@ CREATE TABLE IF NOT EXISTS `products` (
 INSERT INTO `products` (`id`, `title`, `slug`, `description`, `featured_image`, `price`, `stock_qty`, `discount_percent`, `brand`, `brand_id`, `gender`, `care`, `status`, `created_at`) VALUES
 (25, 'Testing', 'testing', 'Testing', 'assets/images/product_images/prod_1757060302_f5994e2f.jpeg', '20.00', 20, '10.00', NULL, NULL, 'men', NULL, 'active', '2025-09-05 08:18:22'),
 (26, 'Men\'s Classic Tee', 'prod-sample-001', NULL, 'assets/images/product_images/prod_26_bd03ce43.webp', '19.99', 100, '40.00', 'Nike', 1, 'men', NULL, 'active', '2025-09-05 08:18:49'),
-(27, 'Women\'s Running Leggings', 'prod-sample-002', 'Stretch leggings for workouts.', 'assets/images/samples/img_2.jpg', '29.99', 80, NULL, 'Adidas', NULL, 'women', NULL, 'active', '2025-09-05 08:18:49'),
-(28, 'Kids Hoodie', 'prod-sample-003', 'Soft hoodie for kids.', 'assets/images/samples/img_3.jpg', '24.99', 60, NULL, 'Puma', NULL, 'kids', NULL, 'active', '2025-09-05 08:18:49'),
-(29, 'Leather Belt', 'prod-sample-004', 'Genuine leather belt.', 'assets/images/samples/img_4.jpg', '15.99', 120, NULL, 'FILA', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(30, 'Android Smartphone X', 'prod-sample-005', '6.5\" display, 128GB storage.', 'assets/images/samples/img_1.jpg', '399.00', 50, NULL, 'Samsung', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(31, 'Ultrabook 14\"', 'prod-sample-006', 'Lightweight laptop for travel.', 'assets/images/samples/img_2.jpg', '899.00', 25, NULL, 'Lenovo', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(32, '10\" Tablet Pro', 'prod-sample-007', 'Entertainment and work on the go.', 'assets/images/samples/img_3.jpg', '299.00', 40, NULL, 'Apple', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(33, 'Wireless Earbuds', 'prod-sample-008', 'Noise-cancelling earbuds.', 'assets/images/samples/img_4.jpg', '79.00', 90, NULL, 'Sony', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(27, 'Women\'s Running Leggings', 'prod-sample-002', NULL, 'assets/images/product_images/prod_27_44c4ede8.webp', '29.99', 80, NULL, 'Adidas', 2, 'women', NULL, 'active', '2025-09-05 08:18:49'),
+(28, 'Kids Hoodie', 'prod-sample-003', NULL, 'assets/images/product_images/prod_28_69504530.webp', '24.99', 60, NULL, 'Puma', 3, 'kids', NULL, 'active', '2025-09-05 08:18:49'),
+(29, 'Leather Belt', 'prod-sample-004', NULL, 'assets/images/product_images/prod_29_6e8e991f.jpeg', '15.99', 120, NULL, 'FILA', 10, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(30, 'Android Smartphone X', 'prod-sample-005', NULL, 'assets/images/product_images/prod_30_9e1f3951.png', '399.00', 50, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(31, 'Ultrabook 14\"', 'prod-sample-006', NULL, 'assets/images/product_images/prod_31_c5386a8c.webp', '899.00', 25, NULL, 'Brooks Running', 15, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(32, '10\" Tablet Pro', 'prod-sample-007', NULL, 'assets/images/product_images/prod_32_0cb1696f.webp', '299.00', 40, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(33, 'Wireless Earbuds', 'prod-sample-008', NULL, 'assets/images/product_images/prod_33_817e50ee.webp', '79.00', 90, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
 (34, 'Modern Sofa 3-Seater', 'prod-sample-009', NULL, 'assets/images/product_images/prod_34_879730de.webp', '599.00', 10, NULL, 'New Balance', 5, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(35, 'Air Fryer XL', 'prod-sample-010', NULL, 'assets/images/samples/img_2.jpg', '129.00', 35, NULL, 'Adidas', 2, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(36, 'Wall Art Canvas', 'prod-sample-011', 'Abstract canvas wall art.', 'assets/images/samples/img_3.jpg', '49.00', 70, NULL, 'Brand C', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(37, 'King Size Duvet', 'prod-sample-012', 'Soft microfiber duvet.', 'assets/images/samples/img_4.jpg', '89.00', 45, NULL, 'Brand D', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(38, 'Hydrating Face Serum', 'prod-sample-013', 'Hyaluronic acid serum.', 'assets/images/samples/img_1.jpg', '25.00', 80, NULL, 'Brand E', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(39, 'Matte Lipstick', 'prod-sample-014', 'Long-lasting matte finish.', 'assets/images/samples/img_2.jpg', '12.00', 120, NULL, 'Brand F', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(40, 'Nourishing Shampoo', 'prod-sample-015', 'For all hair types.', 'assets/images/samples/img_3.jpg', '9.00', 150, NULL, 'Brand G', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(41, 'Eau de Parfum', 'prod-sample-016', 'Floral fragrance.', 'assets/images/samples/img_4.jpg', '59.00', 60, NULL, 'Brand H', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(42, 'Adjustable Dumbbells', 'prod-sample-017', 'Space-saving strength training.', 'assets/images/samples/img_1.jpg', '199.00', 20, NULL, 'Brand I', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(43, 'Hiking Backpack 30L', 'prod-sample-018', 'Durable outdoor pack.', 'assets/images/samples/img_2.jpg', '79.00', 50, NULL, 'Brand J', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(44, 'Breathable Sports Tee', 'prod-sample-019', 'Quick-dry athletic shirt.', 'assets/images/samples/img_3.jpg', '19.00', 100, NULL, 'Under Armour', NULL, 'men', NULL, 'active', '2025-09-05 08:18:49'),
-(45, 'Team Soccer Ball', 'prod-sample-020', 'Official size 5.', 'assets/images/samples/img_4.jpg', '25.00', 80, NULL, 'Adidas', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(46, 'Mystery Novel', 'prod-sample-021', 'Bestselling mystery thriller.', 'assets/images/samples/img_1.jpg', '14.00', 200, NULL, 'Brand A', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(47, 'Science Fiction Epic', 'prod-sample-022', 'Space opera adventure.', 'assets/images/samples/img_2.jpg', '18.00', 150, NULL, 'Brand B', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(48, 'Self-Help Guide', 'prod-sample-023', 'Practical life strategies.', 'assets/images/samples/img_3.jpg', '16.00', 170, NULL, 'Brand C', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(49, 'Cookbook Favorites', 'prod-sample-024', '100 easy recipes.', 'assets/images/samples/img_4.jpg', '22.00', 120, NULL, 'Brand D', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(50, 'Family Board Game', 'prod-sample-025', 'Fun for all ages.', 'assets/images/samples/img_1.jpg', '29.00', 90, NULL, 'Brand E', NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(51, '1000-piece Puzzle', 'prod-sample-026', NULL, 'assets/images/samples/img_2.jpg', '15.00', 110, NULL, 'Reebok', 4, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(52, 'Action Figure Hero', 'prod-sample-027', NULL, 'assets/images/samples/img_3.jpg', '19.00', 130, NULL, 'FILA', 10, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(53, 'STEM Kit Robotics', 'prod-sample-028', NULL, 'assets/images/samples/img_4.jpg', '49.00', 70, NULL, 'Adidas', 2, NULL, NULL, 'active', '2025-09-05 08:18:49'),
-(54, 'Women\'s Summer Dress', 'prod-sample-029', NULL, 'assets/images/product_images/prod_54_547fc72a.webp', '39.00', 60, '30.00', 'Nike', 1, 'women', NULL, 'active', '2025-09-05 08:18:49'),
+(35, 'Air Fryer XL', 'prod-sample-010', NULL, 'assets/images/product_images/prod_35_3b1edbcc.jpg', '129.00', 35, NULL, 'Adidas', 2, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(36, 'Wall Art Canvas', 'prod-sample-011', NULL, 'assets/images/product_images/prod_36_c1d2336a.jpeg', '49.00', 70, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(37, 'King Size Duvet', 'prod-sample-012', NULL, 'assets/images/product_images/prod_37_b8618285.jpeg', '89.00', 45, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(38, 'Hydrating Face Serum', 'prod-sample-013', NULL, 'assets/images/product_images/prod_38_c6ba5999.png', '25.00', 80, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(39, 'Matte Lipstick', 'prod-sample-014', NULL, 'assets/images/product_images/prod_39_3f63e6e4.jpeg', '12.00', 120, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(40, 'Nourishing Shampoo', 'prod-sample-015', NULL, 'assets/images/product_images/prod_40_808a467d.png', '9.00', 150, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(41, 'Eau de Parfum', 'prod-sample-016', NULL, 'assets/images/product_images/prod_41_fcf32f4b.png', '59.00', 60, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(42, 'Adjustable Dumbbells', 'prod-sample-017', NULL, 'assets/images/product_images/prod_42_e4b95652.webp', '199.00', 20, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(43, 'Hiking Backpack 30L', 'prod-sample-018', NULL, 'assets/images/product_images/prod_43_26fd9dd0.jpeg', '79.00', 50, NULL, NULL, NULL, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(44, 'Breathable Sports Tee', 'prod-sample-019', NULL, 'assets/images/product_images/prod_44_8adc8681.jpeg', '19.00', 100, NULL, 'Under Armour', 6, 'men', NULL, 'active', '2025-09-05 08:18:49'),
+(45, 'Team Soccer Ball', 'prod-sample-020', NULL, 'assets/images/product_images/prod_45_55755012.jpeg', '25.00', 80, NULL, 'Adidas', 2, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(46, 'Mystery Novel', 'prod-sample-021', NULL, 'assets/images/product_images/prod_46_8d8f678d.webp', '14.00', 200, NULL, 'New Balance', 5, 'women', NULL, 'active', '2025-09-05 08:18:49'),
+(47, 'Science Fiction Epic', 'prod-sample-022', NULL, 'assets/images/product_images/prod_47_e52fbcae.webp', '18.00', 150, NULL, 'Brooks Running', 15, 'women', NULL, 'active', '2025-09-05 08:18:49'),
+(48, 'Self-Help Guide', 'prod-sample-023', NULL, 'assets/images/product_images/prod_48_828c6b1e.webp', '16.00', 170, NULL, 'Adidas', 2, 'men', NULL, 'active', '2025-09-05 08:18:49'),
+(49, 'Cookbook Favorites', 'prod-sample-024', NULL, 'assets/images/product_images/prod_49_a7b39eeb.webp', '22.00', 120, NULL, 'Skechers', 13, 'men', NULL, 'active', '2025-09-05 08:18:49'),
+(50, 'Family Board Game', 'prod-sample-025', NULL, 'assets/images/product_images/prod_50_e4bded2a.webp', '29.00', 90, NULL, 'Jordan', 12, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(51, '1000-piece Puzzle', 'prod-sample-026', NULL, 'assets/images/product_images/prod_51_bad2ac58.webp', '15.00', 110, NULL, 'Reebok', 4, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(52, 'Action Figure Hero', 'prod-sample-027', NULL, 'assets/images/product_images/prod_52_edf6d2f2.webp', '19.00', 130, NULL, 'FILA', 10, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(53, 'STEM Kit Robotics', 'prod-sample-028', NULL, 'assets/images/product_images/prod_53_d5093510.webp', '49.00', 70, NULL, 'Adidas', 2, NULL, NULL, 'active', '2025-09-05 08:18:49'),
+(54, 'Women\'s Summer Dress', 'prod-sample-029', 'Fun for all ages.', 'assets/images/product_images/prod_54_547fc72a.webp', '39.00', 60, '30.00', 'Nike', 1, 'women', NULL, 'active', '2025-09-05 08:18:49'),
 (55, 'Men\'s Chinos', 'prod-sample-030', NULL, 'assets/images/product_images/prod_55_ce555309.jpg', '34.00', 80, '20.00', 'Adidas', 2, 'men', NULL, 'active', '2025-09-05 08:18:49');
 
 -- --------------------------------------------------------
@@ -484,10 +795,18 @@ CREATE TABLE IF NOT EXISTS `product_categories` (
 INSERT INTO `product_categories` (`product_id`, `category_id`) VALUES
 (25, 1),
 (26, 1),
+(46, 1),
+(48, 1),
+(49, 1),
+(50, 1),
 (54, 1),
+(30, 3),
+(32, 3),
 (34, 3),
 (35, 4),
 (55, 4),
+(31, 6),
+(47, 7),
 (51, 7),
 (52, 7),
 (53, 7);
@@ -506,7 +825,7 @@ CREATE TABLE IF NOT EXISTS `product_images` (
   `position` int(10) UNSIGNED NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `idx_product_images_product` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `product_images`
@@ -516,7 +835,45 @@ INSERT INTO `product_images` (`id`, `product_id`, `image_url`, `position`) VALUE
 (6, 55, 'assets/images/product_images/prod_55_e68d58f6.jpg', 1),
 (7, 55, 'assets/images/product_images/prod_55_db197342.jpeg', 2),
 (8, 26, 'assets/images/product_images/prod_26_f78eb8b9.webp', 1),
-(9, 26, 'assets/images/product_images/prod_26_87e474ef.webp', 2);
+(9, 26, 'assets/images/product_images/prod_26_87e474ef.webp', 2),
+(10, 53, 'assets/images/product_images/prod_53_efd128b2.webp', 1),
+(11, 53, 'assets/images/product_images/prod_53_41a38d3f.webp', 2),
+(12, 52, 'assets/images/product_images/prod_52_6a6dc227.webp', 1),
+(13, 52, 'assets/images/product_images/prod_52_b7b648ae.webp', 2),
+(14, 51, 'assets/images/product_images/prod_51_a06896cf.webp', 1),
+(15, 50, 'assets/images/product_images/prod_50_a05f5dc2.webp', 1),
+(16, 49, 'assets/images/product_images/prod_49_c3d81f0f.webp', 1),
+(17, 48, 'assets/images/product_images/prod_48_c9583981.webp', 1),
+(18, 47, 'assets/images/product_images/prod_47_b8349205.webp', 1),
+(19, 46, 'assets/images/product_images/prod_46_122622da.webp', 1),
+(20, 45, 'assets/images/product_images/prod_45_238df949.jpeg', 1),
+(21, 44, 'assets/images/product_images/prod_44_ac3c50a6.jpeg', 1),
+(22, 43, 'assets/images/product_images/prod_43_18f58800.jpeg', 1),
+(23, 42, 'assets/images/product_images/prod_42_1a5ee165.webp', 1),
+(24, 41, 'assets/images/product_images/prod_41_06ea6495.png', 1),
+(25, 36, 'assets/images/product_images/prod_36_6df3319a.jpeg', 1),
+(26, 37, 'assets/images/product_images/prod_37_0bbe07e4.jpeg', 1),
+(27, 38, 'assets/images/product_images/prod_38_c73a80bc.png', 1),
+(28, 38, 'assets/images/product_images/prod_38_81e4dd70.png', 2),
+(29, 39, 'assets/images/product_images/prod_39_b80c9bfd.jpeg', 1),
+(30, 39, 'assets/images/product_images/prod_39_59f384e7.jpeg', 2),
+(31, 39, 'assets/images/product_images/prod_39_450e1a47.jpeg', 3),
+(32, 40, 'assets/images/product_images/prod_40_d981ef00.png', 1),
+(33, 40, 'assets/images/product_images/prod_40_f711521b.png', 2),
+(34, 35, 'assets/images/product_images/prod_35_af896070.jpg', 1),
+(35, 35, 'assets/images/product_images/prod_35_52498761.jpg', 2),
+(36, 27, 'assets/images/product_images/prod_27_378ca5bc.webp', 1),
+(37, 28, 'assets/images/product_images/prod_28_d47d65e5.webp', 1),
+(38, 33, 'assets/images/product_images/prod_33_2d0ca532.webp', 1),
+(39, 33, 'assets/images/product_images/prod_33_3094d9b2.webp', 2),
+(40, 32, 'assets/images/product_images/prod_32_e5937a73.webp', 1),
+(41, 32, 'assets/images/product_images/prod_32_1e7d3208.webp', 2),
+(42, 31, 'assets/images/product_images/prod_31_2bd581df.webp', 1),
+(43, 30, 'assets/images/product_images/prod_30_da1d514b.png', 1),
+(44, 30, 'assets/images/product_images/prod_30_1815a88c.png', 2),
+(45, 30, 'assets/images/product_images/prod_30_28c1d921.jpg', 3),
+(46, 30, 'assets/images/product_images/prod_30_0c72f6d8.png', 4),
+(47, 29, 'assets/images/product_images/prod_29_0bbb0d07.jpeg', 1);
 
 -- --------------------------------------------------------
 
@@ -538,8 +895,13 @@ CREATE TABLE IF NOT EXISTS `product_subcategories` (
 
 INSERT INTO `product_subcategories` (`product_id`, `subcategory_id`) VALUES
 (26, 1),
+(48, 1),
+(49, 1),
 (54, 1),
+(46, 2),
 (25, 8),
+(30, 9),
+(32, 9),
 (34, 9),
 (35, 16),
 (55, 16),
@@ -568,6 +930,15 @@ CREATE TABLE IF NOT EXISTS `promotions` (
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `promotions`
+--
+
+INSERT INTO `promotions` (`id`, `code`, `type`, `value`, `starts_at`, `ends_at`, `min_subtotal`, `max_uses`, `per_user_limit`) VALUES
+(1, 'SAVE10', 'percentage', '10.00', '2025-09-12 17:14:09', '2025-12-11 17:14:09', '50.00', NULL, NULL),
+(2, 'SAVE20', 'fixed', '20.00', '2025-09-12 17:14:09', '2025-11-11 17:14:09', '100.00', 1000, 1),
+(3, 'FREESHIP', 'free_shipping', '0.00', '2025-09-12 17:14:09', '2026-01-10 17:14:09', NULL, NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -582,7 +953,17 @@ CREATE TABLE IF NOT EXISTS `promotion_rules` (
   `rule_value` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_promotion_rules_promo` (`promotion_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `promotion_rules`
+--
+
+INSERT INTO `promotion_rules` (`id`, `promotion_id`, `rule_type`, `rule_value`) VALUES
+(1, 1, 'include_category_slug', 'jeans'),
+(2, 1, 'include_category_slug', 't-shirts'),
+(3, 2, 'include_product_slug', 'sample-product-2'),
+(4, 3, 'country', 'US');
 
 -- --------------------------------------------------------
 
@@ -601,7 +982,7 @@ CREATE TABLE IF NOT EXISTS `returns` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `rma_no` (`rma_no`),
   KEY `idx_returns_order` (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -620,7 +1001,7 @@ CREATE TABLE IF NOT EXISTS `return_items` (
   PRIMARY KEY (`id`),
   KEY `fk_return_items_order_item` (`order_item_id`),
   KEY `idx_return_items_return` (`return_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -641,7 +1022,7 @@ CREATE TABLE IF NOT EXISTS `reviews` (
   PRIMARY KEY (`id`),
   KEY `fk_reviews_user` (`user_id`),
   KEY `idx_reviews_product` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -682,7 +1063,14 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key` (`key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `settings`
+--
+
+INSERT INTO `settings` (`id`, `key`, `value`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'enabled_languages', '[\"kh\",\"en\"]', 'Enabled language codes as JSON array', '2025-12-19 00:59:13', '2025-12-19 00:59:13');
 
 -- --------------------------------------------------------
 
@@ -704,7 +1092,36 @@ CREATE TABLE IF NOT EXISTS `shipments` (
   PRIMARY KEY (`id`),
   KEY `fk_shipments_address` (`address_id`),
   KEY `idx_shipments_order` (`order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipping_methods`
+--
+
+DROP TABLE IF EXISTS `shipping_methods`;
+CREATE TABLE IF NOT EXISTS `shipping_methods` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `base_cost` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `min_subtotal_free` decimal(10,2) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `sort_order` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `shipping_methods`
+--
+
+INSERT INTO `shipping_methods` (`id`, `name`, `code`, `base_cost`, `min_subtotal_free`, `is_active`, `sort_order`, `created_at`, `updated_at`) VALUES
+(1, 'Standard Delivery', 'standard', '2.99', '300.00', 1, 1, '2025-09-12 09:55:54', '2025-09-12 09:55:54'),
+(2, 'Express Delivery', 'express', '12.99', NULL, 1, 2, '2025-09-12 09:55:54', '2025-09-12 09:55:54');
 
 -- --------------------------------------------------------
 
@@ -766,7 +1183,7 @@ CREATE TABLE IF NOT EXISTS `size_charts` (
   `hips_cm` decimal(6,2) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_size_charts_product` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -853,6 +1270,37 @@ INSERT INTO `subcategories` (`id`, `category_id`, `name`, `slug`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tax_rates`
+--
+
+DROP TABLE IF EXISTS `tax_rates`;
+CREATE TABLE IF NOT EXISTS `tax_rates` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `country` char(2) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `city` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `postal` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rate_percent` decimal(6,3) NOT NULL DEFAULT '0.000',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `sort_order` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_tax_geo` (`country`,`state`,`city`,`postal`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `tax_rates`
+--
+
+INSERT INTO `tax_rates` (`id`, `name`, `country`, `state`, `city`, `postal`, `rate_percent`, `is_active`, `sort_order`, `created_at`, `updated_at`) VALUES
+(1, 'US Default Sales Tax', 'US', NULL, NULL, NULL, '8.250', 1, 1, '2025-09-12 09:55:54', '2025-09-12 09:55:54'),
+(2, 'CA Ontario HST', 'CA', 'ON', NULL, NULL, '13.000', 1, 2, '2025-09-12 09:55:54', '2025-09-12 09:55:54');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -867,7 +1315,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `users`
@@ -902,7 +1350,24 @@ CREATE TABLE IF NOT EXISTS `variants` (
   KEY `idx_variants_product` (`product_id`),
   KEY `idx_variants_color` (`color_id`),
   KEY `idx_variants_size` (`size_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `variants`
+--
+
+INSERT INTO `variants` (`id`, `product_id`, `sku`, `color`, `color_id`, `size`, `size_id`, `material`, `price`, `compare_at_price`, `weight`, `barcode`) VALUES
+(1, 26, 'TEE-26-BLK-S', 'Black', 1, 'S', 3, 'Cotton', '19.99', '24.99', '0.300', '012345678901'),
+(2, 26, 'TEE-26-BLK-M', 'Black', 1, 'M', 4, 'Cotton', '19.99', '24.99', '0.320', '012345678902'),
+(3, 26, 'TEE-26-BLK-L', 'Maroon', 13, 'L', 5, 'Cotton', '19.99', '24.99', '0.340', '012345678903'),
+(4, 26, 'TEE-26-WHT-M', 'Green', 4, 'M', 4, 'Cotton', '19.99', '24.99', '0.320', '012345678904'),
+(5, 26, 'TEE-26-WHT-L', 'White', 2, 'L', 5, 'Cotton', '19.99', '24.99', '0.340', '012345678905'),
+(6, 54, 'DRS-54-RED-S', 'Light Blue', 15, 'S', 3, 'Polyester', '39.00', '49.00', '0.400', '012345678906'),
+(7, 54, 'DRS-54-RED-M', 'Pink', 9, 'M', 4, 'Polyester', '39.00', '49.00', '0.420', '012345678907'),
+(8, 54, 'DRS-54-RED-L', 'Red', 3, 'L', 5, 'Polyester', '39.00', '49.00', '0.440', '012345678908'),
+(9, 55, 'CHN-55-BLU-30', 'Blue', 5, '30', 13, 'Twill', '34.00', '44.00', '0.500', '012345678909'),
+(10, 55, 'CHN-55-BLU-32', 'Blue', 5, '32', 14, 'Twill', '34.00', '44.00', '0.520', '012345678910'),
+(11, 26, 'TEE-26-BLK-XXL', 'Red', 3, '2XS', 1, NULL, '3000.00', NULL, NULL, '1234567890166');
 
 -- --------------------------------------------------------
 
@@ -918,7 +1383,7 @@ CREATE TABLE IF NOT EXISTS `variant_images` (
   `position` int(10) UNSIGNED NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `idx_variant_images_variant` (`variant_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Constraints for dumped tables
@@ -950,6 +1415,13 @@ ALTER TABLE `categories`
   ADD CONSTRAINT `fk_categories_parent` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
 
 --
+-- Constraints for table `finance_entries`
+--
+ALTER TABLE `finance_entries`
+  ADD CONSTRAINT `fk_finance_entries_category` FOREIGN KEY (`category_id`) REFERENCES `finance_categories` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_finance_entries_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
 -- Constraints for table `inventory`
 --
 ALTER TABLE `inventory`
@@ -960,6 +1432,12 @@ ALTER TABLE `inventory`
 --
 ALTER TABLE `orders`
   ADD CONSTRAINT `fk_orders_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `order_addresses`
+--
+ALTER TABLE `order_addresses`
+  ADD CONSTRAINT `fk_order_addresses_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `order_items`

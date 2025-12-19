@@ -160,6 +160,9 @@
           <li class="nav-item <?php echo $__ROUTE === 'settings' ? 'active' : ''; ?>">
             <a class="nav-link" href="/admin/?p=settings">Settings</a>
           </li>
+          <li class="nav-item <?php echo $__ROUTE === 'languages' ? 'active' : ''; ?>">
+            <a class="nav-link" href="/admin/?p=languages">Languages</a>
+          </li>
           <li class="nav-item <?php echo $__ROUTE === 'seos' ? 'active' : ''; ?>">
             <a class="nav-link" href="/admin/?p=seos">SEO</a>
           </li>

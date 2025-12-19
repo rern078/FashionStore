@@ -35,6 +35,7 @@ return [
             'sizes' => 'pages/sizes.php',
             'currencies' => 'pages/currencies.php',
             'subcategories' => 'pages/subcategories.php',
+            'languages' => 'pages/languages.php',
             'seos' => 'pages/seos.php',
             'banners' => 'pages/banners.php',
             'about_us' => 'pages/about_us.php',

@@ -522,3 +522,19 @@ CREATE TABLE finance_entries (
   INDEX idx_finance_entries_category (category_id),
   INDEX idx_finance_entries_ref (reference_type, reference_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- Languages
+CREATE TABLE languages (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(10) NOT NULL,                 -- e.g. en, kh, cn, fil
+  name VARCHAR(100) NOT NULL,                -- English name
+  native_name VARCHAR(100) NULL,             -- Native label
+  position INT UNSIGNED NOT NULL DEFAULT 1,  -- Sort order
+  is_default TINYINT(1) NOT NULL DEFAULT 0,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_languages_code (code),
+  INDEX idx_languages_active_position (is_active, position)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

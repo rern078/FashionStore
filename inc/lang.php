@@ -15,8 +15,14 @@ if (isset($_GET['set_lang'])) {
       }
 }
 
-// Supported language codes
-$__SUPPORTED_LANGS = ['en', 'cn', 'kh', 'vn', 'lo', 'ma', 'ph', 'sp', 'fr', 'gm', 'ru','jp','kr','de','it','es','pt','nl','sv','no','fi','da','is','lt','lv','et','pl','ro','bg','hr','sl','sq','mk','az','hy','ka','ru','ja','ko','zh','th','vi','id','ms','fil','ml','ta','te','ur','hi','bn','mr','gu','pa','or','sd','as','ks','ne','bh','np'];
+// Supported language codes loaded from DB (fallback to a reasonable default list)
+$__SUPPORTED_LANGS = [];
+if (function_exists('getActiveLanguageCodes')) {
+      $__SUPPORTED_LANGS = getActiveLanguageCodes();
+}
+if (!$__SUPPORTED_LANGS) {
+      $__SUPPORTED_LANGS = ['en', 'kh', 'cn'];
+}
 
 // Always attempt to detect language from request path (works with both pretty and query routes)
 $__LANG_CODE = null;

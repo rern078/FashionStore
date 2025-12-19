@@ -24,6 +24,10 @@ if (isset($_GET['set_currency'])) {
       }
 }
 
+// Load shared DB helpers and global getters before language resolution
+require_once __DIR__ . '/admin/config/function.php';
+require_once __DIR__ . '/admin/config/global.php';
+
 // Load translation helper
 $__langHelper = __DIR__ . '/inc/lang.php';
 if (is_file($__langHelper)) {
@@ -36,10 +40,6 @@ $pageTitle = $config['site']['name'] ?? 'Website';
 
 $__CONFIG = $config;
 $__ROUTE = $route;
-
-require_once __DIR__ . '/admin/config/function.php';
-
-require_once __DIR__ . '/admin/config/global.php';
 
 require __DIR__ . '/inc/header.php';
 
